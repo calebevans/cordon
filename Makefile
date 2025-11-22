@@ -1,4 +1,4 @@
-.PHONY: help install install-dev install-faiss test test-verbose coverage lint format typecheck pre-commit clean clean-all
+.PHONY: help install install-dev install-faiss install-faiss-gpu test test-verbose coverage lint format typecheck pre-commit clean clean-all
 
 # default target - show help
 help:
@@ -7,7 +7,8 @@ help:
 	@echo "Available targets:"
 	@echo "  make install         Install package in development mode"
 	@echo "  make install-dev     Install with development dependencies"
-	@echo "  make install-faiss   Install with FAISS CPU support"
+	@echo "  make install-faiss   Install with FAISS CPU support (better performance)"
+	@echo "  make install-faiss-gpu Install with FAISS GPU support (CUDA required)"
 	@echo ""
 	@echo "  make test            Run all tests"
 	@echo "  make test-verbose    Run tests with verbose output"
@@ -34,15 +35,18 @@ install-dev:
 install-faiss:
 	pip install -e ".[faiss-cpu]"
 
+install-faiss-gpu:
+	pip install -e ".[faiss-gpu]"
+
 # testing targets
 test:
-	pytest tests/
+	OMP_NUM_THREADS=1 pytest tests/ --no-cov
 
 test-verbose:
-	pytest tests/ -v
+	OMP_NUM_THREADS=1 pytest tests/ -v --no-cov
 
 coverage:
-	pytest tests/ --cov=cordon --cov-report=term-missing --cov-report=html
+	OMP_NUM_THREADS=1 pytest tests/ --cov=cordon --cov-report=term-missing --cov-report=html
 	@echo ""
 	@echo "Coverage report generated in htmlcov/index.html"
 
