@@ -55,10 +55,13 @@ cordon system.log
 cordon app.log error.log
 
 # With options
-cordon --window-size 20 --k-neighbors 10 --anomaly-percentile 0.05 application.log
+cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 application.log
 
 # Detailed statistics
 cordon --detailed --device cuda production.log
+
+# Use FAISS for large logs
+cordon --use-faiss --detailed large.log
 ```
 
 ### Python Library
@@ -74,8 +77,8 @@ print(output)
 
 # Advanced configuration
 config = AnalysisConfig(
-    window_size=20,          # Lines per window
-    stride=10,               # Step size for sliding
+    window_size=10,          # Lines per window
+    stride=5,                # Step size for sliding
     k_neighbors=10,          # k-NN parameter
     anomaly_percentile=0.05, # Top 5% most anomalous
     device="cuda"            # Force GPU usage
@@ -164,17 +167,38 @@ The score for each window is the average cosine distance to its k nearest neighb
 
 | Parameter | Default | CLI Flag | Description |
 |-----------|---------|----------|-------------|
-| `window_size` | 10 | `--window-size` | Number of lines per window |
-| `stride` | 5 | `--stride` | Lines to skip between windows |
+| `window_size` | 5 | `--window-size` | Number of lines per window |
+| `stride` | 2 | `--stride` | Lines to skip between windows |
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Percentile threshold (0.1 = top 10% most anomalous) |
 | `model_name` | `"all-MiniLM-L6-v2"` | `--model-name` | Sentence-transformers model |
 | `batch_size` | 32 | `--batch-size` | Embedding batch size |
 | `device` | `None` | `--device` | Device override (`cuda`/`mps`/`cpu`/`None` for auto) |
+| `use_faiss` | `False` | `--use-faiss` | Force FAISS for k-NN (faster for large logs) |
 | `use_mmap_threshold` | 50000 | N/A | Auto-enable memory mapping above N windows (`None` to disable) |
 | `use_faiss_threshold` | `None` | N/A | Auto-enable FAISS above N windows (requires faiss installation) |
 
 Run `cordon --help` for full CLI documentation.
+
+### ⚠️ Important: Token Limits and Window Sizing
+
+**Transformer models have token limits that affect how much of each window is analyzed.** Windows exceeding the limit are automatically truncated to the first N tokens.
+
+**Cordon will warn you if significant truncation is detected** and suggest better settings for your logs.
+
+**Default model (`all-MiniLM-L6-v2`) has a 256-token limit:**
+- Compact logs (20-30 tokens/line): Default `window_size=5` works perfectly
+- Standard logs (40-50 tokens/line): Default settings work well
+- Verbose logs (50-70 tokens/line): Consider larger window with a bigger model
+- Very verbose logs (80+ tokens/line): Use a larger-context model
+
+**For verbose system logs**, use larger-context models:
+```bash
+# BAAI/bge-base-en-v1.5 supports 512 tokens (~8-10 verbose lines)
+cordon --model-name "BAAI/bge-base-en-v1.5" --window-size 8 --stride 4 your.log
+```
+
+**See [Configuration Guidelines](./docs/how-it-works.md#configuration-guidelines) for detailed recommendations.**
 
 ## Use Cases
 

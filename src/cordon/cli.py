@@ -27,14 +27,14 @@ def parse_args() -> argparse.Namespace:
     config_group.add_argument(
         "--window-size",
         type=int,
-        default=10,
-        help="Number of lines per window (default: 10)",
+        default=5,
+        help="Number of lines per window (default: 5)",
     )
     config_group.add_argument(
         "--stride",
         type=int,
-        default=5,
-        help="Step size for sliding window in lines (default: 5)",
+        default=2,
+        help="Step size for sliding window in lines (default: 2)",
     )
     config_group.add_argument(
         "--k-neighbors",

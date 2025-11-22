@@ -17,8 +17,8 @@ class AnalysisConfig:
         use_faiss_threshold: Auto-enable FAISS above this many windows (None=auto)
     """
 
-    window_size: int = 10
-    stride: int = 5
+    window_size: int = 5
+    stride: int = 2
     k_neighbors: int = 5
     anomaly_percentile: float = 0.1
     model_name: str = "all-MiniLM-L6-v2"

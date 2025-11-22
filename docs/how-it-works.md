@@ -92,9 +92,9 @@ Cordon uses a **density-based anomaly detection** approach in **semantic embeddi
 **Windowing converts variable-length logs into fixed-size semantic units.**
 
 ```python
-# Configuration
-window_size = 10  # Lines per window
-stride = 5        # Lines to advance between windows
+# Configuration (defaults)
+window_size = 5  # Lines per window
+stride = 2       # Lines to advance between windows
 
 # Example
 Log lines:  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
@@ -131,6 +131,39 @@ Output: [0.23, -0.45, 0.12, ..., 0.67]  # 384-dimensional vector
 "Connection timeout" ≈ "Request timed out" ≈ "No response from server"
 "OutOfMemoryError"   ≠ "Connection timeout"
 ```
+
+#### Token Limit Constraints
+
+**Important**: Transformer models have maximum token limits that affect how much of each window is actually analyzed.
+
+**Token limits by model:**
+```
+all-MiniLM-L6-v2:      256 tokens (default, 384-dim embeddings)
+all-mpnet-base-v2:     384 tokens (768-dim embeddings)
+BAAI/bge-base-en-v1.5: 512 tokens (768-dim embeddings)
+BAAI/bge-large-en:     512 tokens (1024-dim embeddings)
+```
+
+**When a window exceeds the token limit, the transformer automatically truncates to the first N tokens.** The rest of the window content is silently ignored during embedding.
+
+**Example with verbose system logs** (typical: 50-60 tokens per line):
+```
+window_size=5:  ~250-300 tokens → fits in 256 limit → all lines analyzed ✓
+window_size=10: ~500-600 tokens → exceeds 256 limit → only first ~4 lines analyzed
+window_size=50: ~2,500-3,000 tokens → exceeds 256 limit → only first ~4 lines analyzed
+```
+
+**This means:** With the default model and verbose logs, large window sizes provide diminishing returns because only the beginning of each window is embedded.
+
+**Cordon automatically detects truncation** and warns you with recommendations for better settings.
+
+**Recommendations:**
+1. **Match window_size to token limits**: For 50-60 token/line logs, use `window_size=4` with `all-MiniLM-L6-v2`
+2. **Use larger-context models**: Switch to `BAAI/bge-base-en-v1.5` for 512-token windows (~8 lines)
+3. **Check your logs**: Run a sample through a tokenizer to estimate tokens per line
+4. **Overlapping windows help**: Even with truncation, overlapping windows ensure all log lines appear at the start of some window
+
+**Trade-off**: Larger context models are slower to encode but provide better semantic understanding of longer windows.
 
 ### 3. Anomaly Scoring
 
@@ -213,116 +246,6 @@ Merged block: lines 10-30 (score=max(0.15, 0.18, 0.12) = 0.18)
 
 ---
 
-## Mathematical Foundation
-
-### Embedding Space Geometry
-
-**Vector space properties:**
-```
-Vectors: ℝ^384 (384-dimensional real-valued vectors)
-Distance metric: Cosine distance = 1 - cosine_similarity
-Similarity: cos(θ) = (a·b) / (||a|| ||b||)
-```
-
-**Why cosine distance?**
-- **Scale-invariant**: Focuses on direction, not magnitude
-- **Natural for text**: "Connection timeout" × 3 vs. × 1 have same direction
-- **Clustering-friendly**: Forms well-separated clusters
-- **Range [0, 2]**: Easy to interpret (0 = identical, 1 = orthogonal, 2 = opposite)
-
-### k-NN Density Estimation
-
-**Theoretical basis:** Local Outlier Factor (LOF) family of algorithms.
-
-```
-Density at point p ≈ k / volume_of_k_ball(p)
-
-Where:
-- k = number of neighbors
-- volume_of_k_ball(p) = average distance to k nearest neighbors
-```
-
-**Intuition:**
-- **High density** → Small k-ball contains many points → Normal
-- **Low density** → Large k-ball needed to find k points → Anomalous
-
-**Cordon's simplification:**
-- Uses average k-NN distance directly (proxy for inverse density)
-- Faster than full LOF computation
-- Sufficient for log analysis (doesn't need precise density ratios)
-
-### Why k=5 Default?
-
-Trade-offs in choosing k:
-
-| k value | Pros | Cons |
-|---------|------|------|
-| k=1 | Detects isolated outliers | Sensitive to noise |
-| k=5 | Good balance | May miss subtle patterns |
-| k=20 | Robust to noise | May miss small anomaly clusters |
-
-**Empirical finding**: k=5 provides good balance in practice for typical log files.
-
----
-
-## Design Decisions & Trade-offs
-
-### 1. Window Size (Default: 10 lines)
-
-**Why 10 lines?**
-- **Sufficient context**: Typical log events often span multiple lines
-- **Semantic coherence**: Related log lines cluster together
-- **Computational efficiency**: Not too many windows
-
-**Trade-offs:**
-- **Smaller windows** (5 lines): Faster, but less context, more noise
-- **Larger windows** (20 lines): Better context, but mixes events, slower
-
-**When to adjust:**
-- **Verbose logs** (stack traces): Increase to 20-30
-- **Compact logs** (single-line events): Decrease to 5
-- **Very large files**: Increase to reduce window count
-
-### 2. Stride (Default: 5 lines = 50% overlap)
-
-**Why 50% overlap?**
-- **Redundancy**: Ensures anomalies appear in ≥2 windows
-- **Boundary robustness**: Events split across windows still detected
-- **Reasonable cost**: ~2× window count vs. non-overlapping (good trade-off)
-
-**Alternative approaches:**
-- **No overlap** (stride=window_size): Faster, but misses boundary events
-- **High overlap** (stride=2, 80% overlap): More robust, but ~2.4× more windows than default
-
-### 3. Model Choice: all-MiniLM-L6-v2
-
-**Why this model?**
-- **Fast**: Efficient inference on CPU
-- **Compact**: 384 dimensions
-- **Accurate**: Strong performance on semantic similarity tasks
-- **Pre-trained**: Works out-of-box for log text
-
-**Alternatives considered:**
-- **all-mpnet-base-v2**: More accurate (768-dim), but slower
-- **all-MiniLM-L12-v2**: Slightly better, but slower
-- **Domain-specific models**: Better for specialized logs, but require training
-
-**Trade-off**: Accuracy vs. speed. MiniLM-L6-v2 is the sweet spot for general logs.
-
-### 4. Percentile Threshold (Default: 10%)
-
-**Why top 10%?**
-- **Empirical balance**: Captures interesting events without overwhelming output
-- **Adaptive**: Works across different log types (security, system, application)
-- **LLM-friendly**: Reduces 2,000 lines → ~306 lines average (based on our test results)
-
-**Adjustment guidance:**
-- **5%**: Maximum compression (only most unusual events)
-- **10%**: Good default (balanced signal-to-noise)
-- **20%**: Comprehensive view (includes moderately unusual patterns)
-
----
-
 ## Performance Optimizations
 
 ### Memory Management
@@ -354,6 +277,62 @@ Benefits:
 
 Trade-off: Larger batches use more VRAM but are faster
 ```
+
+### Hardware Acceleration
+
+**Device auto-detection:**
+```python
+Priority order:
+1. CUDA (NVIDIA GPUs) - fastest
+2. MPS (Apple Silicon) - fast on M1/M2/M3
+3. CPU - slowest but universal
+
+Override with --device flag if needed
+```
+
+---
+
+## Configuration Guidelines
+
+### Choosing Window Size
+
+**The relationship between window_size and token limits is critical for effective analysis.**
+
+**Step 1: Measure your log verbosity**
+```bash
+# Sample your log and count average tokens per line
+head -n 100 your.log | wc -c  # Rough estimate: chars ≈ 1.3x tokens
+```
+
+**Step 2: Choose window size based on model**
+```
+Token budget per window = model_token_limit
+Lines per window ≈ token_limit / tokens_per_line
+
+Example (50 token/line logs):
+- all-MiniLM-L6-v2 (256 tokens):    window_size ≤ 5
+- all-mpnet-base-v2 (384 tokens):   window_size ≤ 7
+- BAAI/bge-base-en-v1.5 (512 tokens): window_size ≤ 10
+```
+
+**Step 3: Set stride for overlap**
+```
+Recommended: stride = window_size / 2 (50% overlap)
+
+This ensures:
+- Every line appears at the start of some window (fully analyzed)
+- Anomalies at boundaries are captured
+- Sufficient context for semantic understanding
+```
+
+**Common configurations:**
+
+| Log Type | Tokens/Line | Recommended Config |
+|----------|-------------|-------------------|
+| **Compact** (app logs) | 20-30 | `window_size=5, stride=2` (default) ✓ |
+| **Standard** (web server) | 40-50 | `window_size=5, stride=2` (default) ✓ |
+| **Verbose** (system logs) | 50-70 | `window_size=4, stride=2` or use larger model |
+| **Very verbose** (debug logs) | 80+ | Use `BAAI/bge-base-en-v1.5` with `window_size=6` |
 
 ---
 
