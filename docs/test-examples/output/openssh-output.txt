@@ -1,0 +1,381 @@
+Initializing analyzer...
+Using model: all-MiniLM-L6-v2
+Device: auto
+
+================================================================================
+Analyzing: /Users/caevans/repos/loghub/OpenSSH/OpenSSH_2k.log
+Total lines: 2,000
+================================================================================
+
+Analysis Statistics:
+  Total windows created: 400
+  Significant windows: 40
+  Merged blocks: 19
+  Processing time: 3.10s
+
+Score Distribution:
+  Min:    0.0019
+  Mean:   0.0208
+  Median: 0.0146
+  P90:    0.0513
+  Max:    0.1002
+
+                               Significant Blocks                               
+================================================================================
+<block lines="1-20" score="0.0807">
+Dec 10 06:55:46 LabSZ sshd[24200]: reverse mapping checking getaddrinfo for ns.marryaldkfaczcz.com [173.234.31.186] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 06:55:46 LabSZ sshd[24200]: Invalid user webmaster from 173.234.31.186
+Dec 10 06:55:46 LabSZ sshd[24200]: input_userauth_request: invalid user webmaster [preauth]
+Dec 10 06:55:46 LabSZ sshd[24200]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 06:55:46 LabSZ sshd[24200]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=173.234.31.186 
+Dec 10 06:55:48 LabSZ sshd[24200]: Failed password for invalid user webmaster from 173.234.31.186 port 38926 ssh2
+Dec 10 06:55:48 LabSZ sshd[24200]: Connection closed by 173.234.31.186 [preauth]
+Dec 10 07:02:47 LabSZ sshd[24203]: Connection closed by 212.47.254.145 [preauth]
+Dec 10 07:07:38 LabSZ sshd[24206]: Invalid user test9 from 52.80.34.196
+Dec 10 07:07:38 LabSZ sshd[24206]: input_userauth_request: invalid user test9 [preauth]
+Dec 10 07:07:38 LabSZ sshd[24206]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 07:07:38 LabSZ sshd[24206]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=ec2-52-80-34-196.cn-north-1.compute.amazonaws.com.cn 
+Dec 10 07:07:45 LabSZ sshd[24206]: Failed password for invalid user test9 from 52.80.34.196 port 36060 ssh2
+Dec 10 07:07:45 LabSZ sshd[24206]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]
+Dec 10 07:08:28 LabSZ sshd[24208]: reverse mapping checking getaddrinfo for ns.marryaldkfaczcz.com [173.234.31.186] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 07:08:28 LabSZ sshd[24208]: Invalid user webmaster from 173.234.31.186
+Dec 10 07:08:28 LabSZ sshd[24208]: input_userauth_request: invalid user webmaster [preauth]
+Dec 10 07:08:28 LabSZ sshd[24208]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 07:08:28 LabSZ sshd[24208]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=173.234.31.186 
+Dec 10 07:08:30 LabSZ sshd[24208]: Failed password for invalid user webmaster from 173.234.31.186 port 39257 ssh2
+</block>
+
+<block lines="26-40" score="0.0743">
+Dec 10 07:11:44 LabSZ sshd[24224]: Failed password for invalid user chen from 202.100.179.208 port 32484 ssh2
+Dec 10 07:11:44 LabSZ sshd[24224]: Received disconnect from 202.100.179.208: 11: Bye Bye [preauth]
+Dec 10 07:13:31 LabSZ sshd[24227]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.36.59.76.dynamic-dsl-ip.omantel.net.om  user=root
+Dec 10 07:13:43 LabSZ sshd[24227]: Failed password for root from 5.36.59.76 port 42393 ssh2
+Dec 10 07:13:56 LabSZ sshd[24227]: message repeated 5 times: [ Failed password for root from 5.36.59.76 port 42393 ssh2]
+Dec 10 07:13:56 LabSZ sshd[24227]: Disconnecting: Too many authentication failures for root [preauth]
+Dec 10 07:13:56 LabSZ sshd[24227]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.36.59.76.dynamic-dsl-ip.omantel.net.om  user=root
+Dec 10 07:13:56 LabSZ sshd[24227]: PAM service(sshd) ignoring max retries; 6 > 3
+Dec 10 07:27:50 LabSZ sshd[24235]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3  user=root
+Dec 10 07:27:52 LabSZ sshd[24235]: Failed password for root from 112.95.230.3 port 45378 ssh2
+Dec 10 07:27:52 LabSZ sshd[24235]: Received disconnect from 112.95.230.3: 11: Bye Bye [preauth]
+Dec 10 07:27:53 LabSZ sshd[24237]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3  user=root
+Dec 10 07:27:55 LabSZ sshd[24237]: Failed password for root from 112.95.230.3 port 47068 ssh2
+Dec 10 07:27:55 LabSZ sshd[24237]: Received disconnect from 112.95.230.3: 11: Bye Bye [preauth]
+Dec 10 07:27:55 LabSZ sshd[24239]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3  user=root
+</block>
+
+<block lines="51-60" score="0.0535">
+Dec 10 07:28:03 LabSZ sshd[24245]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 07:28:03 LabSZ sshd[24245]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3 
+Dec 10 07:28:05 LabSZ sshd[24245]: Failed password for invalid user pgadmin from 112.95.230.3 port 54087 ssh2
+Dec 10 07:28:05 LabSZ sshd[24245]: Received disconnect from 112.95.230.3: 11: Bye Bye [preauth]
+Dec 10 07:28:06 LabSZ sshd[24247]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3  user=root
+Dec 10 07:28:08 LabSZ sshd[24247]: Failed password for root from 112.95.230.3 port 55618 ssh2
+Dec 10 07:28:08 LabSZ sshd[24247]: Received disconnect from 112.95.230.3: 11: Bye Bye [preauth]
+Dec 10 07:28:08 LabSZ sshd[24249]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=112.95.230.3  user=root
+Dec 10 07:28:10 LabSZ sshd[24249]: Failed password for root from 112.95.230.3 port 57138 ssh2
+Dec 10 07:28:10 LabSZ sshd[24249]: Received disconnect from 112.95.230.3: 11: Bye Bye [preauth]
+</block>
+
+<block lines="151-175" score="0.0823">
+Dec 10 07:51:09 LabSZ sshd[24323]: Did not receive identification string from 195.154.37.122
+Dec 10 07:51:12 LabSZ sshd[24324]: reverse mapping checking getaddrinfo for 195-154-37-122.rev.poneytelecom.eu [195.154.37.122] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 07:51:12 LabSZ sshd[24324]: Invalid user support from 195.154.37.122
+Dec 10 07:51:12 LabSZ sshd[24324]: input_userauth_request: invalid user support [preauth]
+Dec 10 07:51:12 LabSZ sshd[24324]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 07:51:12 LabSZ sshd[24324]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=195.154.37.122 
+Dec 10 07:51:15 LabSZ sshd[24324]: Failed password for invalid user support from 195.154.37.122 port 56539 ssh2
+Dec 10 07:51:15 LabSZ sshd[24324]: error: Received disconnect from 195.154.37.122: 3: com.jcraft.jsch.JSchException: Auth fail [preauth]
+Dec 10 07:51:17 LabSZ sshd[24326]: reverse mapping checking getaddrinfo for 195-154-37-122.rev.poneytelecom.eu [195.154.37.122] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 07:51:18 LabSZ sshd[24326]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=195.154.37.122  user=uucp
+Dec 10 07:51:20 LabSZ sshd[24326]: Failed password for uucp from 195.154.37.122 port 59266 ssh2
+Dec 10 07:51:20 LabSZ sshd[24326]: error: Received disconnect from 195.154.37.122: 3: com.jcraft.jsch.JSchException: Auth fail [preauth]
+Dec 10 07:53:26 LabSZ sshd[24329]: Connection closed by 194.190.163.22 [preauth]
+Dec 10 07:55:55 LabSZ sshd[24331]: Invalid user test from 52.80.34.196
+Dec 10 07:55:55 LabSZ sshd[24331]: input_userauth_request: invalid user test [preauth]
+Dec 10 07:55:55 LabSZ sshd[24331]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 07:55:55 LabSZ sshd[24331]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=ec2-52-80-34-196.cn-north-1.compute.amazonaws.com.cn 
+Dec 10 07:56:02 LabSZ sshd[24331]: Failed password for invalid user test from 52.80.34.196 port 36060 ssh2
+Dec 10 07:56:02 LabSZ sshd[24331]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]
+Dec 10 07:56:13 LabSZ sshd[24333]: Did not receive identification string from 103.207.39.165
+Dec 10 07:56:14 LabSZ sshd[24334]: Invalid user support from 103.207.39.165
+Dec 10 07:56:14 LabSZ sshd[24334]: input_userauth_request: invalid user support [preauth]
+Dec 10 07:56:14 LabSZ sshd[24334]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 07:56:14 LabSZ sshd[24334]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.207.39.165 
+Dec 10 07:56:15 LabSZ sshd[24334]: Failed password for invalid user support from 103.207.39.165 port 58158 ssh2
+</block>
+
+<block lines="251-265" score="0.0712">
+Dec 10 08:26:01 LabSZ sshd[24375]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 08:26:03 LabSZ sshd[24375]: Failed password for invalid user default from 5.188.10.180 port 41538 ssh2
+Dec 10 08:26:04 LabSZ sshd[24375]: Connection closed by 5.188.10.180 [preauth]
+Dec 10 08:26:04 LabSZ sshd[24375]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.188.10.180 
+Dec 10 08:26:09 LabSZ sshd[24377]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.188.10.180  user=ftp
+Dec 10 08:26:12 LabSZ sshd[24377]: Failed password for ftp from 5.188.10.180 port 54715 ssh2
+Dec 10 08:26:14 LabSZ sshd[24377]: Connection closed by 5.188.10.180 [preauth]
+Dec 10 08:26:22 LabSZ sshd[24379]: Invalid user guest from 5.188.10.180
+Dec 10 08:26:22 LabSZ sshd[24379]: input_userauth_request: invalid user guest [preauth]
+Dec 10 08:26:22 LabSZ sshd[24379]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 08:26:22 LabSZ sshd[24379]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=5.188.10.180 
+Dec 10 08:26:24 LabSZ sshd[24379]: Failed password for invalid user guest from 5.188.10.180 port 47337 ssh2
+Dec 10 08:26:25 LabSZ sshd[24379]: Connection closed by 5.188.10.180 [preauth]
+Dec 10 08:26:32 LabSZ sshd[24381]: Connection closed by 5.188.10.180 [preauth]
+Dec 10 08:26:40 LabSZ sshd[24383]: Did not receive identification string from 5.188.10.180
+</block>
+
+<block lines="286-305" score="0.0667">
+Dec 10 08:39:59 LabSZ sshd[24408]: Disconnecting: Too many authentication failures for root [preauth]
+Dec 10 08:39:59 LabSZ sshd[24408]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=106.5.5.195  user=root
+Dec 10 08:39:59 LabSZ sshd[24408]: PAM service(sshd) ignoring max retries; 6 > 3
+Dec 10 08:44:20 LabSZ sshd[24410]: Invalid user matlab from 52.80.34.196
+Dec 10 08:44:20 LabSZ sshd[24410]: input_userauth_request: invalid user matlab [preauth]
+Dec 10 08:44:20 LabSZ sshd[24410]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 08:44:20 LabSZ sshd[24410]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=ec2-52-80-34-196.cn-north-1.compute.amazonaws.com.cn 
+Dec 10 08:44:27 LabSZ sshd[24410]: Failed password for invalid user matlab from 52.80.34.196 port 46199 ssh2
+Dec 10 08:44:27 LabSZ sshd[24410]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]
+Dec 10 09:04:46 LabSZ sshd[24414]: Did not receive identification string from 188.132.244.89
+Dec 10 09:07:23 LabSZ sshd[24415]: Invalid user 0 from 185.190.58.151
+Dec 10 09:07:23 LabSZ sshd[24415]: input_userauth_request: invalid user 0 [preauth]
+Dec 10 09:07:23 LabSZ sshd[24415]: Failed none for invalid user 0 from 185.190.58.151 port 55495 ssh2
+Dec 10 09:07:24 LabSZ sshd[24415]: Connection closed by 185.190.58.151 [preauth]
+Dec 10 09:07:56 LabSZ sshd[24417]: Invalid user 123 from 185.190.58.151
+Dec 10 09:07:56 LabSZ sshd[24417]: input_userauth_request: invalid user 123 [preauth]
+Dec 10 09:07:56 LabSZ sshd[24417]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:07:56 LabSZ sshd[24417]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=185.190.58.151 
+Dec 10 09:07:58 LabSZ sshd[24417]: Failed password for invalid user 123 from 185.190.58.151 port 48700 ssh2
+Dec 10 09:08:03 LabSZ sshd[24417]: Connection closed by 185.190.58.151 [preauth]
+</block>
+
+<block lines="471-485" score="0.0606">
+Dec 10 09:12:24 LabSZ sshd[24483]: Failed password for invalid user admin from 103.99.0.122 port 53531 ssh2
+Dec 10 09:12:24 LabSZ sshd[24483]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]
+Dec 10 09:12:24 LabSZ sshd[24485]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.99.0.122  user=ftp
+Dec 10 09:12:26 LabSZ sshd[24485]: Failed password for ftp from 103.99.0.122 port 56079 ssh2
+Dec 10 09:12:27 LabSZ sshd[24455]: Connection closed by 185.190.58.151 [preauth]
+Dec 10 09:12:27 LabSZ sshd[24455]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=185.190.58.151 
+Dec 10 09:12:27 LabSZ sshd[24485]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]
+Dec 10 09:12:28 LabSZ sshd[24488]: Invalid user monitor from 103.99.0.122
+Dec 10 09:12:28 LabSZ sshd[24488]: input_userauth_request: invalid user monitor [preauth]
+Dec 10 09:12:28 LabSZ sshd[24488]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:12:28 LabSZ sshd[24488]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.99.0.122 
+Dec 10 09:12:30 LabSZ sshd[24488]: Failed password for invalid user monitor from 103.99.0.122 port 59812 ssh2
+Dec 10 09:12:30 LabSZ sshd[24488]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]
+Dec 10 09:12:30 LabSZ sshd[24490]: Invalid user ftpuser from 103.99.0.122
+Dec 10 09:12:30 LabSZ sshd[24490]: input_userauth_request: invalid user ftpuser [preauth]
+</block>
+
+<block lines="496-505" score="0.0527">
+Dec 10 09:12:35 LabSZ sshd[24494]: Invalid user PlcmSpIp from 103.99.0.122
+Dec 10 09:12:35 LabSZ sshd[24494]: input_userauth_request: invalid user PlcmSpIp [preauth]
+Dec 10 09:12:35 LabSZ sshd[24494]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:12:35 LabSZ sshd[24494]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.99.0.122 
+Dec 10 09:12:37 LabSZ sshd[24494]: Failed password for invalid user PlcmSpIp from 103.99.0.122 port 51966 ssh2
+Dec 10 09:12:37 LabSZ sshd[24494]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]
+Dec 10 09:12:38 LabSZ sshd[24497]: Invalid user Management from 103.99.0.122
+Dec 10 09:12:38 LabSZ sshd[24497]: input_userauth_request: invalid user Management [preauth]
+Dec 10 09:12:38 LabSZ sshd[24497]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:12:38 LabSZ sshd[24497]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.99.0.122 
+</block>
+
+<block lines="511-520" score="0.0651">
+Dec 10 09:12:43 LabSZ sshd[24501]: Invalid user ftpuser from 103.99.0.122
+Dec 10 09:12:43 LabSZ sshd[24501]: input_userauth_request: invalid user ftpuser [preauth]
+Dec 10 09:12:43 LabSZ sshd[24501]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:12:43 LabSZ sshd[24501]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.99.0.122 
+Dec 10 09:12:44 LabSZ sshd[24501]: Failed password for invalid user ftpuser from 103.99.0.122 port 60836 ssh2
+Dec 10 09:12:44 LabSZ sshd[24501]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]
+Dec 10 09:12:46 LabSZ sshd[24503]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:12:46 LabSZ sshd[24503]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180  user=root
+Dec 10 09:12:48 LabSZ sshd[24503]: Failed password for root from 187.141.143.180 port 33314 ssh2
+Dec 10 09:12:48 LabSZ sshd[24503]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+</block>
+
+<block lines="526-535" score="0.0609">
+Dec 10 09:12:57 LabSZ sshd[24487]: input_userauth_request: invalid user api [preauth]
+Dec 10 09:12:57 LabSZ sshd[24487]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:12:57 LabSZ sshd[24487]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=185.190.58.151 
+Dec 10 09:12:57 LabSZ sshd[24507]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:12:57 LabSZ sshd[24507]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180  user=root
+Dec 10 09:12:59 LabSZ sshd[24487]: Failed password for invalid user api from 185.190.58.151 port 36894 ssh2
+Dec 10 09:12:59 LabSZ sshd[24507]: Failed password for root from 187.141.143.180 port 35685 ssh2
+Dec 10 09:12:59 LabSZ sshd[24507]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:13:03 LabSZ sshd[24509]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:13:03 LabSZ sshd[24509]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180  user=root
+</block>
+
+<block lines="716-725" score="0.0818">
+Dec 10 09:16:59 LabSZ sshd[24599]: Invalid user butter from 187.141.143.180
+Dec 10 09:16:59 LabSZ sshd[24599]: input_userauth_request: invalid user butter [preauth]
+Dec 10 09:16:59 LabSZ sshd[24599]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:16:59 LabSZ sshd[24599]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+Dec 10 09:17:00 LabSZ sshd[24599]: Failed password for invalid user butter from 187.141.143.180 port 48369 ssh2
+Dec 10 09:17:01 LabSZ sshd[24599]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:17:05 LabSZ sshd[24604]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:17:05 LabSZ sshd[24604]: Invalid user redhat from 187.141.143.180
+Dec 10 09:17:05 LabSZ sshd[24604]: input_userauth_request: invalid user redhat [preauth]
+Dec 10 09:17:05 LabSZ sshd[24604]: pam_unix(sshd:auth): check pass; user unknown
+</block>
+
+<block lines="751-760" score="0.0731">
+Dec 10 09:17:26 LabSZ sshd[24612]: Invalid user postgres from 187.141.143.180
+Dec 10 09:17:26 LabSZ sshd[24612]: input_userauth_request: invalid user postgres [preauth]
+Dec 10 09:17:26 LabSZ sshd[24612]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:17:26 LabSZ sshd[24612]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+Dec 10 09:17:28 LabSZ sshd[24612]: Failed password for invalid user postgres from 187.141.143.180 port 54596 ssh2
+Dec 10 09:17:28 LabSZ sshd[24612]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:17:31 LabSZ sshd[24614]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:17:31 LabSZ sshd[24614]: Invalid user nagios from 187.141.143.180
+Dec 10 09:17:31 LabSZ sshd[24614]: input_userauth_request: invalid user nagios [preauth]
+Dec 10 09:17:31 LabSZ sshd[24614]: pam_unix(sshd:auth): check pass; user unknown
+</block>
+
+<block lines="786-795" score="0.0816">
+Dec 10 09:17:52 LabSZ sshd[24622]: Invalid user vnc from 187.141.143.180
+Dec 10 09:17:52 LabSZ sshd[24622]: input_userauth_request: invalid user vnc [preauth]
+Dec 10 09:17:52 LabSZ sshd[24622]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:17:52 LabSZ sshd[24622]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+Dec 10 09:17:54 LabSZ sshd[24622]: Failed password for invalid user vnc from 187.141.143.180 port 60547 ssh2
+Dec 10 09:17:55 LabSZ sshd[24622]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:17:58 LabSZ sshd[24624]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:17:58 LabSZ sshd[24624]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180  user=git
+Dec 10 09:18:00 LabSZ sshd[24624]: Failed password for git from 187.141.143.180 port 33532 ssh2
+Dec 10 09:18:01 LabSZ sshd[24624]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+</block>
+
+<block lines="821-855" score="0.1002">
+Dec 10 09:18:27 LabSZ sshd[24636]: Did not receive identification string from 103.207.39.16
+Dec 10 09:18:27 LabSZ sshd[24637]: Invalid user support from 103.207.39.16
+Dec 10 09:18:27 LabSZ sshd[24637]: input_userauth_request: invalid user support [preauth]
+Dec 10 09:18:28 LabSZ sshd[24634]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:18:28 LabSZ sshd[24634]: Invalid user deploy from 187.141.143.180
+Dec 10 09:18:28 LabSZ sshd[24634]: input_userauth_request: invalid user deploy [preauth]
+Dec 10 09:18:28 LabSZ sshd[24634]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:18:28 LabSZ sshd[24634]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+Dec 10 09:18:28 LabSZ sshd[24637]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:18:28 LabSZ sshd[24637]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.207.39.16 
+Dec 10 09:18:30 LabSZ sshd[24634]: Failed password for invalid user deploy from 187.141.143.180 port 38606 ssh2
+Dec 10 09:18:30 LabSZ sshd[24637]: Failed password for invalid user support from 103.207.39.16 port 33310 ssh2
+Dec 10 09:18:30 LabSZ sshd[24634]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:18:30 LabSZ sshd[24637]: Received disconnect from 103.207.39.16: 11: Closed due to user request. [preauth]
+Dec 10 09:18:31 LabSZ sshd[24639]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.207.39.16  user=uucp
+Dec 10 09:18:33 LabSZ sshd[24639]: Failed password for uucp from 103.207.39.16 port 42435 ssh2
+Dec 10 09:18:33 LabSZ sshd[24639]: Received disconnect from 103.207.39.16: 11: Closed due to user request. [preauth]
+Dec 10 09:18:33 LabSZ sshd[24643]: Invalid user admin from 103.207.39.16
+Dec 10 09:18:33 LabSZ sshd[24643]: input_userauth_request: invalid user admin [preauth]
+Dec 10 09:18:33 LabSZ sshd[24643]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:18:33 LabSZ sshd[24643]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=103.207.39.16 
+Dec 10 09:18:33 LabSZ sshd[24641]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:18:33 LabSZ sshd[24641]: Invalid user deploy from 187.141.143.180
+Dec 10 09:18:33 LabSZ sshd[24641]: input_userauth_request: invalid user deploy [preauth]
+Dec 10 09:18:33 LabSZ sshd[24641]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:18:33 LabSZ sshd[24641]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+Dec 10 09:18:35 LabSZ sshd[24643]: Failed password for invalid user admin from 103.207.39.16 port 46723 ssh2
+Dec 10 09:18:35 LabSZ sshd[24643]: Received disconnect from 103.207.39.16: 11: Closed due to user request. [preauth]
+Dec 10 09:18:35 LabSZ sshd[24641]: Failed password for invalid user deploy from 187.141.143.180 port 39710 ssh2
+Dec 10 09:18:36 LabSZ sshd[24641]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:18:40 LabSZ sshd[24645]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:18:40 LabSZ sshd[24645]: Invalid user oralce from 187.141.143.180
+Dec 10 09:18:40 LabSZ sshd[24645]: input_userauth_request: invalid user oralce [preauth]
+Dec 10 09:18:40 LabSZ sshd[24645]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:18:40 LabSZ sshd[24645]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+</block>
+
+<block lines="866-875" score="0.0614">
+Dec 10 09:18:52 LabSZ sshd[24649]: Invalid user nagios1 from 187.141.143.180
+Dec 10 09:18:52 LabSZ sshd[24649]: input_userauth_request: invalid user nagios1 [preauth]
+Dec 10 09:18:52 LabSZ sshd[24649]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:18:52 LabSZ sshd[24649]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+Dec 10 09:18:54 LabSZ sshd[24649]: Failed password for invalid user nagios1 from 187.141.143.180 port 43647 ssh2
+Dec 10 09:18:54 LabSZ sshd[24649]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:18:58 LabSZ sshd[24651]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:18:58 LabSZ sshd[24651]: Invalid user postgres1 from 187.141.143.180
+Dec 10 09:18:58 LabSZ sshd[24651]: input_userauth_request: invalid user postgres1 [preauth]
+Dec 10 09:18:58 LabSZ sshd[24651]: pam_unix(sshd:auth): check pass; user unknown
+</block>
+
+<block lines="906-915" score="0.0553">
+Dec 10 09:19:28 LabSZ sshd[24661]: Failed password for mysql from 187.141.143.180 port 52586 ssh2
+Dec 10 09:19:28 LabSZ sshd[24661]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:19:32 LabSZ sshd[24663]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:19:32 LabSZ sshd[24663]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180  user=git
+Dec 10 09:19:34 LabSZ sshd[24663]: Failed password for git from 187.141.143.180 port 53992 ssh2
+Dec 10 09:19:34 LabSZ sshd[24663]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:19:37 LabSZ sshd[24665]: reverse mapping checking getaddrinfo for customer-187-141-143-180-sta.uninet-ide.com.mx [187.141.143.180] failed - POSSIBLE BREAK-IN ATTEMPT!
+Dec 10 09:19:37 LabSZ sshd[24665]: Invalid user magnos from 187.141.143.180
+Dec 10 09:19:37 LabSZ sshd[24665]: input_userauth_request: invalid user magnos [preauth]
+Dec 10 09:19:37 LabSZ sshd[24665]: pam_unix(sshd:auth): check pass; user unknown
+</block>
+
+<block lines="941-970" score="0.0896">
+Dec 10 09:20:00 LabSZ sshd[24673]: Invalid user cyrus from 187.141.143.180
+Dec 10 09:20:00 LabSZ sshd[24673]: input_userauth_request: invalid user cyrus [preauth]
+Dec 10 09:20:00 LabSZ sshd[24673]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:20:00 LabSZ sshd[24673]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=187.141.143.180 
+Dec 10 09:20:02 LabSZ sshd[24673]: Failed password for invalid user cyrus from 187.141.143.180 port 33574 ssh2
+Dec 10 09:20:03 LabSZ sshd[24673]: Received disconnect from 187.141.143.180: 11: Bye Bye [preauth]
+Dec 10 09:31:22 LabSZ sshd[24676]: Invalid user FILTER from 104.192.3.34
+Dec 10 09:31:22 LabSZ sshd[24676]: input_userauth_request: invalid user FILTER [preauth]
+Dec 10 09:31:22 LabSZ sshd[24676]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:31:22 LabSZ sshd[24676]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=104.192.3.34 
+Dec 10 09:31:24 LabSZ sshd[24676]: Failed password for invalid user FILTER from 104.192.3.34 port 33738 ssh2
+Dec 10 09:31:24 LabSZ sshd[24676]: Received disconnect from 104.192.3.34: 11: Bye Bye [preauth]
+Dec 10 09:31:32 LabSZ sshd[24678]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=104.192.3.34  user=root
+Dec 10 09:31:34 LabSZ sshd[24678]: Failed password for root from 104.192.3.34 port 56524 ssh2
+Dec 10 09:31:34 LabSZ sshd[24678]: Connection closed by 104.192.3.34 [preauth]
+Dec 10 09:32:20 LabSZ sshd[24680]: Accepted password for fztu from 119.137.62.142 port 49116 ssh2
+Dec 10 09:32:20 LabSZ sshd[24680]: pam_unix(sshd:session): session opened for user fztu by (uid=0)
+Dec 10 09:32:35 LabSZ sshd[24787]: Invalid user matlab from 52.80.34.196
+Dec 10 09:32:35 LabSZ sshd[24787]: input_userauth_request: invalid user matlab [preauth]
+Dec 10 09:32:35 LabSZ sshd[24787]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 09:32:35 LabSZ sshd[24787]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=ec2-52-80-34-196.cn-north-1.compute.amazonaws.com.cn 
+Dec 10 09:32:42 LabSZ sshd[24787]: Failed password for invalid user matlab from 52.80.34.196 port 36060 ssh2
+Dec 10 09:32:42 LabSZ sshd[24787]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]
+Dec 10 09:45:06 LabSZ sshd[24761]: Received disconnect from 119.137.62.142: 11: disconnected by user
+Dec 10 09:45:06 LabSZ sshd[24680]: pam_unix(sshd:session): session closed for user fztu
+Dec 10 09:48:23 LabSZ sshd[24806]: Invalid user 0 from 181.214.87.4
+Dec 10 09:48:23 LabSZ sshd[24806]: input_userauth_request: invalid user 0 [preauth]
+Dec 10 09:48:23 LabSZ sshd[24806]: Failed none for invalid user 0 from 181.214.87.4 port 51889 ssh2
+Dec 10 09:48:24 LabSZ sshd[24806]: Connection closed by 181.214.87.4 [preauth]
+Dec 10 09:48:32 LabSZ sshd[24808]: Did not receive identification string from 181.214.87.4
+</block>
+
+<block lines="1001-1025" score="0.0672">
+Dec 10 10:14:13 LabSZ sshd[24833]: Disconnecting: Too many authentication failures for admin [preauth]
+Dec 10 10:14:13 LabSZ sshd[24833]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=119.4.203.64 
+Dec 10 10:14:13 LabSZ sshd[24833]: PAM service(sshd) ignoring max retries; 6 > 3
+Dec 10 10:19:59 LabSZ sshd[24839]: Connection closed by 1.237.174.253 [preauth]
+Dec 10 10:21:01 LabSZ sshd[24841]: Invalid user matlab from 52.80.34.196
+Dec 10 10:21:01 LabSZ sshd[24841]: input_userauth_request: invalid user matlab [preauth]
+Dec 10 10:21:01 LabSZ sshd[24841]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 10:21:01 LabSZ sshd[24841]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=ec2-52-80-34-196.cn-north-1.compute.amazonaws.com.cn 
+Dec 10 10:21:09 LabSZ sshd[24841]: Failed password for invalid user matlab from 52.80.34.196 port 36060 ssh2
+Dec 10 10:21:09 LabSZ sshd[24841]: Received disconnect from 52.80.34.196: 11: Bye Bye [preauth]
+Dec 10 10:32:27 LabSZ sshd[24844]: Invalid user inspur from 183.136.162.51
+Dec 10 10:32:27 LabSZ sshd[24844]: input_userauth_request: invalid user inspur [preauth]
+Dec 10 10:32:27 LabSZ sshd[24844]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 10:32:27 LabSZ sshd[24844]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=183.136.162.51 
+Dec 10 10:32:30 LabSZ sshd[24844]: Failed password for invalid user inspur from 183.136.162.51 port 26396 ssh2
+Dec 10 10:32:30 LabSZ sshd[24844]: Received disconnect from 183.136.162.51: 11: Bye Bye [preauth]
+Dec 10 10:33:55 LabSZ sshd[24846]: Connection closed by 1.237.174.253 [preauth]
+Dec 10 10:47:18 LabSZ sshd[24862]: Connection closed by 88.147.143.242 [preauth]
+Dec 10 10:50:37 LabSZ sshd[24865]: Connection closed by 1.237.174.253 [preauth]
+Dec 10 10:54:27 LabSZ sshd[24868]: Invalid user zhangyan from 183.62.140.253
+Dec 10 10:54:27 LabSZ sshd[24868]: input_userauth_request: invalid user zhangyan [preauth]
+Dec 10 10:54:27 LabSZ sshd[24868]: pam_unix(sshd:auth): check pass; user unknown
+Dec 10 10:54:27 LabSZ sshd[24868]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=183.62.140.253 
+Dec 10 10:54:29 LabSZ sshd[24868]: Failed password for invalid user zhangyan from 183.62.140.253 port 33521 ssh2
+Dec 10 10:54:29 LabSZ sshd[24868]: Received disconnect from 183.62.140.253: 11: Bye Bye [preauth]
+</block>
+
+<block lines="1866-1875" score="0.0552">
+Dec 10 11:03:52 LabSZ sshd[25461]: Failed password for root from 103.99.0.122 port 61906 ssh2
+Dec 10 11:03:52 LabSZ sshd[25461]: error: Received disconnect from 103.99.0.122: 14: No more user authentication methods available. [preauth]
+Dec 10 11:03:53 LabSZ sshd[25457]: Failed password for root from 183.62.140.253 port 53245 ssh2
+Dec 10 11:03:53 LabSZ sshd[25457]: fatal: Write failed: Connection reset by peer [preauth]
+Dec 10 11:03:53 LabSZ sshd[25463]: Failed password for root from 183.62.140.253 port 55138 ssh2
+Dec 10 11:03:53 LabSZ sshd[25463]: Received disconnect from 183.62.140.253: 11: Bye Bye [preauth]
+Dec 10 11:03:53 LabSZ sshd[25468]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=183.62.140.253  user=root
+Dec 10 11:03:54 LabSZ sshd[25465]: Invalid user 1234 from 103.99.0.122
+Dec 10 11:03:54 LabSZ sshd[25465]: input_userauth_request: invalid user 1234 [preauth]
+Dec 10 11:03:54 LabSZ sshd[25465]: pam_unix(sshd:auth): check pass; user unknown
+</block>
+

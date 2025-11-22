@@ -1,0 +1,380 @@
+Initializing analyzer...
+Using model: all-MiniLM-L6-v2
+Device: auto
+
+================================================================================
+Analyzing: /Users/caevans/repos/loghub/Zookeeper/Zookeeper_2k.log
+Total lines: 2,000
+================================================================================
+
+Analysis Statistics:
+  Total windows created: 400
+  Significant windows: 40
+  Merged blocks: 14
+  Processing time: 2.94s
+
+Score Distribution:
+  Min:    0.0043
+  Mean:   0.0334
+  Median: 0.0155
+  P90:    0.0768
+  Max:    0.2866
+
+                               Significant Blocks                               
+================================================================================
+<block lines="411-420" score="0.1012">
+2015-07-29 19:34:15,884 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:34:15,884 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:34:16,089 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:34:26,102 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:34:29,246 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:34:29,447 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@762] - Connection broken for id 188978561024, my id = 1, error = 
+2015-07-29 19:34:29,448 - INFO  [/10.10.34.11:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.13:60984
+2015-07-29 19:34:32,782 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@765] - Interrupting SendWorker
+2015-07-29 19:34:32,788 - INFO  [/10.10.34.11:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.13:60996
+2015-07-29 19:34:39,358 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@762] - Connection broken for id 188978561024, my id = 1, error = 
+</block>
+
+<block lines="541-560" score="0.1455">
+2015-07-30 17:49:05,943 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.12:45728; will be dropped if server is in r-o mode
+2015-07-30 17:55:26,200 - WARN  [WorkerSender[myid=1]:QuorumCnxManager@368] - Cannot open channel to 2 at election address /10.10.34.12:3888
+2015-07-30 18:18:01,981 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.12:43125
+2015-07-30 18:18:02,003 - INFO  [ProcessThread(sid:1 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14ede63a5a70002
+2015-07-30 18:18:30,005 - INFO  [ProcessThread(sid:1 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ede65503f0010
+2015-07-30 19:50:21,400 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 19:50:32,001 - INFO  [ProcessThread(sid:1 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14ede63a5a70023
+2015-07-30 19:59:02,538 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.13:38053; will be dropped if server is in r-o mode
+2015-07-30 19:59:08,004 - INFO  [ProcessThread(sid:1 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ede65503f002b
+2015-07-30 20:06:34,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24ede63a01b003b, timeout of 10000ms exceeded
+2015-07-30 20:06:34,003 - INFO  [ProcessThread(sid:1 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x24ede63a01b003b
+2015-07-30 20:13:46,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x34ede65503f0036, timeout of 10000ms exceeded
+2015-07-30 20:13:46,004 - INFO  [ProcessThread(sid:1 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ede65503f0039
+2015-07-30 20:17:12,294 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 20:34:58,003 - INFO  [ProcessThread(sid:1 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14ede63a5a7003a
+2015-07-30 20:35:02,324 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.13:38079; will be dropped if server is in r-o mode
+2015-07-30 21:03:35,465 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 21:03:35,468 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.13:38088 which had sessionid 0x14ede63a5a70048
+2015-07-30 21:03:44,632 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.11:40489; will be dropped if server is in r-o mode
+2015-07-30 21:03:44,634 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14ede63a5a7004b with negotiated timeout 10000 for client /10.10.34.11:40489
+</block>
+
+<block lines="581-620" score="0.2561">
+2015-07-31 15:31:40,971 - INFO  [Thread-1:QuorumCnxManager$Listener@486] - My election bind port: 0.0.0.0/0.0.0.0:3888
+2015-07-31 15:31:40,999 - INFO  [WorkerSender[myid=1]:QuorumCnxManager@190] - Have smaller server identifier, so dropping the connection: (2, 1)
+2015-07-31 15:31:42,213 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumPeer@738] - FOLLOWING
+2015-07-31 15:33:29,640 - WARN  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumCnxManager@368] - Cannot open channel to 2 at election address /10.10.34.12:3888
+2015-07-31 19:30:07,398 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumPeer@670] - LOOKING
+2015-07-31 19:30:07,403 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:FastLeaderElection@740] - New election. My id =  1, proposed zxid=0x700000000
+2015-07-31 19:30:07,445 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:host.name=mesos-master-1
+2015-07-31 19:30:07,452 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Follower@63] - FOLLOWING - LEADER ELECTION TOOK - 49
+2015-07-31 21:11:05,474 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14ee3e057ed000c with negotiated timeout 10000 for client /10.10.34.37:49834
+2015-07-31 21:23:08,968 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:40061
+2015-07-31 21:23:08,969 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.11:40061
+2015-07-31 21:23:10,926 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.13:39525; will be dropped if server is in r-o mode
+2015-07-31 21:23:12,897 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.35:48971; will be dropped if server is in r-o mode
+2015-07-31 21:24:43,960 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-31 21:32:18,390 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14ee3e057ed002c with negotiated timeout 10000 for client /10.10.34.19:43049
+2015-07-31 21:32:20,131 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.40:58713
+2015-07-31 21:44:41,270 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.12:59661 which had sessionid 0x14ee3e057ed0027
+2015-08-07 07:27:47,425 - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@542] - Notification: 3 (n.leader), 0x700000197 (n.zxid), 0x1 (n.round), LEADING (n.state), 3 (n.sid), 0x7 (n.peerEPoch), LOOKING (my state)
+2015-08-07 07:27:47,650 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Follower@63] - FOLLOWING - LEADER ELECTION TOOK - 238
+2015-08-10 17:52:39,654 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14f05578bd80002 with negotiated timeout 10000 for client /10.10.34.12:46262
+2015-08-10 17:53:06,869 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-08-10 17:53:22,767 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.15:54175
+2015-08-10 17:53:22,870 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.16:40418; will be dropped if server is in r-o mode
+2015-08-10 18:12:23,970 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.19:57338 which had sessionid 0x14f05578bd8000d
+2015-08-10 18:12:24,076 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-08-10 18:12:24,375 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-08-10 18:13:25,200 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14f05578bd80020 with negotiated timeout 10000 for client /10.10.34.11:38390
+2015-08-10 18:23:49,901 - INFO  [main:DatadirCleanupManager@78] - autopurge.snapRetainCount set to 3
+2015-08-10 18:23:50,332 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:java.vendor=Oracle Corporation
+2015-08-10 18:23:52,646 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:Learner@107] - Revalidating client: 0x14f05578bd80018
+2015-08-10 18:23:52,649 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:ZooKeeperServer@595] - Established session 0x14f05578bd80016 with negotiated timeout 10000 for client /10.10.34.13:38490
+2015-08-10 18:23:52,650 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:ZooKeeperServer@595] - Established session 0x14f05578bd80013 with negotiated timeout 10000 for client /10.10.34.11:38530
+2015-08-10 18:23:52,653 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@832] - Client attempting to renew session 0x14f05578bd8001b at /10.10.34.20:56374
+2015-08-10 18:25:22,080 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:zookeeper.version=3.4.5--1, built on 06/10/2013 17:26 GMT
+2015-08-10 18:25:22,082 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:user.name=zookeeper
+2015-08-10 18:25:24,332 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:Learner@107] - Revalidating client: 0x14f05578bd80013
+2015-08-10 18:25:39,907 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-08-10 18:27:49,007 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.12:46331 which had sessionid 0x14f1724a6e80004
+2015-08-18 16:09:13,285 - INFO  [/10.10.34.11:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.12:34051
+2015-08-18 16:09:15,099 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:os.name=Linux
+</block>
+
+<block lines="626-645" score="0.1547">
+2015-08-20 17:14:23,824 - INFO  [WorkerReceiver[myid=1]:FastLeaderElection@542] - Notification: 3 (n.leader), 0xb0000007b (n.zxid), 0x2 (n.round), LOOKING (n.state), 3 (n.sid), 0xb (n.peerEPoch), FOLLOWING (my state)
+2015-08-20 17:22:22,288 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14f4a6318b80005 with negotiated timeout 10000 for client /10.10.34.11:56492
+2015-08-20 17:24:06,873 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.12:58913
+2015-08-20 17:24:07,582 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.18:36934
+2015-08-20 17:24:07,816 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14f4a6318b80013 with negotiated timeout 10000 for client /10.10.34.20:43137
+2015-08-20 19:02:23,456 - INFO  [CommitProcessor:1:ZooKeeperServer@595] - Established session 0x14f4a6318b80022 with negotiated timeout 10000 for client /10.10.34.30:43272
+2015-08-20 19:32:55,963 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.35:48997 which had sessionid 0x14f4a6318b80024
+2015-08-20 19:33:02,860 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-08-20 19:33:02,860 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.12:58917 which had sessionid 0x14f4a6318b80018
+2015-08-21 15:55:04,347 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.13:50545; will be dropped if server is in r-o mode
+2015-08-21 15:55:07,600 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.30:43278
+2015-08-21 15:55:14,153 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.14:46136
+2015-08-24 15:26:54,494 - INFO  [main:QuorumPeer@913] - tickTime set to 2000
+2015-08-24 15:27:03,681 - WARN  [WorkerSender[myid=1]:QuorumCnxManager@368] - Cannot open channel to 3 at election address /10.10.34.13:3888
+2015-08-24 15:29:13,641 - WARN  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumCnxManager@368] - Cannot open channel to 3 at election address /10.10.34.13:3888
+2015-08-24 15:36:13,663 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:FastLeaderElection@774] - Notification time out: 60000
+2015-08-24 15:37:13,664 - WARN  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumCnxManager@368] - Cannot open channel to 2 at election address /10.10.34.12:3888
+2015-08-24 15:51:13,708 - INFO  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:FastLeaderElection@774] - Notification time out: 60000
+2015-08-24 15:55:13,717 - WARN  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumCnxManager@368] - Cannot open channel to 2 at election address /10.10.34.12:3888
+2015-08-24 15:57:13,723 - WARN  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumCnxManager@368] - Cannot open channel to 2 at election address /10.10.34.12:3888
+</block>
+
+<block lines="751-790" score="0.2866">
+2015-08-25 11:03:16,237 - WARN  [QuorumPeer[myid=1]/0:0:0:0:0:0:0:0:2181:QuorumCnxManager@368] - Cannot open channel to 3 at election address /10.10.34.13:3888
+2015-08-25 11:20:12,465 - WARN  [RecvWorker:3:QuorumCnxManager$RecvWorker@762] - Connection broken for id 3, my id = 1, error = 
+2015-08-25 11:21:22,561 - WARN  [WorkerSender[myid=1]:QuorumCnxManager@368] - Cannot open channel to 3 at election address /10.10.34.13:3888
+2015-07-29 17:42:30,405 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:java.vendor=Oracle Corporation
+2015-07-29 19:03:35,413 - ERROR [LearnerHandler-/10.10.34.11:52225:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:03:54,584 - ERROR [LearnerHandler-/10.10.34.11:52241:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:04:30,989 - WARN  [LearnerHandler-/10.10.34.11:52264:LearnerHandler@575] - ******* GOODBYE /10.10.34.11:52264 ********
+2015-07-29 19:04:30,989 - ERROR [LearnerHandler-/10.10.34.11:52265:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:04:40,999 - ERROR [LearnerHandler-/10.10.34.11:52273:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:13:46,128 - WARN  [LearnerHandler-/10.10.34.11:52308:LearnerHandler@575] - ******* GOODBYE /10.10.34.11:52308 ********
+2015-07-29 19:14:06,236 - WARN  [LearnerHandler-/10.10.34.12:59060:LearnerHandler@575] - ******* GOODBYE /10.10.34.12:59060 ********
+2015-07-29 19:14:46,264 - WARN  [LearnerHandler-/10.10.34.12:59103:LearnerHandler@575] - ******* GOODBYE /10.10.34.12:59103 ********
+2015-07-29 19:14:56,371 - WARN  [LearnerHandler-/10.10.34.13:57247:LearnerHandler@575] - ******* GOODBYE /10.10.34.13:57247 ********
+2015-07-29 19:15:16,204 - ERROR [LearnerHandler-/10.10.34.11:52419:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:15:56,423 - WARN  [LearnerHandler-/10.10.34.13:57319:LearnerHandler@575] - ******* GOODBYE /10.10.34.13:57319 ********
+2015-07-29 19:16:06,243 - WARN  [LearnerHandler-/10.10.34.11:52476:LearnerHandler@575] - ******* GOODBYE /10.10.34.11:52476 ********
+2015-07-29 19:16:06,336 - WARN  [LearnerHandler-/10.10.34.12:59203:LearnerHandler@575] - ******* GOODBYE /10.10.34.12:59203 ********
+2015-07-29 19:16:16,339 - WARN  [LearnerHandler-/10.10.34.12:59211:LearnerHandler@575] - ******* GOODBYE /10.10.34.12:59211 ********
+2015-07-29 19:16:26,268 - WARN  [LearnerHandler-/10.10.34.11:52502:LearnerHandler@575] - ******* GOODBYE /10.10.34.11:52502 ********
+2015-07-29 19:16:26,447 - ERROR [LearnerHandler-/10.10.34.13:57354:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:17:36,507 - ERROR [LearnerHandler-/10.10.34.13:57438:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:17:56,522 - WARN  [LearnerHandler-/10.10.34.13:57458:LearnerHandler@575] - ******* GOODBYE /10.10.34.13:57458 ********
+2015-07-29 19:18:26,565 - WARN  [LearnerHandler-/10.10.34.13:57502:LearnerHandler@575] - ******* GOODBYE /10.10.34.13:57502 ********
+2015-07-29 19:18:56,377 - WARN  [LearnerHandler-/10.10.34.11:52703:LearnerHandler@575] - ******* GOODBYE /10.10.34.11:52703 ********
+2015-07-29 19:18:56,457 - WARN  [LearnerHandler-/10.10.34.12:59406:LearnerHandler@575] - ******* GOODBYE /10.10.34.12:59406 ********
+2015-07-29 19:20:16,690 - ERROR [LearnerHandler-/10.10.34.12:59455:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:20:16,794 - WARN  [LearnerHandler-/10.10.34.13:57580:LearnerHandler@575] - ******* GOODBYE /10.10.34.13:57580 ********
+2015-07-29 19:20:36,704 - ERROR [LearnerHandler-/10.10.34.12:59480:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:20:46,814 - ERROR [LearnerHandler-/10.10.34.13:57617:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:20:56,605 - ERROR [LearnerHandler-/10.10.34.11:52814:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:20:56,608 - WARN  [LearnerHandler-/10.10.34.11:52818:LearnerHandler@575] - ******* GOODBYE /10.10.34.11:52818 ********
+2015-07-29 19:21:16,619 - WARN  [LearnerHandler-/10.10.34.11:52844:LearnerHandler@575] - ******* GOODBYE /10.10.34.11:52844 ********
+2015-07-29 19:21:16,835 - WARN  [LearnerHandler-/10.10.34.13:57653:LearnerHandler@575] - ******* GOODBYE /10.10.34.13:57653 ********
+2015-07-29 19:21:26,625 - ERROR [LearnerHandler-/10.10.34.11:52855:LearnerHandler@562] - Unexpected exception causing shutdown while sock still open
+2015-07-29 19:21:31,738 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@765] - Interrupting SendWorker
+2015-07-29 19:21:31,836 - INFO  [/10.10.34.12:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.12:54788
+2015-07-29 19:21:35,084 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@762] - Connection broken for id 188978561024, my id = 2, error = 
+2015-07-29 19:21:35,284 - INFO  [/10.10.34.12:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.13:42624
+2015-07-29 19:21:35,292 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@765] - Interrupting SendWorker
+2015-07-29 19:21:38,426 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@762] - Connection broken for id 188978561024, my id = 2, error = 
+</block>
+
+<block lines="1256-1275" score="0.1194">
+2015-07-29 19:37:21,611 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@679] - Interrupted while waiting for message on queue
+2015-07-29 19:37:21,726 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@762] - Connection broken for id 188978561024, my id = 2, error = 
+2015-07-29 19:37:27,222 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@627] - Got user-level KeeperException when processing sessionid:0x34ed93485090001 type:create cxid:0x55b8bb0f zxid:0x100000010 txntype:-1 reqpath:n/a Error Path:/home/curi/.zookeeper Error:KeeperErrorCode = NodeExists for /home/curi/.zookeeper
+2015-07-29 19:39:01,170 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-29 19:48:30,969 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.16:56610
+2015-07-29 19:52:16,002 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14ed93111f20005
+2015-07-29 19:52:16,002 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x24ed93119420008
+2015-07-29 19:52:20,004 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14ed93111f20000
+2015-07-29 19:52:20,581 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:50822
+2015-07-29 19:53:12,538 - WARN  [SendWorker:3:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:54:05,544 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.13:37229; will be dropped if server is in r-o mode
+2015-07-29 19:54:05,544 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.13:37229
+2015-07-29 19:56:54,754 - INFO  [WorkerReceiver[myid=2]:FastLeaderElection@542] - Notification: 3 (n.leader), 0x10000006b (n.zxid), 0x2 (n.round), LOOKING (n.state), 3 (n.sid), 0x1 (n.peerEPoch), LEADING (my state)
+2015-07-29 19:57:37,058 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:50926
+2015-07-29 20:15:01,897 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:51168
+2015-07-29 20:39:58,002 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x24ed9311942000c
+2015-07-29 21:01:43,687 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.21:51245
+2015-07-29 21:01:50,768 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.25:53326; will be dropped if server is in r-o mode
+2015-07-29 21:34:47,357 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.12:54610
+2015-07-29 21:34:48,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14ed93111f20020, timeout of 10000ms exceeded
+</block>
+
+<block lines="1311-1320" score="0.0982">
+2015-07-30 15:41:43,385 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 16:00:22,001 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ed9ac1c1e0081
+2015-07-30 16:00:30,000 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ed9ac1c1e0080
+2015-07-30 16:11:39,406 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 16:11:46,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x34ed9ac1c1e007f, timeout of 10000ms exceeded
+2015-07-30 16:11:48,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24ed9311942008e, timeout of 10000ms exceeded
+2015-07-30 16:11:48,004 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ed9ac1c1e007a
+2015-07-30 16:11:48,004 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ed9ac1c1e0078
+2015-07-30 16:12:05,225 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ed931194200a4 with negotiated timeout 10000 for client /10.10.34.32:39275
+2015-07-30 16:12:05,640 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ed931194200a7 with negotiated timeout 10000 for client /10.10.34.36:45209
+</block>
+
+<block lines="1336-1355" score="0.1172">
+2015-07-30 17:49:45,653 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 17:57:44,121 - INFO  [/10.10.34.12:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.13:33209
+2015-07-30 18:08:02,428 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 18:17:53,378 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 18:18:02,134 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ede63a01b000a with negotiated timeout 10000 for client /10.10.34.13:52286
+2015-07-30 18:18:19,328 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.20:49010 which had sessionid 0x24ede63a01b000e
+2015-07-30 18:18:28,772 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.11:53422
+2015-07-30 19:19:12,775 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ede63a01b0027 with negotiated timeout 10000 for client /10.10.34.13:52301
+2015-07-30 19:19:56,251 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ede63a01b002a with negotiated timeout 20000 for client /10.10.34.11:54338
+2015-07-30 19:35:00,506 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.13:52310
+2015-07-30 19:35:08,093 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.11:54576
+2015-07-30 20:41:23,305 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 21:03:49,284 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ede63a01b006c with negotiated timeout 10000 for client /10.10.34.40:47637
+2015-07-30 23:46:27,304 - INFO  [main:QuorumPeerMain@127] - Starting quorum peer
+2015-07-30 23:46:31,590 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:FileTxnSnapLog@240] - Snapshotting: 0x300000dcd to /var/lib/zookeeper/version-2/snapshot.300000dcd
+2015-07-31 00:02:57,176 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.35:59458
+2015-07-31 00:16:10,015 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.37:32918 which had sessionid 0x24edfaa8717000c
+2015-07-31 00:16:20,000 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x34edfaa9c22000d, timeout of 10000ms exceeded
+2015-07-31 00:16:22,002 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24edfaa87170002, timeout of 10000ms exceeded
+2015-07-31 00:17:49,993 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.12:54126; will be dropped if server is in r-o mode
+</block>
+
+<block lines="1376-1390" score="0.1743">
+2015-07-31 12:57:10,007 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14edfaa86f60047
+2015-07-31 15:31:15,575 - INFO  [main:DatadirCleanupManager@79] - autopurge.purgeInterval set to 0
+2015-07-31 15:31:41,457 - INFO  [/10.10.34.12:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.11:59599
+2015-07-31 15:36:21,074 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:FileTxnSnapLog@240] - Snapshotting: 0x50000062e to /var/lib/zookeeper/version-2/snapshot.50000062e
+2015-07-31 15:36:24,570 - INFO  [LearnerHandler-/10.10.34.13:59348:LearnerHandler@263] - Follower sid: 3 : info : org.apache.zookeeper.server.quorum.QuorumPeer$QuorumServer@33557fe4
+2015-07-31 19:02:04,304 - WARN  [SendWorker:1:QuorumCnxManager$SendWorker@679] - Interrupted while waiting for message on queue
+2015-07-31 21:22:52,022 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.27:36125 which had sessionid 0x24ee30a54f5000e
+2015-07-31 21:23:04,002 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ee30a5c53000a
+2015-07-31 21:23:12,518 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ee30a54f5001c with negotiated timeout 10000 for client /10.10.34.32:45013
+2015-07-31 21:24:52,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24ee30a54f50017, timeout of 10000ms exceeded
+2015-07-31 21:24:54,002 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24ee30a54f5001d, timeout of 10000ms exceeded
+2015-07-31 21:24:54,005 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x24ee30a54f50019
+2015-07-31 21:24:54,005 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x24ee30a54f5001a
+2015-07-31 21:25:02,006 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34ee30a5c530011
+2015-07-31 21:32:06,109 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24ee30a54f5001e with negotiated timeout 20000 for client /10.10.34.11:45101
+</block>
+
+<block lines="1396-1440" score="0.1891">
+2015-07-31 21:44:44,002 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14ee3e057ed002a, timeout of 10000ms exceeded
+2015-07-31 21:44:46,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x34ee30a5c53002a, timeout of 10000ms exceeded
+2015-08-07 07:27:35,422 - WARN  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:QuorumCnxManager@368] - Cannot open channel to 3 at election address /10.10.34.13:3888
+2015-08-10 17:52:46,935 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.20:44648; will be dropped if server is in r-o mode
+2015-08-10 17:53:26,762 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.18:49139; will be dropped if server is in r-o mode
+2015-08-10 18:12:35,690 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-08-10 18:12:47,212 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.11:50990
+2015-08-10 18:12:48,994 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24f0557806a001e with negotiated timeout 10000 for client /10.10.34.11:51000
+2015-08-10 18:12:50,548 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.25:44819; will be dropped if server is in r-o mode
+2015-08-10 18:23:56,257 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.15:49471; will be dropped if server is in r-o mode
+2015-08-10 18:23:56,268 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:Learner@107] - Revalidating client: 0x24f0557806a001c
+2015-08-10 18:25:25,206 - INFO  [main:DatadirCleanupManager@79] - autopurge.purgeInterval set to 0
+2015-08-10 18:25:25,239 - INFO  [main:QuorumPeer@944] - maxSessionTimeout set to -1
+2015-08-10 18:25:25,413 - INFO  [/10.10.34.12:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.13:44925
+2015-08-10 18:25:25,673 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:QuorumPeer@738] - FOLLOWING
+2015-08-10 18:25:27,950 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.11:51259; will be dropped if server is in r-o mode
+2015-08-10 18:25:27,951 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:51260
+2015-08-10 18:25:27,964 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@832] - Client attempting to renew session 0x24f0557806a0020 at /10.10.34.17:55969
+2015-08-10 18:25:52,337 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-08-10 18:25:52,537 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.13:36187 which had sessionid 0x24f0557806a001b
+2015-08-10 18:26:03,376 - INFO  [CommitProcessor:2:ZooKeeperServer@595] - Established session 0x24f1724b8af0009 with negotiated timeout 10000 for client /10.10.34.21:44834
+2015-08-10 18:35:11,692 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:51562
+2015-08-18 16:09:18,789 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:java.class.path=/etc/zookeeper/conf:/usr/share/java/jline.jar:/usr/share/java/log4j-1.2.jar:/usr/share/java/xercesImpl.jar:/usr/share/java/xmlParserAPIs.jar:/usr/share/java/netty.jar:/usr/share/java/slf4j-api.jar:/usr/share/java/slf4j-log4j12.jar:/usr/share/java/zookeeper.jar
+2015-08-18 16:09:18,900 - INFO  [LearnerHandler-/10.10.34.11:49928:Leader@598] - Have quorum of supporters; starting up and setting last processed zxid: 0xb00000000
+2015-08-18 16:09:22,982 - INFO  [WorkerReceiver[myid=2]:FastLeaderElection@542] - Notification: 2 (n.leader), 0xa0000009a (n.zxid), 0x1 (n.round), FOLLOWING (n.state), 1 (n.sid), 0xa (n.peerEPoch), LEADING (my state)
+2015-08-18 16:09:30,004 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14f1724a6e80011, timeout of 10000ms exceeded
+2015-08-18 16:09:30,009 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34f1724a35e000c
+2015-08-18 16:09:30,013 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14f1724a6e8000d
+2015-08-20 13:12:40,288 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.12:36322
+2015-08-20 13:13:18,000 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14f3fdae8ba0002, timeout of 10000ms exceeded
+2015-08-20 13:13:20,001 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14f3fdae8ba0001
+2015-08-20 17:12:28,002 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24f3fdaf738000a, timeout of 10000ms exceeded
+2015-08-20 17:12:29,085 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:FinalRequestProcessor@415] - shutdown of request processor complete
+2015-08-20 17:12:45,757 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.12:36358
+2015-08-20 17:12:45,757 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@354] - Exception causing close of session 0x0 due to java.io.IOException: ZooKeeperServer not running
+2015-08-20 17:13:23,515 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.12:36401 (no session established for client)
+2015-08-20 17:13:51,524 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@354] - Exception causing close of session 0x0 due to java.io.IOException: ZooKeeperServer not running
+2015-08-20 17:14:13,880 - WARN  [LearnerHandler-/10.10.34.13:42241:Leader@576] - First is 0x0
+2015-08-20 17:14:14,195 - INFO  [WorkerReceiver[myid=2]:FastLeaderElection@542] - Notification: 1 (n.leader), 0xb0000007b (n.zxid), 0x2 (n.round), LOOKING (n.state), 1 (n.sid), 0xb (n.peerEPoch), LEADING (my state)
+2015-08-20 17:14:14,196 - INFO  [WorkerReceiver[myid=2]:FastLeaderElection@542] - Notification: 1 (n.leader), 0xb0000007b (n.zxid), 0x2 (n.round), LOOKING (n.state), 1 (n.sid), 0xb (n.peerEPoch), LEADING (my state)
+2015-08-20 17:14:24,000 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14f3fdae8ba0017, timeout of 10000ms exceeded
+2015-08-20 17:14:24,000 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14f3fdae8ba000c, timeout of 10000ms exceeded
+2015-08-20 17:14:24,000 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24f3fdaf7380008, timeout of 10000ms exceeded
+2015-08-20 17:23:54,127 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.19:60483 which had sessionid 0x24f4a631df90002
+2015-08-20 17:24:04,002 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24f4a631df90002, timeout of 10000ms exceeded
+</block>
+
+<block lines="1456-1470" score="0.1758">
+2015-08-25 11:14:53,074 - INFO  [LearnerHandler-/10.10.34.11:32976:LearnerHandler@395] - Sending DIFF
+2015-08-25 11:15:04,735 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x24f4a631df90029, timeout of 10000ms exceeded
+2015-08-25 11:15:04,743 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x34f4a63146b003c
+2015-08-25 11:15:04,750 - INFO  [ProcessThread(sid:2 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x14f4a6318b8002f
+2015-08-25 11:26:27,861 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:QuorumPeer@670] - LOOKING
+2015-08-25 11:26:28,145 - INFO  [QuorumPeer[myid=2]/0:0:0:0:0:0:0:0:2181:Learner@325] - Getting a snapshot from leader
+2015-07-29 17:42:53,528 - WARN  [WorkerSender[myid=3]:QuorumCnxManager@368] - Cannot open channel to 2 at election address /10.10.34.12:3888
+2015-07-29 17:43:29,975 - INFO  [WorkerReceiver[myid=3]:FastLeaderElection@542] - Notification: 3 (n.leader), 0x0 (n.zxid), 0x1 (n.round), LOOKING (n.state), 3 (n.sid), 0x0 (n.peerEPoch), LOOKING (my state)
+2015-07-29 17:43:47,783 - INFO  [WorkerReceiver[myid=3]:FastLeaderElection@542] - Notification: 3 (n.leader), 0x0 (n.zxid), 0x1 (n.round), LOOKING (n.state), 3 (n.sid), 0x0 (n.peerEPoch), LOOKING (my state)
+2015-07-29 19:21:29,146 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@679] - Interrupted while waiting for message on queue
+2015-07-29 19:21:32,680 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@762] - Connection broken for id 188978561024, my id = 3, error = 
+2015-07-29 19:21:35,820 - WARN  [RecvWorker:188978561024:QuorumCnxManager$RecvWorker@762] - Connection broken for id 188978561024, my id = 3, error = 
+2015-07-29 19:21:35,823 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:21:36,029 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+2015-07-29 19:21:39,171 - WARN  [SendWorker:188978561024:QuorumCnxManager$SendWorker@688] - Send worker leaving thread
+</block>
+
+<block lines="1921-1940" score="0.1509">
+2015-07-29 19:53:54,912 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.13:54265 (no session established for client)
+2015-07-29 19:54:00,915 - INFO  [WorkerReceiver[myid=3]:FastLeaderElection@542] - Notification: 3 (n.leader), 0x10000006b (n.zxid), 0x2 (n.round), LOOKING (n.state), 3 (n.sid), 0x1 (n.peerEPoch), LOOKING (my state)
+2015-07-29 19:55:01,647 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.13:54294 (no session established for client)
+2015-07-29 19:55:02,980 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.13:54298
+2015-07-29 19:55:19,655 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.13:54310
+2015-07-29 21:01:45,071 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ed9ac1c1e0007 with negotiated timeout 10000 for client /10.10.34.12:59224
+2015-07-29 21:34:44,640 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.12:59230; will be dropped if server is in r-o mode
+2015-07-29 21:34:46,432 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.12:59235
+2015-07-29 21:34:47,040 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.17:51260
+2015-07-29 23:02:33,103 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.38:43508
+2015-07-29 23:05:05,988 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-29 23:42:53,384 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ed9ac1c1e002e with negotiated timeout 10000 for client /10.10.34.42:39469
+2015-07-29 23:44:22,733 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ed9ac1c1e0036 with negotiated timeout 10000 for client /10.10.34.36:37583
+2015-07-29 23:44:23,034 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.39:45022
+2015-07-29 23:52:09,561 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.41:54923
+2015-07-30 14:38:37,500 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:35811
+2015-07-30 14:48:54,960 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 14:52:35,531 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:37021
+2015-07-30 15:13:40,916 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.12:59284 which had sessionid 0x34ed9ac1c1e0059
+2015-07-30 15:13:40,916 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+</block>
+
+<block lines="1951-1965" score="0.1634">
+2015-07-30 16:36:05,149 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.11:41160 which had sessionid 0x34ed9ac1c1e00a9
+2015-07-30 17:11:56,508 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.12:59359
+2015-07-30 17:22:36,450 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.13:54649
+2015-07-30 17:34:50,730 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.11:41732
+2015-07-30 17:36:52,812 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-30 17:40:45,765 - WARN  [RecvWorker:1:QuorumCnxManager$RecvWorker@762] - Connection broken for id 1, my id = 3, error = 
+2015-07-30 17:49:01,419 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ed9ac1c1e00d1 with negotiated timeout 10000 for client /10.10.34.11:49255
+2015-07-30 17:57:38,413 - INFO  [QuorumPeer[myid=3]/0:0:0:0:0:0:0:0:2181:QuorumPeer@670] - LOOKING
+2015-07-30 17:57:38,440 - INFO  [WorkerReceiver[myid=3]:FastLeaderElection@542] - Notification: 3 (n.leader), 0x100001564 (n.zxid), 0x3 (n.round), FOLLOWING (n.state), 3 (n.sid), 0x2 (n.peerEPoch), FOLLOWING (my state)
+2015-07-30 17:58:23,837 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.13:50180
+2015-07-30 19:19:12,507 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.11:50716; will be dropped if server is in r-o mode
+2015-07-30 19:35:00,232 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ede65503f0025 with negotiated timeout 10000 for client /10.10.34.11:50961
+2015-07-30 19:35:00,326 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ede65503f0027 with negotiated timeout 10000 for client /10.10.34.12:56359
+2015-07-30 19:57:45,009 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ede65503f002d with negotiated timeout 20000 for client /10.10.34.11:51041
+2015-07-30 19:57:45,045 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.11:51043; will be dropped if server is in r-o mode
+</block>
+
+<block lines="1976-2000" score="0.1211">
+2015-07-30 23:52:57,092 - INFO  [QuorumPeer[myid=3]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:os.name=Linux
+2015-07-30 23:52:57,093 - INFO  [QuorumPeer[myid=3]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:user.name=zookeeper
+2015-07-31 00:02:53,198 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34edfaa9c220002 with negotiated timeout 10000 for client /10.10.34.11:53000
+2015-07-31 00:02:56,431 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.24:37975
+2015-07-31 00:02:57,579 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.39:51758
+2015-07-31 00:15:23,611 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.11:53310 which had sessionid 0x34edfaa9c220012
+2015-07-31 00:16:12,152 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@349] - caught end of stream exception
+2015-07-31 00:17:54,495 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34edfaa9c22001e with negotiated timeout 10000 for client /10.10.34.41:51908
+2015-07-31 11:07:41,903 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.13:42060 which had sessionid 0x34edfaa9c22002d
+2015-07-31 11:09:00,683 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34edfaa9c22003a with negotiated timeout 10000 for client /10.10.34.16:42267
+2015-07-31 11:09:02,264 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.34:55584; will be dropped if server is in r-o mode
+2015-07-31 11:09:02,548 - WARN  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@793] - Connection request from old client /10.10.34.37:34701; will be dropped if server is in r-o mode
+2015-07-31 15:15:17,186 - INFO  [/10.10.34.13:3888:QuorumCnxManager$Listener@493] - Received connection request /10.10.34.11:53230
+2015-07-31 15:36:23,686 - INFO  [main:QuorumPeer@933] - minSessionTimeout set to -1
+2015-07-31 15:36:23,865 - INFO  [QuorumPeer[myid=3]/0:0:0:0:0:0:0:0:2181:Environment@100] - Server environment:java.home=/usr/lib/jvm/java-7-openjdk-amd64/jre
+2015-07-31 15:36:23,884 - INFO  [QuorumPeer[myid=3]/0:0:0:0:0:0:0:0:2181:Learner@325] - Getting a snapshot from leader
+2015-07-31 21:24:18,366 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.11:59186 which had sessionid 0x34ee30a5c530018
+2015-07-31 21:32:18,447 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxnFactory@197] - Accepted socket connection from /10.10.34.23:51828
+2015-07-31 21:32:19,994 - INFO  [CommitProcessor:3:ZooKeeperServer@595] - Established session 0x34ee30a5c53002b with negotiated timeout 10000 for client /10.10.34.42:37429
+2015-08-07 07:27:46,402 - INFO  [WorkerReceiver[myid=3]:FastLeaderElection@542] - Notification: 3 (n.leader), 0x700000197 (n.zxid), 0x1 (n.round), LOOKING (n.state), 3 (n.sid), 0x7 (n.peerEPoch), LOOKING (my state)
+2015-08-10 17:52:39,698 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@839] - Client attempting to establish new session at /10.10.34.13:58180
+2015-08-10 17:53:14,914 - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:NIOServerCnxn@1001] - Closed socket connection for client /10.10.34.12:33342 which had sessionid 0x34f0557885e0002
+2015-08-10 17:53:16,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14f05578bd80006, timeout of 10000ms exceeded
+2015-08-10 18:12:34,001 - INFO  [SessionTracker:ZooKeeperServer@325] - Expiring session 0x14f05578bd8000f, timeout of 10000ms exceeded
+2015-08-10 18:12:34,004 - INFO  [ProcessThread(sid:3 cport:-1)::PrepRequestProcessor@476] - Processed session termination for sessionid: 0x24f0557806a0010</block>
+

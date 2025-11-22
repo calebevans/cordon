@@ -89,6 +89,20 @@ print(f"Processing time: {result.processing_time:.2f}s")
 print(f"Top anomaly score: {result.score_distribution['max']:.4f}")
 ```
 
+## Real-World Examples
+
+Want to see Cordon in action? Check out our **[comprehensive test examples](./docs/test-examples/)** showing results across 9 different log types.
+
+Each example includes:
+- Links to original log files from the [LogHub research dataset](https://github.com/logpai/loghub)
+- Complete Cordon output with detected anomalies
+- Performance metrics and analysis
+- Real security incidents and unusual patterns discovered
+
+**Average results**: 2,000-line logs reduced to ~306 lines (84.7% reduction) in ~3 seconds.
+
+**[View Test Examples →](./docs/test-examples/)**
+
 ## Primary Use Case: LLM Context Reduction
 
 Cordon is specifically designed to solve the "log file too large for LLM context window" problem:
@@ -143,6 +157,8 @@ Question: What caused the outage?
 The score for each window is the average cosine distance to its k nearest neighbors in the embedding space.
 
 **Important:** This means repetitive patterns are filtered out even if they're critical errors. For example, the same FATAL error repeated 100 times will score as "normal" because it's semantically similar to itself. Cordon finds **unusual** patterns, not **all** errors.
+
+**Want to understand the technical details?** Read the **[technical deep dive](./docs/how-it-works.md)** for the full algorithmic approach, mathematical foundations, and design decisions.
 
 ## Configuration Options
 
