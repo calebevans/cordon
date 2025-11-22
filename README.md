@@ -14,6 +14,8 @@ Cordon is a Python library that uses transformer-based embeddings and density-ba
 
 ## Installation
 
+### Native Installation (Recommended for macOS GPU Support)
+
 Using `uv` (recommended):
 
 ```bash
@@ -33,6 +35,13 @@ uv pip install -e ".[dev]"
 pre-commit install
 ```
 
+For llama.cpp backend (GPU acceleration in containers):
+
+```bash
+# Install with llama.cpp support
+uv pip install -e ".[llama-cpp]"
+```
+
 For very large logs (optional FAISS support for better performance):
 
 ```bash
@@ -42,6 +51,26 @@ uv pip install -e ".[faiss-cpu]"
 # For systems with CUDA/GPU
 uv pip install -e ".[faiss-gpu]"
 ```
+
+### Container Installation
+
+For a containerized environment using Podman or Docker:
+
+```bash
+# Build container image
+./build-container.sh
+
+# Or manually
+podman build -t cordon:latest -f Containerfile .
+```
+
+**GPU Support in Containers:**
+- ✅ **Linux with NVIDIA**: CUDA acceleration via Podman with nvidia-ctk
+- ✅ **Linux with AMD/Intel**: Vulkan acceleration via Podman with `--device /dev/dri`
+- ✅ **macOS**: Vulkan acceleration via Podman libkrun with `--device /dev/dri`
+- ✅ **CPU fallback**: Works on all platforms
+
+See [Container Usage](#container-usage) section below for details.
 
 ## Quick Start
 
@@ -91,6 +120,156 @@ print(f"Found {result.merged_blocks} significant blocks")
 print(f"Processing time: {result.processing_time:.2f}s")
 print(f"Top anomaly score: {result.score_distribution['max']:.4f}")
 ```
+
+## Backend Options
+
+Cordon supports two embedding backends for flexibility across different deployment environments:
+
+### sentence-transformers (Default)
+
+The default backend using HuggingFace transformers with PyTorch:
+
+```bash
+# Automatic GPU detection (MPS on macOS, CUDA on Linux)
+cordon system.log
+
+# Force specific device
+cordon --device cuda system.log
+cordon --device mps system.log
+cordon --device cpu system.log
+```
+
+**Best for:**
+- Native macOS/Linux installations with GPU access
+- Development and testing
+- Maximum throughput with batching
+
+### llama.cpp Backend
+
+Alternative backend using GGUF models with Vulkan GPU support:
+
+```bash
+# CPU-only
+cordon --backend llama-cpp \
+    --use-faiss \
+    --model-path ./models/model.gguf \
+    system.log
+
+# GPU-accelerated (offload 10 layers)
+cordon --backend llama-cpp \
+    --use-faiss \
+    --model-path ./models/model.gguf \
+    --n-gpu-layers 10 \
+    system.log
+```
+
+**Best for:**
+- **Container deployments** with GPU acceleration via Vulkan (only option for containers)
+- Lower memory footprint (GGUF quantization)
+- Cross-platform GPU support
+
+**Performance (Apache 2k.log - 1999 lines, 167KB):**
+- **Native**: Slower than sentence-transformers (7.65s vs 3.56s) - not recommended
+- **Container with GPU**: 17.56s (best option for containers, but native is 5x faster)
+- **Container CPU-only**: 19.15s (minimal GPU benefit in containers)
+
+**Critical**: For native macOS/Linux, use sentence-transformers (default) - it's 2x faster due to batching
+
+**Why llama.cpp for containers?**
+
+PyTorch's MPS backend cannot work in Linux containers on macOS. The llama.cpp backend with Vulkan support provides GPU acceleration in containers via device passthrough (`--device /dev/dri`). While GPU provides only ~9% speedup in containers (17.56s vs 19.15s), it's the only option for GPU-accelerated analysis in containerized environments.
+
+See the **[llama.cpp Backend Guide](./docs/llama-cpp-guide.md)** for:
+- Model conversion and preparation
+- Performance tuning and benchmarks
+- Container deployment with GPU
+- Troubleshooting and best practices
+
+### Backend Technical Differences
+
+While both backends are unified under the LlamaIndex interface, they have distinct characteristics:
+
+| Feature | sentence-transformers (Default) | llama.cpp Backend |
+|---------|---------------------------------|-------------------|
+| **Model Precision** | Full precision (FP32) | Quantized (Q4_K_M, 4-bit) |
+| **Processing** | Batched (High Throughput) | Sequential (batch_size=1 only) |
+| **Token Truncation** | Default tokenizer behavior (usually 512 tokens) | Model context window (512 tokens for default model) |
+| **Normalization** | Explicit L2 Normalization | Explicit L2 Normalization |
+| **Best For** | Native macOS/Linux, High Performance | Containers, Low Memory, Cross-Platform GPU |
+
+**Note on Batching**: The llama.cpp backend with BERT-based models (like all-MiniLM-L6-v2) **does not support batching** in the current llama-cpp-python implementation. It processes embeddings one at a time (batch_size=1), which significantly impacts performance. This is a known limitation of the BERT architecture support in llama.cpp.
+
+**Note on Truncation**: Both backends now handle token limits automatically via LlamaIndex. Explicit truncation warnings are no longer shown; instead, text exceeding the limit is handled by the underlying model's default behavior (truncation).
+
+## Container Usage
+
+Cordon can be run in a containerized environment using Podman or Docker. This provides a consistent, isolated runtime across platforms.
+
+### Quick Start with Containers
+
+```bash
+# Build the container image
+./build-container.sh
+
+# Run Cordon on a log file
+./run-container.sh /path/to/system.log
+
+# Or use Podman/Docker directly
+podman build -t cordon:latest -f Containerfile .
+podman run -v $(pwd)/logs:/logs cordon:latest /logs/system.log
+```
+
+### GPU Support
+
+The container includes multi-platform GPU support via the llama.cpp backend:
+
+```bash
+# macOS with Podman libkrun (Vulkan)
+podman run --device /dev/dri -v $(pwd)/logs:/logs cordon:latest \
+  --backend llama-cpp \
+  --use-faiss \
+  --model-path /app/models/all-MiniLM-L6-v2-Q4_K_M.gguf \
+  --n-gpu-layers 10 \
+  /logs/system.log
+
+# Linux with NVIDIA GPU (CUDA)
+podman run --hooks-dir=/usr/share/containers/oci/hooks.d/ \
+  -v $(pwd)/logs:/logs:z cordon:latest \
+  --backend llama-cpp \
+  --use-faiss \
+  --model-path /app/models/all-MiniLM-L6-v2-Q4_K_M.gguf \
+  --n-gpu-layers 10 \
+  /logs/system.log
+
+# Linux with AMD/Intel GPU (Vulkan)
+podman run --device /dev/dri -v $(pwd)/logs:/logs cordon:latest \
+  --backend llama-cpp \
+  --use-faiss \
+  --model-path /app/models/all-MiniLM-L6-v2-Q4_K_M.gguf \
+  --n-gpu-layers 10 \
+  /logs/system.log
+```
+
+**Container Performance (Apache 2k.log - 1999 lines):**
+- **Vulkan GPU**: 17.56s (~9% faster than CPU)
+- **CPU-only**: 19.15s
+- **CUDA (NVIDIA)**: Expected 5-10x speedup (hardware dependent, not tested)
+
+**Critical**: Native installation is **5x faster** (3.56s) than containers (17.56s). Use containers only when necessary.
+
+**Note:** sentence-transformers backend with PyTorch MPS cannot work in Linux containers. For best performance on macOS, use native installation with sentence-transformers instead of containers.
+
+### Complete Container Documentation
+
+For detailed container usage, including:
+- Podman/Docker installation and setup
+- libkrun provider configuration for GPU experimentation
+- Build options and customization
+- Volume mounting strategies
+- Performance comparisons
+- Troubleshooting guide
+
+See the **[Container Usage Guide →](./docs/CONTAINER.md)**
 
 ## Real-World Examples
 
@@ -165,16 +344,43 @@ The score for each window is the average cosine distance to its k nearest neighb
 
 ## Configuration Options
 
+### Analysis Parameters
+
 | Parameter | Default | CLI Flag | Description |
 |-----------|---------|----------|-------------|
 | `window_size` | 5 | `--window-size` | Number of lines per window |
 | `stride` | 2 | `--stride` | Lines to skip between windows |
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Percentile threshold (0.1 = top 10% most anomalous) |
-| `model_name` | `"all-MiniLM-L6-v2"` | `--model-name` | Sentence-transformers model |
+
+### Backend Selection
+
+| Parameter | Default | CLI Flag | Description |
+|-----------|---------|----------|-------------|
+| `backend` | `"sentence-transformers"` | `--backend` | Embedding backend (`sentence-transformers` or `llama-cpp`) |
+
+### sentence-transformers Backend
+
+| Parameter | Default | CLI Flag | Description |
+|-----------|---------|----------|-------------|
+| `model_name` | `"all-MiniLM-L6-v2"` | `--model-name` | HuggingFace model name |
 | `batch_size` | 32 | `--batch-size` | Embedding batch size |
 | `device` | `None` | `--device` | Device override (`cuda`/`mps`/`cpu`/`None` for auto) |
 | `use_faiss` | `False` | `--use-faiss` | Force FAISS for k-NN (faster for large logs) |
+
+### llama.cpp Backend
+
+| Parameter | Default | CLI Flag | Description |
+|-----------|---------|----------|-------------|
+| `model_path` | `None` | `--model-path` | Path to GGUF model file (required for llama-cpp) |
+| `n_gpu_layers` | 0 | `--n-gpu-layers` | Number of layers to offload to GPU (0=CPU only, -1=all) |
+| `n_threads` | `None` | `--n-threads` | CPU threads for llama.cpp (`None`=auto-detect) |
+| `n_ctx` | 2048 | `--n-ctx` | Context size for llama.cpp |
+
+### Advanced Options
+
+| Parameter | Default | CLI Flag | Description |
+|-----------|---------|----------|-------------|
 | `use_mmap_threshold` | 50000 | N/A | Auto-enable memory mapping above N windows (`None` to disable) |
 | `use_faiss_threshold` | `None` | N/A | Auto-enable FAISS above N windows (requires faiss installation) |
 

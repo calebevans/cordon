@@ -22,6 +22,40 @@ def parse_args() -> argparse.Namespace:
         help="Path(s) to log file(s) to analyze",
     )
 
+    # embedding backend selection
+    backend_group = parser.add_argument_group("embedding backend")
+    backend_group.add_argument(
+        "--backend",
+        type=str,
+        choices=["sentence-transformers", "llama-cpp"],
+        default="sentence-transformers",
+        help="Embedding backend to use (default: sentence-transformers)",
+    )
+    backend_group.add_argument(
+        "--model-path",
+        type=Path,
+        default=None,
+        help="Path to GGUF model file (llama-cpp backend, auto-downloads if not specified)",
+    )
+    backend_group.add_argument(
+        "--n-gpu-layers",
+        type=int,
+        default=0,
+        help="Number of layers to offload to GPU (llama-cpp only, default: 0)",
+    )
+    backend_group.add_argument(
+        "--n-threads",
+        type=int,
+        default=None,
+        help="Thread count for llama.cpp (default: auto-detect)",
+    )
+    backend_group.add_argument(
+        "--n-ctx",
+        type=int,
+        default=2048,
+        help="Context size for llama.cpp (default: 2048)",
+    )
+
     # configuration options
     config_group = parser.add_argument_group("analysis configuration")
     config_group.add_argument(
@@ -52,13 +86,13 @@ def parse_args() -> argparse.Namespace:
         "--model-name",
         type=str,
         default="all-MiniLM-L6-v2",
-        help="Sentence-transformers model name (default: all-MiniLM-L6-v2)",
+        help="HuggingFace model name for sentence-transformers backend (default: all-MiniLM-L6-v2)",
     )
     config_group.add_argument(
         "--batch-size",
         type=int,
         default=32,
-        help="Batch size for embedding operations (default: 32)",
+        help="Batch size for embedding operations (sentence-transformers only, default: 32)",
     )
     config_group.add_argument(
         "--device",
@@ -151,6 +185,11 @@ def main() -> None:
             batch_size=args.batch_size,
             device=args.device,
             use_faiss_threshold=0 if args.use_faiss else None,
+            backend=args.backend,
+            model_path=str(args.model_path) if args.model_path else None,
+            n_gpu_layers=args.n_gpu_layers,
+            n_threads=args.n_threads,
+            n_ctx=args.n_ctx,
         )
     except ValueError as error:
         print(f"Configuration error: {error}", file=sys.stderr)
@@ -158,9 +197,28 @@ def main() -> None:
 
     # create analyzer
     print("Initializing analyzer...")
-    analyzer = SemanticLogAnalyzer(config)
-    print(f"Using model: {config.model_name}")
-    print(f"Device: {config.device or 'auto'}")
+    print(f"Backend: {config.backend}")
+    if config.backend == "sentence-transformers":
+        print(f"Model: {config.model_name}")
+        print(f"Device: {config.device or 'auto'}")
+    elif config.backend == "llama-cpp":
+        print(f"Model path: {config.model_path}")
+        print(f"GPU layers: {config.n_gpu_layers}")
+        if config.n_threads:
+            print(f"Threads: {config.n_threads}")
+    print()
+
+    try:
+        analyzer = SemanticLogAnalyzer(config)
+    except ImportError as error:
+        print(f"Import error: {error}", file=sys.stderr)
+        print("\nTo install llama.cpp support:", file=sys.stderr)
+        print("  uv pip install 'cordon[llama-cpp]'", file=sys.stderr)
+        print("  or: pip install llama-cpp-python", file=sys.stderr)
+        sys.exit(1)
+    except Exception as error:
+        print(f"Initialization error: {error}", file=sys.stderr)
+        sys.exit(1)
     print()
 
     # analyze each log file

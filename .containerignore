@@ -1,0 +1,75 @@
+# .containerignore - Exclude files from container build context
+# This reduces build context size and speeds up container builds
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.virtualenv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Development tools
+.mypy_cache/
+.ruff_cache/
+.pre-commit-config.yaml
+.git/
+.github/
+.gitlab/
+.gitignore
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation build artifacts
+docs/_build/
+docs/.doctrees/
+
+# Container files (don't copy container into itself)
+Containerfile
+Dockerfile
+.dockerignore
+.containerignore
+*.tar
+*.tar.gz
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Project-specific
+examples/
+tests/
+*.md
+!README.md
+!LICENSE

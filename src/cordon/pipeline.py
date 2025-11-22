@@ -7,7 +7,7 @@ from cordon.analysis.scorer import DensityAnomalyScorer
 from cordon.analysis.thresholder import Thresholder
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import AnalysisResult, ScoredWindow
-from cordon.embedding.vectorizer import TransformerVectorizer
+from cordon.embedding import create_vectorizer
 from cordon.ingestion.reader import LogFileReader
 from cordon.postprocess.formatter import OutputFormatter
 from cordon.postprocess.merger import IntervalMerger
@@ -61,8 +61,8 @@ class SemanticLogAnalyzer:
         segmenter = SlidingWindowSegmenter()
         windows = segmenter.segment(lines, self.config)
 
-        # stage 3: vectorization
-        vectorizer = TransformerVectorizer(self.config)
+        # stage 3: vectorization (using factory to select backend)
+        vectorizer = create_vectorizer(self.config)
         embedded = list(vectorizer.embed_windows(windows))
         total_windows = len(embedded)
 
