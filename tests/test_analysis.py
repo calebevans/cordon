@@ -35,7 +35,7 @@ class TestDensityAnomalyScorer:
     def test_score_similar_windows(self) -> None:
         """Test that similar windows have low scores."""
         windows = [
-            TextWindow(content="test", start_line=i, end_line=i, window_id=i) for i in range(5)
+            TextWindow(content="test", start_line=i, end_line=i, window_id=i-1) for i in range(1, 6)
         ]
         # all embeddings very similar
         embeddings = [np.array([0.1, 0.2, 0.3]) + np.random.randn(3) * 0.01 for _ in range(5)]
@@ -54,7 +54,7 @@ class TestDensityAnomalyScorer:
     def test_score_diverse_windows(self) -> None:
         """Test that diverse embeddings have higher scores for outliers."""
         windows = [
-            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i) for i in range(6)
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i-1) for i in range(1, 7)
         ]
         # create 5 similar embeddings and 1 outlier
         embeddings = [np.array([0.1, 0.2, 0.3]) for _ in range(5)]
@@ -74,8 +74,8 @@ class TestDensityAnomalyScorer:
         """Test that memory-mapped strategy produces consistent results."""
         # create enough windows to trigger mmap (if threshold is set low)
         windows = [
-            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i)
-            for i in range(100)
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i-1)
+            for i in range(1, 101)
         ]
         # create diverse embeddings
         embeddings = [np.random.randn(10) for _ in range(100)]
@@ -103,8 +103,8 @@ class TestThresholder:
     def test_select_top_10_percent(self) -> None:
         """Test selecting top 10% of windows."""
         windows = [
-            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i)
-            for i in range(100)
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i-1)
+            for i in range(1, 101)
         ]
         embeddings = [np.array([float(i)]) for i in range(100)]
         scored = [
@@ -123,7 +123,7 @@ class TestThresholder:
     def test_select_all_windows(self) -> None:
         """Test selecting all windows with ratio=1.0."""
         windows = [
-            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i) for i in range(10)
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i-1) for i in range(1, 11)
         ]
         embeddings = [np.array([float(i)]) for i in range(10)]
         scored = [
@@ -140,7 +140,7 @@ class TestThresholder:
     def test_select_no_windows(self) -> None:
         """Test selecting no windows with ratio=0.0."""
         windows = [
-            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i) for i in range(10)
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i-1) for i in range(1, 11)
         ]
         embeddings = [np.array([float(i)]) for i in range(10)]
         scored = [
@@ -167,7 +167,7 @@ class TestThresholder:
     def test_results_sorted_descending(self) -> None:
         """Test that results are sorted by score (descending)."""
         windows = [
-            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i) for i in range(10)
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i-1) for i in range(1, 11)
         ]
         embeddings = [np.array([float(i)]) for i in range(10)]
         # create scores in random order
