@@ -67,6 +67,11 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Device for model inference (default: auto-detect)",
     )
+    config_group.add_argument(
+        "--use-faiss",
+        action="store_true",
+        help="Use FAISS for k-NN search (faster for large logs, requires faiss-cpu or faiss-gpu)",
+    )
 
     # output options
     output_group = parser.add_argument_group("output options")
@@ -145,6 +150,7 @@ def main() -> None:
             model_name=args.model_name,
             batch_size=args.batch_size,
             device=args.device,
+            use_faiss_threshold=0 if args.use_faiss else None,
         )
     except ValueError as error:
         print(f"Configuration error: {error}", file=sys.stderr)

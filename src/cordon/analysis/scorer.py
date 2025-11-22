@@ -223,6 +223,9 @@ class DensityAnomalyScorer:
         embedding_dim = embeddings.shape[1]
         n_neighbors = self._calculate_n_neighbors(config, n_windows)
 
+        # normalize embeddings so inner product = cosine similarity
+        faiss.normalize_L2(embeddings)
+
         # create FAISS index
         index = faiss.IndexFlatIP(embedding_dim)
         index.add(embeddings)
@@ -230,8 +233,8 @@ class DensityAnomalyScorer:
         # query k-nearest neighbors
         distances, _ = index.search(embeddings, n_neighbors)
 
-        # convert inner product distances to cosine distances (1 - similarity)
-        # FAISS returns similarity scores, we need distances
+        # convert inner product (cosine similarity) to cosine distance
+        # after normalization, inner product equals cosine similarity
         distances = 1.0 - distances
 
         # calculate scores
@@ -240,6 +243,9 @@ class DensityAnomalyScorer:
             # skip first distance (self) and take mean of remaining
             neighbor_distances = distances[window_idx][1:]
             score = float(np.mean(neighbor_distances))
+
+            # ensure non-negative scores (handle numerical precision issues)
+            score = max(0.0, score)
 
             scored_windows.append(
                 ScoredWindow(window=window, score=score, embedding=embeddings[window_idx])
