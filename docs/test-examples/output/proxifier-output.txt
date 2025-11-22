@@ -20,13 +20,13 @@ Score Distribution:
   P90:    0.1512
   Max:    0.2896
 
-                               Significant Blocks                               
+                               Significant Blocks
 ================================================================================
 <block lines="251-270" score="0.1992">
 [10.30 17:14:20] Dropbox.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
 [10.30 17:15:10] QQ.exe - tcpconn.tencent.com:80 close, 133 bytes sent, 0 bytes received, lifetime <1 sec
 [10.30 17:15:42] QQ.exe - tcpconn6.tencent.com:443 error : A connection request was canceled before the completion.
-[10.30 17:16:10] QQ.exe - tcpconn4.tencent.com:80 error : Could not connect through proxy proxy.cse.cuhk.edu.hk:5070 - Proxy closed the connection unexpectedly. 
+[10.30 17:16:10] QQ.exe - tcpconn4.tencent.com:80 error : Could not connect through proxy proxy.cse.cuhk.edu.hk:5070 - Proxy closed the connection unexpectedly.
 [10.30 17:17:09] SogouCloud.exe - get.sogou.com:80 close, 651 bytes sent, 346 bytes received, lifetime <1 sec
 [10.30 17:17:16] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
 [10.30 17:17:17] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
@@ -112,18 +112,18 @@ Score Distribution:
 </block>
 
 <block lines="926-945" score="0.1849">
-[10.30 21:14:05] YodaoDict.exe - oimageb8.ydstatic.com:80 error : A connection request was canceled before the completion. 
+[10.30 21:14:05] YodaoDict.exe - oimageb8.ydstatic.com:80 error : A connection request was canceled before the completion.
 [10.30 21:14:16] YodaoDict.exe - oimageb6.ydstatic.com:80 close, 358 bytes sent, 38960 bytes (38.0 KB) received, lifetime 00:30
 [10.30 21:14:57] YodaoDict.exe - oimagec4.ydstatic.com:80 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
 [10.30 21:14:59] YodaoDict.exe - oimagea7.ydstatic.com:80 close, 414 bytes sent, 41182 bytes (40.2 KB) received, lifetime 00:30
 [10.30 21:15:27] YodaoDict.exe - oimagec3.ydstatic.com:80 close, 358 bytes sent, 48647 bytes (47.5 KB) received, lifetime 00:30
 [10.30 21:16:30] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 7685 bytes (7.50 KB) sent, 51839 bytes (50.6 KB) received, lifetime 09:54
 [10.30 21:16:40] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
-[10.30 21:16:41] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion. 
-[10.30 21:16:41] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion. 
-[10.30 21:16:41] YodaoDict.exe - oimageb8.ydstatic.com:80 error : A connection request was canceled before the completion. 
-[10.30 21:16:41] YodaoDict.exe - oimagec1.ydstatic.com:80 error : A connection request was canceled before the completion. 
-[10.30 21:17:51] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion. 
+[10.30 21:16:41] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion.
+[10.30 21:16:41] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion.
+[10.30 21:16:41] YodaoDict.exe - oimageb8.ydstatic.com:80 error : A connection request was canceled before the completion.
+[10.30 21:16:41] YodaoDict.exe - oimagec1.ydstatic.com:80 error : A connection request was canceled before the completion.
+[10.30 21:17:51] YodaoDict.exe - oimagea5.ydstatic.com:80 error : A connection request was canceled before the completion.
 [10.30 21:17:57] YodaoDict.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
 [10.30 21:18:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
 [10.30 21:19:15] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
@@ -321,4 +321,3 @@ Score Distribution:
 [07.27 10:22:23] chrome.exe *64 - www.evernote.com:443 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
 [07.27 10:22:27] chrome.exe *64 - drive.google.com:443 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS
 </block>
-

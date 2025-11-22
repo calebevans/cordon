@@ -20,7 +20,7 @@ Score Distribution:
   P90:    0.0263
   Max:    0.3443
 
-                               Significant Blocks                               
+                               Significant Blocks
 ================================================================================
 <block lines="1-30" score="0.2368">
 2016-09-28 04:30:30, Info                  CBS    Loaded Servicing Stack v6.1.7601.23505 with Core: C:\Windows\winsxs\amd64_microsoft-windows-servicingstack_31bf3856ad364e35_6.1.7601.23505_none_681aa442f6fed7f0\cbscore.dll
@@ -375,4 +375,3 @@ Score Distribution:
 2016-09-29 02:04:34, Info                  CBS    Read out cached package applicability for package: Package_for_KB3020388~31bf3856ad364e35~amd64~~6.1.1.1, ApplicableState: 112, CurrentState:112
 2016-09-29 02:04:34, Info                  CBS    Session: 30546354_3307521360 initialized by client WindowsUpdateAgent.
 </block>
-

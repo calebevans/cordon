@@ -41,7 +41,7 @@ Each output file contains:
    - Significant windows identified
    - Merged blocks (final output count)
    - Processing time
-   
+
 2. **Score Distribution**: Statistical overview of anomaly scores
    - Min, Mean, Median, P90, Max scores
    - Higher scores indicate more semantically unique content
@@ -106,7 +106,6 @@ model:                all-MiniLM-L6-v2
 ```
 ---
 
-**Last Updated**: November 22, 2025  
-**Test Version**: Cordon v0.1.0  
+**Last Updated**: November 22, 2025
+**Test Version**: Cordon v0.1.0
 **Python Version**: 3.12.10
-

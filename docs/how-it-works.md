@@ -357,6 +357,5 @@ Trade-off: Larger batches use more VRAM but are faster
 
 ---
 
-**Last Updated**: November 22, 2025  
+**Last Updated**: November 22, 2025
 **Version**: 0.1.0
-

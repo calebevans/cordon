@@ -20,7 +20,7 @@ Score Distribution:
   P90:    0.0243
   Max:    0.1985
 
-                               Significant Blocks                               
+                               Significant Blocks
 ================================================================================
 <block lines="191-200" score="0.0292">
 [Sun Dec 04 06:12:40 2005] [error] mod_jk child workerEnv in error state 6
@@ -401,4 +401,3 @@ Score Distribution:
 [Mon Dec 05 19:15:55 2005] [notice] jk2_init() Found child 6790 in scoreboard slot 7
 [Mon Dec 05 19:15:57 2005] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties
 [Mon Dec 05 19:15:57 2005] [error] mod_jk child workerEnv in error state 6</block>
-

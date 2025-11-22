@@ -20,7 +20,7 @@ Score Distribution:
   P90:    0.0473
   Max:    0.2346
 
-                               Significant Blocks                               
+                               Significant Blocks
 ================================================================================
 <block lines="26-35" score="0.0848">
 081109 205749 997 INFO dfs.DataNode$DataXceiver: Receiving block blk_-28342503914935090 src: /10.251.123.132:57542 dest: /10.251.123.132:50010
@@ -490,4 +490,3 @@ Score Distribution:
 081111 100417 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.30.101:50010 is added to blk_6451403582950672007 size 67108864
 081111 100646 26268 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7048088870427586736 src: /10.250.10.100:56512 dest: /10.250.10.100:50010
 </block>
-

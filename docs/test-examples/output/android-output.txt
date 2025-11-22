@@ -20,7 +20,7 @@ Score Distribution:
   P90:    0.1672
   Max:    0.4330
 
-                               Significant Blocks                               
+                               Significant Blocks
 ================================================================================
 <block lines="6-25" score="0.4330">
 03-17 16:13:38.861  2227  2227 D TextView: mVisiblity.getValue is false
@@ -80,7 +80,7 @@ Score Distribution:
 03-17 16:13:46.671  2227  2318 I PhoneStatusBar: logNotificationVisibilityChanges runInThread start
 03-17 16:13:46.671  1702 17633 I NotificationManager: onNotificationVisibilityChanged called
 03-17 16:13:46.672  2227  2318 I PhoneStatusBar: logNotificationVisibilityChanges runInThread over
-03-17 16:13:46.764  2227  2794 E KeyguardUpdateMonitor: isSimPinSecure mSimDatas is null or empty 
+03-17 16:13:46.764  2227  2794 E KeyguardUpdateMonitor: isSimPinSecure mSimDatas is null or empty
 03-17 16:13:46.765  2227  2794 W KeyguardUpdateMonitor: registerCallback not in UI.
 03-17 16:13:46.765  2227  2794 W KeyguardUpdateMonitor: android.util.AndroidRuntimeException: Must execute in UI
 03-17 16:13:46.765  2227  2794 V KeyguardUpdateMonitor: *** register callback for com.android.systemui.statusbar.policy.KeyguardMonitor@712d093
@@ -227,7 +227,7 @@ Score Distribution:
 03-17 16:15:25.170  1702 14638 D WindowManager: interceptKeyBeforeQueueing: key 4 , result : 1
 03-17 16:15:25.171  1702  2105 D PowerManagerService: userActivityNoUpdateLocked: eventTime=261949805, event=1, flags=0x0, uid=1000
 03-17 16:15:25.171  1702  2105 D PowerManagerService: ready=true,policy=3,wakefulness=1,wksummary=0x0,uasummary=0x1,bootcompleted=true,boostinprogress=false,waitmodeenable=false,mode=false,manual=38,auto=-1,adj=0.0userId=0
-03-17 16:15:25.196  1702  3693 I WindowManager: Destroying surface Surface(name=PopupWindow:317e46) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.removeLocked:1554 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2739 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2702 com.android.server.wm.WindowManagerService.removeWindowLocked:2691 com.android.server.wm.WindowManagerService.removeWindowLocked:2560 com.android.server.wm.WindowManagerService.removeWindow:2555 
+03-17 16:15:25.196  1702  3693 I WindowManager: Destroying surface Surface(name=PopupWindow:317e46) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.removeLocked:1554 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2739 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2702 com.android.server.wm.WindowManagerService.removeWindowLocked:2691 com.android.server.wm.WindowManagerService.removeWindowLocked:2560 com.android.server.wm.WindowManagerService.removeWindow:2555
 03-17 16:15:25.201  2227  2227 V PhoneStatusBar: setLightsOn(true)
 03-17 16:15:25.201  2227  2227 I PhoneStatusBar: setSystemUiVisibility vis=0 mask=1 oldVal=40000500 newVal=40000500 diff=0 fullscreenStackVis=0 dockedStackVis=0, fullscreenStackBounds=Rect(0, 0 - 0, 0), dockedStackBounds=Rect(0, 0 - 0, 0)
 03-17 16:15:25.262  2227  2227 I PhoneStatusBar: resumeSuspendedAutohide
@@ -344,9 +344,9 @@ Score Distribution:
 03-17 16:16:00.091  1702  1820 D DisplayPowerController: Animating brightness: target=38, rate=200
 03-17 16:16:00.233 28601 28601 V AudioManager: playSoundEffect   effectType: 0
 03-17 16:16:00.233 28601 28601 V AudioManager: querySoundEffectsEnabled...
-03-17 16:16:00.249  1702  8290 I WindowManager: Destroying surface Surface(name=PopupWindow:9b04807) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.removeLocked:1554 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2739 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2702 com.android.server.wm.WindowManagerService.removeWindowLocked:2691 com.android.server.wm.WindowManagerService.removeWindowLocked:2560 com.android.server.wm.WindowManagerService.removeWindow:2555 
+03-17 16:16:00.249  1702  8290 I WindowManager: Destroying surface Surface(name=PopupWindow:9b04807) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.removeLocked:1554 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2739 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2702 com.android.server.wm.WindowManagerService.removeWindowLocked:2691 com.android.server.wm.WindowManagerService.removeWindowLocked:2560 com.android.server.wm.WindowManagerService.removeWindow:2555
 03-17 16:16:00.284  7111  7111 V AudioManager: isWiredHeadsetOn...
-03-17 16:16:00.289  1702  2250 I WindowManager: Destroying surface Surface(name=PopupWindow:317e46) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.removeLocked:1554 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2739 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2702 com.android.server.wm.WindowManagerService.removeWindowLocked:2691 com.android.server.wm.WindowManagerService.removeWindowLocked:2560 com.android.server.wm.WindowManagerService.removeWindow:2555 
+03-17 16:16:00.289  1702  2250 I WindowManager: Destroying surface Surface(name=PopupWindow:317e46) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.removeLocked:1554 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2739 com.android.server.wm.WindowManagerService.removeWindowInnerLocked:2702 com.android.server.wm.WindowManagerService.removeWindowLocked:2691 com.android.server.wm.WindowManagerService.removeWindowLocked:2560 com.android.server.wm.WindowManagerService.removeWindow:2555
 </block>
 
 <block lines="1776-1795" score="0.3052">
@@ -381,7 +381,7 @@ Score Distribution:
 03-17 16:16:04.790  1702 17621 W ActivityManager: getTasks: caller 10111 does not hold REAL_GET_TASKS; limiting output
 03-17 16:16:04.791  1702  3694 W ActivityManager: getTasks: caller 10111 does not hold REAL_GET_TASKS; limiting output
 03-17 16:16:04.808  1702 27365 I NotificationManager: onNotificationExpansionChanged called
-03-17 16:16:04.816  1702  8303 I WindowManager: Destroying surface Surface(name=com.tencent.mobileqq/com.tencent.mobileqq.activity.SplashActivity) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.destroyOrSaveSurface:2201 com.android.server.wm.AppWindowToken.destroySurfaces:374 com.android.server.wm.AppWindowToken.notifyAppStopped:400 com.android.server.wm.WindowManagerService.notifyAppStopped:4869 com.android.server.am.ActivityStack.activityStoppedLocked:1393 com.android.server.am.ActivityManagerService.activityStopped:7690 
+03-17 16:16:04.816  1702  8303 I WindowManager: Destroying surface Surface(name=com.tencent.mobileqq/com.tencent.mobileqq.activity.SplashActivity) called by com.android.server.wm.WindowStateAnimator.destroySurface:2060 com.android.server.wm.WindowStateAnimator.destroySurfaceLocked:913 com.android.server.wm.WindowState.destroyOrSaveSurface:2201 com.android.server.wm.AppWindowToken.destroySurfaces:374 com.android.server.wm.AppWindowToken.notifyAppStopped:400 com.android.server.wm.WindowManagerService.notifyAppStopped:4869 com.android.server.am.ActivityStack.activityStoppedLocked:1393 com.android.server.am.ActivityManagerService.activityStopped:7690
 03-17 16:16:04.850  2227  2227 I StackScrollAlgorithm: updateClipping isOverlap:false, getTopPadding=333.0, Translation=-429.0
 03-17 16:16:04.850  2227  2227 I StackScrollAlgorithm: updateDimmedActivatedHideSensitive overlap:false
 03-17 16:16:04.858  1702  1736 W ActivityManager: getRunningAppProcesses: caller 10111 does not hold REAL_GET_TASKS; limiting output
@@ -433,4 +433,3 @@ Score Distribution:
 03-17 16:16:07.084  1702  3694 D ActivityManager: getRecentTasks: topActivity=ComponentInfo{com.tencent.mm/com.tencent.mm.ui.LauncherUI}
 03-17 16:16:07.144  2227  2227 I PanelView: mHeadsUpExistenceChangedRunnable
 </block>
-

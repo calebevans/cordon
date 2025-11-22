@@ -20,54 +20,54 @@ Score Distribution:
   P90:    0.0865
   Max:    0.3547
 
-                               Significant Blocks                               
+                               Significant Blocks
 ================================================================================
 <block lines="86-100" score="0.1167">
-Jun 17 07:07:00 combo ftpd[29505]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:00 2005 
-Jun 17 07:07:00 combo ftpd[29506]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:00 2005 
-Jun 17 07:07:00 combo ftpd[29509]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:00 2005 
-Jun 17 07:07:02 combo ftpd[29510]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:02 2005 
-Jun 17 07:07:04 combo ftpd[29511]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:04 2005 
+Jun 17 07:07:00 combo ftpd[29505]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:00 2005
+Jun 17 07:07:00 combo ftpd[29506]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:00 2005
+Jun 17 07:07:00 combo ftpd[29509]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:00 2005
+Jun 17 07:07:02 combo ftpd[29510]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:02 2005
+Jun 17 07:07:04 combo ftpd[29511]: connection from 24.54.76.216 (24-54-76-216.bflony.adelphia.net) at Fri Jun 17 07:07:04 2005
 Jun 17 19:43:13 combo sshd(pam_unix)[30565]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=211.46.224.253  user=guest
 Jun 17 20:29:26 combo sshd(pam_unix)[30631]: session opened for user test by (uid=509)
 Jun 17 20:34:57 combo sshd(pam_unix)[30631]: session closed for user test
-Jun 17 20:55:06 combo ftpd[30755]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005 
-Jun 17 20:55:06 combo ftpd[30754]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005 
-Jun 17 20:55:06 combo ftpd[30753]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005 
-Jun 17 20:55:06 combo ftpd[30756]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005 
-Jun 17 20:55:06 combo ftpd[30757]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005 
-Jun 17 20:55:07 combo ftpd[30758]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:07 2005 
-Jun 17 20:55:07 combo ftpd[30759]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:07 2005 
+Jun 17 20:55:06 combo ftpd[30755]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005
+Jun 17 20:55:06 combo ftpd[30754]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005
+Jun 17 20:55:06 combo ftpd[30753]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005
+Jun 17 20:55:06 combo ftpd[30756]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005
+Jun 17 20:55:06 combo ftpd[30757]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:06 2005
+Jun 17 20:55:07 combo ftpd[30758]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:07 2005
+Jun 17 20:55:07 combo ftpd[30759]: connection from 82.252.162.81 (lns-vlq-45-tou-82-252-162-81.adsl.proxad.net) at Fri Jun 17 20:55:07 2005
 </block>
 
 <block lines="536-555" score="0.1359">
 Jun 30 20:16:26 combo sshd(pam_unix)[19209]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=195.129.24.210  user=root
 Jun 30 20:16:26 combo sshd(pam_unix)[19208]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=195.129.24.210  user=root
 Jun 30 20:16:30 combo sshd(pam_unix)[19222]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=195.129.24.210  user=root
-Jun 30 20:53:04 combo klogind[19272]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19272]: Kerberos authentication failed 
-Jun 30 20:53:04 combo klogind[19287]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19287]: Kerberos authentication failed 
-Jun 30 20:53:04 combo klogind[19286]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19286]: Kerberos authentication failed 
-Jun 30 20:53:04 combo klogind[19271]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19271]: Kerberos authentication failed 
-Jun 30 20:53:04 combo klogind[19270]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19270]: Kerberos authentication failed 
-Jun 30 20:53:04 combo klogind[19269]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19269]: Kerberos authentication failed 
-Jun 30 20:53:04 combo klogind[19268]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19288]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code 
-Jun 30 20:53:04 combo klogind[19274]: Authentication failed from 163.27.187.39 (163.27.187.39): Software caused connection abort 
-Jun 30 20:53:04 combo klogind[19268]: Kerberos authentication failed 
-Jun 30 20:53:04 combo klogind[19288]: Kerberos authentication failed 
+Jun 30 20:53:04 combo klogind[19272]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19272]: Kerberos authentication failed
+Jun 30 20:53:04 combo klogind[19287]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19287]: Kerberos authentication failed
+Jun 30 20:53:04 combo klogind[19286]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19286]: Kerberos authentication failed
+Jun 30 20:53:04 combo klogind[19271]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19271]: Kerberos authentication failed
+Jun 30 20:53:04 combo klogind[19270]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19270]: Kerberos authentication failed
+Jun 30 20:53:04 combo klogind[19269]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19269]: Kerberos authentication failed
+Jun 30 20:53:04 combo klogind[19268]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19288]: Authentication failed from 163.27.187.39 (163.27.187.39): Permission denied in replay cache code
+Jun 30 20:53:04 combo klogind[19274]: Authentication failed from 163.27.187.39 (163.27.187.39): Software caused connection abort
+Jun 30 20:53:04 combo klogind[19268]: Kerberos authentication failed
+Jun 30 20:53:04 combo klogind[19288]: Kerberos authentication failed
 </block>
 
 <block lines="581-590" score="0.1301">
-Jun 30 20:53:06 combo klogind[19282]: Kerberos authentication failed 
-Jun 30 20:53:06 combo klogind[19283]: Kerberos authentication failed 
-Jun 30 20:53:06 combo klogind[19285]: Kerberos authentication failed 
-Jun 30 20:53:06 combo klogind[19284]: Kerberos authentication failed 
+Jun 30 20:53:06 combo klogind[19282]: Kerberos authentication failed
+Jun 30 20:53:06 combo klogind[19283]: Kerberos authentication failed
+Jun 30 20:53:06 combo klogind[19285]: Kerberos authentication failed
+Jun 30 20:53:06 combo klogind[19284]: Kerberos authentication failed
 Jun 30 22:16:32 combo sshd(pam_unix)[19432]: session opened for user test by (uid=509)
 Jun 30 22:16:32 combo sshd(pam_unix)[19431]: session opened for user test by (uid=509)
 Jun 30 22:16:32 combo sshd(pam_unix)[19433]: session opened for user test by (uid=509)
@@ -78,22 +78,22 @@ Jun 30 22:16:32 combo sshd(pam_unix)[19436]: session opened for user test by (ui
 
 <block lines="771-780" score="0.0961">
 Jul  4 09:33:14 combo sshd(pam_unix)[2547]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=210.76.59.29  user=root
-Jul  4 12:52:44 combo ftpd[2839]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2838]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2841]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2840]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2831]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2829]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2835]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2828]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2832]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
+Jul  4 12:52:44 combo ftpd[2839]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2838]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2841]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2840]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2831]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2829]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2835]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2828]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2832]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
 </block>
 
 <block lines="791-800" score="0.1167">
-Jul  4 12:52:44 combo ftpd[2825]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2842]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2826]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
-Jul  4 12:52:44 combo ftpd[2843]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005 
+Jul  4 12:52:44 combo ftpd[2825]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2842]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2826]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
+Jul  4 12:52:44 combo ftpd[2843]: connection from 63.197.98.106 (adsl-63-197-98-106.dsl.mtry01.pacbell.net) at Mon Jul  4 12:52:44 2005
 Jul  4 19:15:48 combo sshd(pam_unix)[3378]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=220.117.241.87  user=root
 Jul  4 19:15:48 combo sshd(pam_unix)[3380]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=220.117.241.87  user=root
 Jul  4 19:15:49 combo sshd(pam_unix)[3382]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=220.117.241.87  user=root
@@ -108,7 +108,7 @@ Jul  7 07:18:13 combo sshd(pam_unix)[12524]: session closed for user test
 Jul  7 07:18:13 combo sshd(pam_unix)[12527]: session opened for user test by (uid=509)
 Jul  7 07:18:14 combo sshd(pam_unix)[12525]: session closed for user test
 Jul  7 07:18:14 combo sshd(pam_unix)[12527]: session closed for user test
-Jul  7 08:06:12 combo gpm[2094]: *** info [mice.c(1766)]: 
+Jul  7 08:06:12 combo gpm[2094]: *** info [mice.c(1766)]:
 Jul  7 08:06:12 combo gpm[2094]: imps2: Auto-detected intellimouse PS/2
 Jul  7 08:06:15 combo login(pam_unix)[2421]: session opened for user root by LOGIN(uid=0)
 Jul  7 08:06:15 combo  -- root[2421]: ROOT LOGIN ON tty2
@@ -122,11 +122,11 @@ Jul  7 08:09:11 combo udev[12790]: removing device node '/udev/vcsa2'
 Jul  7 08:09:11 combo udev[12795]: creating device node '/udev/vcs2'
 Jul  7 08:09:11 combo udev[12798]: creating device node '/udev/vcsa2'
 Jul  7 14:18:55 combo sshd(pam_unix)[13317]: check pass; user unknown
-Jul  7 14:18:55 combo sshd(pam_unix)[13317]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=c9063558.virtua.com.br 
+Jul  7 14:18:55 combo sshd(pam_unix)[13317]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=c9063558.virtua.com.br
 Jul  7 14:18:57 combo sshd(pam_unix)[13321]: check pass; user unknown
-Jul  7 14:18:57 combo sshd(pam_unix)[13321]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=c9063558.virtua.com.br 
+Jul  7 14:18:57 combo sshd(pam_unix)[13321]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=c9063558.virtua.com.br
 Jul  7 14:18:58 combo sshd(pam_unix)[13318]: check pass; user unknown
-Jul  7 14:18:58 combo sshd(pam_unix)[13318]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=c9063558.virtua.com.br 
+Jul  7 14:18:58 combo sshd(pam_unix)[13318]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=c9063558.virtua.com.br
 Jul  7 14:18:59 combo sshd(pam_unix)[13323]: check pass; user unknown
 </block>
 
@@ -135,19 +135,19 @@ Jul 10 04:04:46 combo syslogd 1.4.1: restart.
 Jul 10 04:04:46 combo logrotate: ALERT exited abnormally with [1]
 Jul 10 04:10:47 combo su(pam_unix)[26353]: session opened for user news by (uid=0)
 Jul 10 04:10:47 combo su(pam_unix)[26353]: session closed for user news
-Jul 10 07:24:24 combo ftpd[29726]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005 
-Jul 10 07:24:24 combo ftpd[29725]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005 
-Jul 10 07:24:24 combo ftpd[29719]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005 
-Jul 10 07:24:24 combo ftpd[29723]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005 
-Jul 10 07:24:24 combo ftpd[29720]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005 
-Jul 10 07:24:24 combo ftpd[29717]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005 
+Jul 10 07:24:24 combo ftpd[29726]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005
+Jul 10 07:24:24 combo ftpd[29725]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005
+Jul 10 07:24:24 combo ftpd[29719]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005
+Jul 10 07:24:24 combo ftpd[29723]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005
+Jul 10 07:24:24 combo ftpd[29720]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005
+Jul 10 07:24:24 combo ftpd[29717]: connection from 82.83.227.67 (dsl-082-083-227-067.arcor-ip.net) at Sun Jul 10 07:24:24 2005
 </block>
 
 <block lines="1356-1365" score="0.1037">
-Jul 16 08:14:07 combo ftpd[17689]: connection from 212.65.68.82 () at Sat Jul 16 08:14:07 2005 
-Jul 16 08:14:07 combo ftpd[17679]: connection from 212.65.68.82 () at Sat Jul 16 08:14:07 2005 
-Jul 17 04:06:32 combo ftpd[19675]: connection from 83.116.207.11 (aml-sfh-3310b.adsl.wanadoo.nl) at Sun Jul 17 04:06:32 2005 
-Jul 17 04:06:32 combo ftpd[19674]: connection from 83.116.207.11 (aml-sfh-3310b.adsl.wanadoo.nl) at Sun Jul 17 04:06:32 2005 
+Jul 16 08:14:07 combo ftpd[17689]: connection from 212.65.68.82 () at Sat Jul 16 08:14:07 2005
+Jul 16 08:14:07 combo ftpd[17679]: connection from 212.65.68.82 () at Sat Jul 16 08:14:07 2005
+Jul 17 04:06:32 combo ftpd[19675]: connection from 83.116.207.11 (aml-sfh-3310b.adsl.wanadoo.nl) at Sun Jul 17 04:06:32 2005
+Jul 17 04:06:32 combo ftpd[19674]: connection from 83.116.207.11 (aml-sfh-3310b.adsl.wanadoo.nl) at Sun Jul 17 04:06:32 2005
 Jul 17 04:08:08 combo su(pam_unix)[19686]: session opened for user cyrus by (uid=0)
 Jul 17 04:08:09 combo su(pam_unix)[19686]: session closed for user cyrus
 Jul 17 04:08:10 combo cups: cupsd shutdown succeeded
@@ -157,8 +157,8 @@ Jul 17 04:08:23 combo logrotate: ALERT exited abnormally with [1]
 </block>
 
 <block lines="1746-1755" score="0.0912">
-Jul 24 02:38:22 combo ftpd[16793]: connection from 84.102.20.2 () at Sun Jul 24 02:38:22 2005 
-Jul 24 02:38:22 combo ftpd[16794]: connection from 84.102.20.2 () at Sun Jul 24 02:38:22 2005 
+Jul 24 02:38:22 combo ftpd[16793]: connection from 84.102.20.2 () at Sun Jul 24 02:38:22 2005
+Jul 24 02:38:22 combo ftpd[16794]: connection from 84.102.20.2 () at Sun Jul 24 02:38:22 2005
 Jul 24 02:38:23 combo ftpd[16781]: ANONYMOUS FTP LOGIN FROM 84.102.20.2,  (anonymous)
 Jul 24 02:38:23 combo ftpd[16782]: ANONYMOUS FTP LOGIN FROM 84.102.20.2,  (anonymous)
 Jul 24 04:20:19 combo su(pam_unix)[17283]: session opened for user cyrus by (uid=0)
@@ -170,10 +170,10 @@ Jul 24 04:20:42 combo logrotate: ALERT exited abnormally with [1]
 </block>
 
 <block lines="1806-1840" score="0.2989">
-Jul 25 06:39:18 combo ftpd[24969]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005 
-Jul 25 06:39:18 combo ftpd[24960]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005 
-Jul 25 06:39:18 combo ftpd[24963]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005 
-Jul 25 06:39:18 combo ftpd[24961]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005 
+Jul 25 06:39:18 combo ftpd[24969]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005
+Jul 25 06:39:18 combo ftpd[24960]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005
+Jul 25 06:39:18 combo ftpd[24963]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005
+Jul 25 06:39:18 combo ftpd[24961]: connection from 206.47.209.10 () at Mon Jul 25 06:39:18 2005
 Jul 25 12:09:06 combo named[2306]: notify question section contains no SOA
 Jul 25 12:18:50 combo named[2306]: notify question section contains no SOA
 Jul 25 12:27:05 combo named[2306]: notify question section contains no SOA
@@ -196,20 +196,20 @@ Jul 25 23:23:13 combo xinetd[26482]: warning: can't get client address: Connecti
 Jul 25 23:23:13 combo ftpd[26482]: getpeername (ftpd): Transport endpoint is not connected
 Jul 25 23:23:13 combo xinetd[26484]: warning: can't get client address: Connection reset by peer
 Jul 25 23:23:13 combo ftpd[26484]: getpeername (ftpd): Transport endpoint is not connected
-Jul 25 23:24:09 combo ftpd[26479]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26478]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26477]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26476]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26475]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26474]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26473]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26467]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
-Jul 25 23:24:09 combo ftpd[26471]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005 
+Jul 25 23:24:09 combo ftpd[26479]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26478]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26477]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26476]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26475]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26474]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26473]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26467]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
+Jul 25 23:24:09 combo ftpd[26471]: connection from 217.187.83.50 () at Mon Jul 25 23:24:09 2005
 </block>
 
 <block lines="1906-2000" score="0.3547">
 Jul 27 04:21:40 combo su(pam_unix)[31373]: session closed for user news
-Jul 27 10:59:53 combo ftpd[31985]: connection from 218.38.58.3 () at Wed Jul 27 10:59:53 2005 
+Jul 27 10:59:53 combo ftpd[31985]: connection from 218.38.58.3 () at Wed Jul 27 10:59:53 2005
 Jul 27 14:41:57 combo syslogd 1.4.1: restart.
 Jul 27 14:41:57 combo syslog: syslogd startup succeeded
 Jul 27 14:41:57 combo kernel: klogd 1.4.1, log source = /proc/kmsg started.
@@ -285,15 +285,15 @@ Jul 27 14:41:59 combo kernel: Transparent bridge - 0000:00:1e.0
 Jul 27 14:41:59 combo kernel: PCI: Using IRQ router PIIX/ICH [8086/2410] at 0000:00:1f.0
 Jul 27 14:41:59 combo kernel: apm: BIOS version 1.2 Flags 0x03 (Driver version 1.16ac)
 Jul 27 14:41:59 combo kernel: audit: initializing netlink socket (disabled)
-Jul 27 14:41:54 combo sysctl: kernel.core_uses_pid = 1 
+Jul 27 14:41:54 combo sysctl: kernel.core_uses_pid = 1
 Jul 27 14:41:59 combo hcid[1690]: HCI daemon ver 2.4 started
 Jul 27 14:41:59 combo bluetooth: hcid startup succeeded
 Jul 27 14:41:59 combo kernel: audit(1122475266.4294965305:0): initialized
-Jul 27 14:41:54 combo network: Setting network parameters:  succeeded 
+Jul 27 14:41:54 combo network: Setting network parameters:  succeeded
 Jul 27 14:41:59 combo bluetooth: sdpd startup succeeded
-Jul 27 14:41:59 combo sdpd[1696]: sdpd v1.5 started 
+Jul 27 14:41:59 combo sdpd[1696]: sdpd v1.5 started
 Jul 27 14:41:59 combo kernel: Total HugeTLB memory allocated, 0
-Jul 27 14:41:54 combo network: Bringing up loopback interface:  succeeded 
+Jul 27 14:41:54 combo network: Bringing up loopback interface:  succeeded
 Jul 27 14:41:59 combo kernel: VFS: Disk quotas dquot_6.5.1
 Jul 27 14:41:59 combo kernel: Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
 Jul 27 14:41:59 combo kernel: SELinux:  Registering netfilter hooks
@@ -303,4 +303,3 @@ Jul 27 14:42:00 combo kernel: isapnp: Scanning for PnP cards...
 Jul 27 14:42:00 combo kernel: isapnp: No Plug & Play device found
 Jul 27 14:42:00 combo kernel: Real Time Clock Driver v1.12
 Jul 27 14:42:00 combo kernel: Linux agpgart interface v0.100 (c) Dave Jones</block>
-
