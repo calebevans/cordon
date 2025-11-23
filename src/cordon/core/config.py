@@ -4,24 +4,7 @@ from pathlib import Path
 
 @dataclass
 class AnalysisConfig:
-    """Global configuration for the analysis pipeline.
-
-    Attributes:
-        window_size: Number of lines per window
-        stride: Step size for sliding window (number of lines to skip)
-        k_neighbors: Number of neighbors for k-NN density calculation
-        anomaly_percentile: Percentile of windows to retain (e.g., 0.1 = top 10%)
-        model_name: Name of sentence-transformers model to use
-        batch_size: Batch size for embedding operations
-        device: Device for model inference ('cuda', 'mps', 'cpu', or None for auto)
-        use_mmap_threshold: Auto-enable memory mapping above this many windows (None=auto)
-        use_faiss_threshold: Auto-enable FAISS above this many windows (None=auto)
-        backend: Embedding backend to use ('sentence-transformers' or 'llama-cpp')
-        model_path: Path to GGUF model file (required for llama-cpp backend)
-        n_ctx: Context size for llama.cpp (default: 2048)
-        n_threads: Thread count for llama.cpp (None=auto-detect)
-        n_gpu_layers: Number of layers to offload to GPU in llama.cpp (0=CPU only)
-    """
+    """Global configuration for the analysis pipeline."""
 
     window_size: int = 5
     stride: int = 2

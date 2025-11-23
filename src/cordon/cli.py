@@ -35,7 +35,7 @@ def parse_args() -> argparse.Namespace:
         "--model-path",
         type=Path,
         default=None,
-        help="Path to GGUF model file (llama-cpp backend, auto-downloads if not specified)",
+        help="GGUF model path (auto-downloads default if omitted)",
     )
     backend_group.add_argument(
         "--n-gpu-layers",
@@ -86,13 +86,13 @@ def parse_args() -> argparse.Namespace:
         "--model-name",
         type=str,
         default="all-MiniLM-L6-v2",
-        help="HuggingFace model name for sentence-transformers backend (default: all-MiniLM-L6-v2)",
+        help="HuggingFace model name for sentence-transformers (default: all-MiniLM-L6-v2)",
     )
     config_group.add_argument(
         "--batch-size",
         type=int,
         default=32,
-        help="Batch size for embedding operations (sentence-transformers only, default: 32)",
+        help="Batch size for embeddings (default: 32)",
     )
     config_group.add_argument(
         "--device",
@@ -104,7 +104,7 @@ def parse_args() -> argparse.Namespace:
     config_group.add_argument(
         "--use-faiss",
         action="store_true",
-        help="Use FAISS for k-NN search (faster for large logs, requires faiss-cpu or faiss-gpu)",
+        help="Use FAISS for faster k-NN search on large logs",
     )
 
     # output options

@@ -1,13 +1,6 @@
-"""Embedding module providing LlamaIndex-based backend implementation.
-
-This module supports multiple embedding backends via LlamaIndex:
-- sentence-transformers: Default backend using HuggingFace models
-- llama-cpp: Alternative backend using GGUF models for better container performance
-"""
+"""Embedding module for log analysis."""
 
 from typing import TYPE_CHECKING
-
-from cordon.embedding.llamaindex_vectorizer import LlamaIndexVectorizer
 
 if TYPE_CHECKING:
     from cordon.core.config import AnalysisConfig
@@ -23,7 +16,14 @@ def create_vectorizer(config: "AnalysisConfig") -> "Embedder":
     Returns:
         Vectorizer instance implementing the Embedder protocol
     """
-    return LlamaIndexVectorizer(config)
+    if config.backend == "llama-cpp":
+        from cordon.embedding.llama_cpp import LlamaCppVectorizer
+
+        return LlamaCppVectorizer(config)
+
+    from cordon.embedding.transformer import TransformerVectorizer
+
+    return TransformerVectorizer(config)
 
 
-__all__ = ["LlamaIndexVectorizer", "create_vectorizer"]
+__all__ = ["create_vectorizer"]
