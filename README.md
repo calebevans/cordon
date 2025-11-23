@@ -132,8 +132,8 @@ See [llama.cpp Guide](./docs/llama-cpp.md) for details on models, performance, a
 # Build
 make container-build
 
-# Run
-make container-run ARGS="system.log"
+# Run (specify directory with your logs)
+make container-run DIR=/path/to/logs ARGS="/logs/system.log"
 
 # With GPU (requires Podman with libkrun)
 podman run --device /dev/dri -v $(pwd)/logs:/logs cordon:latest \

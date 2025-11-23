@@ -23,7 +23,7 @@ help:
 	@echo "  make pre-commit-run  Run pre-commit on all files"
 	@echo ""
 	@echo "  make container-build Build container image"
-	@echo "  make container-run   Run container (use ARGS='...' for arguments)"
+	@echo "  make container-run   Run container (use DIR=/path/to/logs ARGS='file.log')"
 	@echo ""
 	@echo "  make clean           Remove Python cache and build artifacts"
 	@echo "  make clean-all       Deep clean (cache, build, venv, coverage)"
@@ -99,4 +99,8 @@ container-build:
 	podman build -t cordon:latest -f Containerfile .
 
 container-run:
-	podman run --rm -v $(PWD)/logs:/logs cordon:latest $(ARGS)
+	@if [ -z "$(DIR)" ]; then \
+		echo "Error: DIR not specified. Usage: make container-run DIR=/path/to/logs ARGS='file.log'"; \
+		exit 1; \
+	fi
+	podman run --rm -v $(DIR):/logs cordon:latest $(ARGS)
