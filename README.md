@@ -228,7 +228,7 @@ Run `cordon --help` for full CLI documentation.
 cordon --model-name "BAAI/bge-base-en-v1.5" --window-size 8 --stride 4 your.log
 ```
 
-**See [Configuration Guidelines](./docs/how-it-works.md#configuration-guidelines) for detailed recommendations.**
+**See [Configuration Guidelines](./docs/architecture.md#configuration-guidelines) for detailed recommendations.**
 
 ## Use Cases
 
