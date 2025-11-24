@@ -121,12 +121,14 @@ cordon /logs/system.log
 
 The container supports GPU acceleration via llama.cpp with Vulkan:
 
-- **macOS**: Vulkan via Podman libkrun (2-3x speedup)
-- **Linux + NVIDIA**: CUDA via Podman hooks (5-10x speedup)
-- **Linux + AMD/Intel**: Vulkan via `/dev/dri` (2-3x speedup)
+- **macOS**: Vulkan via Podman libkrun
+- **Linux + NVIDIA**: CUDA via Podman hooks
+- **Linux + AMD/Intel**: Vulkan via `/dev/dri`
 - **CPU fallback**: Works everywhere
 
 **Note**: PyTorch MPS cannot work in Linux containers, so GPU support requires llama.cpp backend.
+
+See [Performance Benchmarks](./llama-cpp.md#performance-benchmarks) for performance data on macOS with libkrun.
 
 ### macOS with libkrun
 
@@ -140,7 +142,9 @@ podman machine init --provider libkrun --cpus 4 --memory 8192
 podman machine start
 
 # Run with GPU
-podman run --device /dev/dri -v $(pwd)/logs:/logs cordon:latest \
+# Note: GPU passthrough is enabled by default with libkrun
+# The --device /dev/dri flag is optional
+podman run -v $(pwd)/logs:/logs cordon:latest \
   --backend llama-cpp --use-faiss --n-gpu-layers 10 /logs/system.log
 ```
 

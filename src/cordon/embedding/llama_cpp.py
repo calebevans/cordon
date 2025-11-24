@@ -22,6 +22,7 @@ class LlamaCppVectorizer:
         """
         self.config = config
         if not config.model_path:
+            # Auto-download default model and update config
             config.model_path = self._get_default_model()
 
         try:

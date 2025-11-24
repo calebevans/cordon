@@ -19,13 +19,28 @@ Cordon supports two embedding backends:
 
 ### Trade-offs
 
-- **No Batching**: Processes embeddings one at a time (slower than sentence-transformers on CPU)
-- **Performance**: ~10-15% slower than sentence-transformers with batching on CPU
+- **No Batching**: Processes embeddings one at a time
+- **Performance**: See benchmarks below - competitive with sentence-transformers on CPU, faster with GPU acceleration
 
 ### Recommendation
 
-- **Native installations**: Use sentence-transformers (default) - 2x faster
-- **Container deployments**: Use llama.cpp - only option for GPU acceleration
+- **Native installations**: Use sentence-transformers (default) for simplicity
+- **Container deployments**: Use llama.cpp - enables GPU acceleration via Vulkan
+
+## Performance Benchmarks
+
+Tested on 2,000-line Apache log file (macOS, Podman machine with libkrun):
+
+| Backend | Mode | Time | Blocks Detected | Notes |
+|---------|------|------|-----------------|-------|
+| sentence-transformers | CPU | 27.42s | 48 | Baseline (PyTorch) |
+| llama.cpp | CPU | 24.04s | 47 | 12% faster than baseline |
+| llama.cpp | GPU (Vulkan) | 22.20s | 47 | 19% faster than baseline, 8% faster than llama-cpp CPU |
+
+**Key Findings:**
+- llama.cpp CPU is 12% faster than sentence-transformers despite no batching
+- GPU acceleration provides an additional 8% speedup over CPU
+- CPU-only mode is fully functional for environments without GPU
 
 ## Installation
 
@@ -105,7 +120,9 @@ make container-build
 
 ```bash
 # macOS with libkrun (Vulkan)
-podman run --device /dev/dri -v ./logs:/logs cordon:latest \
+# Note: GPU passthrough is enabled by default with libkrun
+# The --device /dev/dri flag is optional
+podman run -v ./logs:/logs cordon:latest \
     --backend llama-cpp \
     --use-faiss \
     --n-gpu-layers 10 \

@@ -57,8 +57,8 @@ class AnalysisConfig:
         if self.n_ctx < 1:
             raise ValueError("n_ctx must be >= 1")
 
-        if self.n_gpu_layers < 0:
-            raise ValueError("n_gpu_layers must be >= 0")
+        if self.n_gpu_layers < -1:
+            raise ValueError("n_gpu_layers must be >= -1 (-1 for all layers, 0 for CPU-only)")
 
         if self.n_threads is not None and self.n_threads < 1:
             raise ValueError("n_threads must be >= 1 or None for auto-detect")
