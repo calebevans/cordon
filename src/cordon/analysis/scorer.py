@@ -182,7 +182,9 @@ class DensityAnomalyScorer:
 
                 scored_windows.append(
                     ScoredWindow(
-                        window=window, score=score, embedding=embeddings_mmap[window_idx].copy()
+                        window=window,
+                        score=score,
+                        embedding=embeddings_mmap[window_idx].copy(),
                     )
                 )
 

@@ -1,4 +1,4 @@
-.PHONY: help install install-dev install-faiss install-faiss-gpu test test-verbose coverage lint format typecheck pre-commit clean clean-all
+.PHONY: help install install-dev install-faiss install-faiss-gpu test test-verbose coverage lint format typecheck pre-commit clean clean-all container-build container-run
 
 # default target - show help
 help:
@@ -21,6 +21,9 @@ help:
 	@echo ""
 	@echo "  make pre-commit      Install pre-commit hooks"
 	@echo "  make pre-commit-run  Run pre-commit on all files"
+	@echo ""
+	@echo "  make container-build Build container image"
+	@echo "  make container-run   Run container (use DIR=/path/to/logs ARGS='file.log')"
 	@echo ""
 	@echo "  make clean           Remove Python cache and build artifacts"
 	@echo "  make clean-all       Deep clean (cache, build, venv, coverage)"
@@ -90,3 +93,14 @@ clean:
 clean-all: clean
 	rm -rf .venv/
 	@echo "✓ Deep clean complete (removed virtual environment)"
+
+# container targets
+container-build:
+	podman build -t cordon:latest -f Containerfile .
+
+container-run:
+	@if [ -z "$(DIR)" ]; then \
+		echo "Error: DIR not specified. Usage: make container-run DIR=/path/to/logs ARGS='file.log'"; \
+		exit 1; \
+	fi
+	podman run --rm -v $(DIR):/logs cordon:latest $(ARGS)

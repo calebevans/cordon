@@ -208,3 +208,8 @@ __marimo__/
 
 # VSCode
 .vscode/
+
+# GGUF model files (large binary files)
+# Keep the models/ directory structure but ignore downloaded models
+models/*.gguf
+models/*/*.gguf
