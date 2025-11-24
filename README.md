@@ -15,9 +15,23 @@ Cordon uses transformer-based embeddings and density-based scoring to identify s
 
 ## Installation
 
-### Native Installation
+### From PyPI (Recommended)
 
 ```bash
+# With uv (recommended)
+uv pip install cordon
+
+# With pip
+pip install cordon
+```
+
+### From Source
+
+```bash
+# Clone the repository
+git clone https://github.com/calebevans/cordon.git
+cd cordon
+
 # With uv (recommended)
 uv pip install -e .
 
