@@ -65,7 +65,7 @@ uv pip install -e ".[faiss-gpu]"  # GPU
 make container-build
 ```
 
-See [Container Guide](./docs/container.md) for GPU support and advanced usage.
+See [Container Guide](./docs/CONTAINER.md) for GPU support and advanced usage.
 
 ## Quick Start
 
@@ -142,19 +142,31 @@ See [llama.cpp Guide](./docs/llama-cpp.md) for details on models, performance, a
 
 ## Container Usage
 
-```bash
-# Build
-make container-build
+### Build
 
-# Run (specify directory with your logs)
+```bash
+# Build locally
+make container-build
+```
+
+### Run
+
+```bash
+# Pull published image from GitHub Container Registry
+podman pull ghcr.io/calebevans/cordon:latest  # or :dev for development builds
+
+# Run with published image
+podman run --rm -v /path/to/logs:/logs:Z ghcr.io/calebevans/cordon:latest /logs/system.log
+
+# Run with locally built image
 make container-run DIR=/path/to/logs ARGS="/logs/system.log"
 
 # With GPU (requires Podman with libkrun)
-podman run --device /dev/dri -v $(pwd)/logs:/logs cordon:latest \
+podman run --device /dev/dri -v /path/to/logs:/logs:Z ghcr.io/calebevans/cordon:latest \
   --backend llama-cpp --use-faiss --n-gpu-layers 10 /logs/system.log
 ```
 
-See [Container Guide](./docs/container.md) for full details.
+See [Container Guide](./docs/CONTAINER.md) for full details.
 
 ## Primary Use Case: LLM Context Reduction
 
