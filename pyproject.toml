@@ -9,11 +9,11 @@ authors = [
     { name = "Caleb Evans", email = "caevans@redhat.com" }
 ]
 dependencies = [
-    "sentence-transformers>=2.2.0",
+    "sentence-transformers>=3.0.0",
     "torch>=2.0.0",
     "numpy>=1.24.0",
     "scikit-learn>=1.3.0",
-    "huggingface-hub>=0.16.0",
+    "huggingface-hub>=0.20.0",
 ]
 
 [project.scripts]
@@ -29,6 +29,7 @@ dev = [
 ]
 llama-cpp = [
     "llama-cpp-python>=0.3.0",
+    "huggingface-hub>=0.20.0",
 ]
 faiss-cpu = [
     "faiss-cpu>=1.7.0",
