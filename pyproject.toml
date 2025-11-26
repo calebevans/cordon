@@ -27,6 +27,14 @@ dev = [
     "ruff>=0.1.0",
     "pre-commit>=3.5.0",
 ]
+benchmark = [
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "scipy>=1.10.0",
+    "pyyaml>=6.0",
+    "requests>=2.31.0",
+    "umap-learn>=0.5.0",
+]
 llama-cpp = [
     "llama-cpp-python>=0.3.0",
     "huggingface-hub>=0.20.0",
@@ -78,6 +86,14 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "huggingface_hub.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "umap.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "cuml.*"
 ignore_missing_imports = true
 
 [tool.ruff]

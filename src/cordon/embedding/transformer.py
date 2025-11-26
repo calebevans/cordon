@@ -6,6 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import torch
 from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import TextWindow
@@ -67,8 +68,19 @@ class TransformerVectorizer:
         if not self._truncation_warned:
             self._check_truncation_warning(window_list)
 
+        # clear GPU cache before starting
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
         batch_size = self.config.batch_size
-        for batch_start_idx in range(0, len(window_list), batch_size):
+        total_batches = (len(window_list) + batch_size - 1) // batch_size
+
+        for batch_start_idx in tqdm(
+            range(0, len(window_list), batch_size),
+            desc="Generating embeddings",
+            total=total_batches,
+            unit="batch",
+        ):
             batch = window_list[batch_start_idx : batch_start_idx + batch_size]
             texts = [window.content for window in batch]
 
@@ -79,6 +91,10 @@ class TransformerVectorizer:
                 convert_to_numpy=True,
                 normalize_embeddings=True,
             )
+
+            # aggressive memory cleanup
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
 
             yield from zip(batch, embeddings, strict=False)
 
