@@ -1,0 +1,15 @@
+{
+  "template_recall_mean": 0.6774405217880786,
+  "template_recall_std": 0.1379549024896497,
+  "rare_recall_mean": 0.4811233211233212,
+  "rare_recall_std": 0.33180878671130637,
+  "freq_weighted_mean": 0.3484793016162956,
+  "freq_weighted_std": 0.3462080209055344,
+  "traditional_f1_mean": 0.0513378850909373,
+  "traditional_f1_std": 0.012189498939832167,
+  "traditional_precision_mean": 0.0387877575515103,
+  "traditional_precision_std": 0.011995880739063563,
+  "traditional_recall_mean": 0.09614223129531614,
+  "traditional_recall_std": 0.04347027797838895,
+  "num_runs": 10
+}
