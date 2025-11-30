@@ -47,12 +47,12 @@ Traditional tools would focus on the ERROR keyword, but Cordon identifies the ER
 Modern LLM-driven log analysis faces:
 - **Context limits**: GPT-4 has ~128K token context (≈100K log lines)
 - **Quality degradation**: Even when logs fit, performance degrades as context fills up (especially with repetitive content)
-- **Cost scaling**: More tokens = exponentially higher costs
+- **Cost scaling**: More tokens = higher costs
 - **Signal-to-noise**: LLMs waste tokens on repetitive content, burying important information
 
 **Example**: Filling GPT-4's 128K context with raw logs would technically work, but the model's ability to extract insights diminishes significantly when processing mostly-repetitive content at that scale.
 
-**Cordon's solution**: Significantly reduce logs while keeping semantically interesting content. (In our tests: 84.7% reduction on average across diverse log types)
+**Cordon's solution**: Reduce logs while keeping semantically interesting content. (Benchmark: 98% reduction on 1M-5M line HDFS logs with p=0.02 threshold)
 
 ---
 

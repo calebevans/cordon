@@ -1,0 +1,14 @@
+datasets:
+  hdfs_v1:
+    name: "HDFS v1"
+    url: "https://zenodo.org/records/8196385/files/HDFS_v1.zip?download=1"
+    extract_to: "benchmark/data/HDFS"
+    log_file: "HDFS.log"
+    labels_file: "preprocessed/anomaly_label.csv"
+    templates_file: "preprocessed/HDFS.log_templates.csv"
+    traces_file: "preprocessed/Event_traces.csv"
+    label_column: "Label"
+    id_column: "BlockId"
+    id_pattern: "blk_-?\\d+"
+    total_lines: 11175629
+    anomaly_rate: 0.0293
