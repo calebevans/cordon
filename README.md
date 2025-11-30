@@ -170,12 +170,11 @@ See [Container Guide](./docs/CONTAINER.md) for full details.
 
 ## Primary Use Case: LLM Context Reduction
 
-Cordon attempts to solve for when log files are too large for a context window:
+Cordon attempts to solve the problem of log files being too large for LLM context windows by reducing them to semantically significant sections.
 
-```
-Problem: 50GB production log → Can't fit in any LLM context window
-Solution: Cordon → 12 anomalous blocks (few KB) → Send to LLM for analysis
-```
+**Real-world reduction rates from benchmarks:**
+- 1M-line HDFS logs → 20K lines (98% reduction with p=0.02 threshold)
+- 5M-line HDFS logs → 100K lines (98% reduction with p=0.02 threshold)
 
 Example workflow:
 
@@ -282,5 +281,3 @@ Cordon automatically chooses the best approach:
 | FAISS | >500k windows | ~50MB | Fast |
 
 **What's a "window"?** A window is a sliding chunk of N consecutive log lines (default: 10 lines). A 10,000-line log with window_size=10 and stride=5 creates ~2,000 windows.
-
-See [Test Examples](./docs/examples/) for real-world results across 9 log types.
