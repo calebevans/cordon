@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from sklearn.neighbors import NearestNeighbors
+from tqdm import tqdm
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import ScoredWindow, TextWindow
@@ -111,17 +112,32 @@ class DensityAnomalyScorer:
         knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine", n_jobs=n_jobs)
         knn.fit(embeddings)
 
-        # query all points (parallelized via n_jobs)
-        distances, _ = knn.kneighbors(embeddings)
-
-        # calculate scores (average distance to k nearest neighbors, excluding self)
+        # query in batches with progress bar
+        query_batch_size = 10000
         scored_windows = []
-        for window_idx, (window, embedding) in enumerate(zip(windows, embeddings, strict=False)):
-            # skip first distance (self = 0) and take mean of remaining
-            neighbor_distances = distances[window_idx][1:]
-            score = float(np.mean(neighbor_distances))
 
-            scored_windows.append(ScoredWindow(window=window, score=score, embedding=embedding))
+        for batch_start in tqdm(
+            range(0, n_samples, query_batch_size),
+            desc="Scoring embeddings   ",
+            unit="batch",
+            total=(n_samples + query_batch_size - 1) // query_batch_size,
+        ):
+            batch_end = min(batch_start + query_batch_size, n_samples)
+            batch_embeddings = embeddings[batch_start:batch_end]
+
+            # query batch (parallelized via n_jobs)
+            distances, _ = knn.kneighbors(batch_embeddings)
+
+            # calculate scores for this batch
+            for local_idx, global_idx in enumerate(range(batch_start, batch_end)):
+                window = windows[global_idx]
+                embedding = embeddings[global_idx]
+
+                # skip first distance (self = 0) and take mean of remaining
+                neighbor_distances = distances[local_idx][1:]
+                score = float(np.mean(neighbor_distances))
+
+                scored_windows.append(ScoredWindow(window=window, score=score, embedding=embedding))
 
         return scored_windows
 
@@ -173,20 +189,37 @@ class DensityAnomalyScorer:
             knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine", n_jobs=n_jobs)
             knn.fit(embeddings_mmap)
 
-            # query all points and calculate scores (parallelized via n_jobs)
-            distances, _ = knn.kneighbors(embeddings_mmap)
+            # query in batches with progress bar
+            query_batch_size = 10000  # balance between progress updates and overhead
             scored_windows = []
-            for window_idx, window in enumerate(windows):
-                neighbor_distances = distances[window_idx][1:]
-                score = float(np.mean(neighbor_distances))
 
-                scored_windows.append(
-                    ScoredWindow(
-                        window=window,
-                        score=score,
-                        embedding=embeddings_mmap[window_idx].copy(),
+            for batch_start in tqdm(
+                range(0, n_windows, query_batch_size),
+                desc="Scoring embeddings   ",
+                unit="batch",
+                total=(n_windows + query_batch_size - 1) // query_batch_size,
+            ):
+                batch_end = min(batch_start + query_batch_size, n_windows)
+                batch_embeddings = embeddings_mmap[batch_start:batch_end]
+
+                # query batch (parallelized via n_jobs)
+                distances, _ = knn.kneighbors(batch_embeddings)
+
+                # calculate scores for this batch
+                for local_idx, global_idx in enumerate(range(batch_start, batch_end)):
+                    window = windows[global_idx]
+
+                    # skip first distance (self = 0) and take mean of remaining
+                    neighbor_distances = distances[local_idx][1:]
+                    score = float(np.mean(neighbor_distances))
+
+                    scored_windows.append(
+                        ScoredWindow(
+                            window=window,
+                            score=score,
+                            embedding=embeddings_mmap[global_idx].copy(),
+                        )
                     )
-                )
 
             return scored_windows
 
