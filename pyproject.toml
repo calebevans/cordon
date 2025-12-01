@@ -39,12 +39,6 @@ llama-cpp = [
     "llama-cpp-python>=0.3.0",
     "huggingface-hub>=0.20.0",
 ]
-faiss-cpu = [
-    "faiss-cpu>=1.7.0",
-]
-faiss-gpu = [
-    "faiss-gpu>=1.7.0",
-]
 
 [build-system]
 requires = ["hatchling"]
@@ -74,10 +68,6 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "sklearn.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "faiss.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]

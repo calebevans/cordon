@@ -1,4 +1,4 @@
-.PHONY: help install install-dev install-faiss install-faiss-gpu test test-verbose coverage lint format typecheck pre-commit clean clean-all container-build container-run
+.PHONY: help install install-dev test test-verbose coverage lint format typecheck pre-commit clean clean-all container-build container-run
 
 # default target - show help
 help:
@@ -7,8 +7,6 @@ help:
 	@echo "Available targets:"
 	@echo "  make install         Install package in development mode"
 	@echo "  make install-dev     Install with development dependencies"
-	@echo "  make install-faiss   Install with FAISS CPU support (better performance)"
-	@echo "  make install-faiss-gpu Install with FAISS GPU support (CUDA required)"
 	@echo ""
 	@echo "  make test            Run all tests"
 	@echo "  make test-verbose    Run tests with verbose output"
@@ -35,18 +33,12 @@ install:
 install-dev:
 	pip install -e ".[dev]"
 
-install-faiss:
-	pip install -e ".[faiss-cpu]"
-
-install-faiss-gpu:
-	pip install -e ".[faiss-gpu]"
-
 # testing targets
 test:
-	OMP_NUM_THREADS=1 pytest tests/ --no-cov
+	OMP_NUM_THREADS=1 pytest tests/ --override-ini="addopts="
 
 test-verbose:
-	OMP_NUM_THREADS=1 pytest tests/ -v --no-cov
+	OMP_NUM_THREADS=1 pytest tests/ -v --override-ini="addopts="
 
 coverage:
 	OMP_NUM_THREADS=1 pytest tests/ --cov=cordon --cov-report=term-missing --cov-report=html

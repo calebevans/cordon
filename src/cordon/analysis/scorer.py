@@ -1,5 +1,4 @@
 import tempfile
-import warnings
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -10,14 +9,6 @@ from sklearn.neighbors import NearestNeighbors
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import ScoredWindow, TextWindow
-
-# optional FAISS support
-try:
-    import faiss
-
-    HAS_FAISS = True
-except ImportError:
-    HAS_FAISS = False
 
 
 class DensityAnomalyScorer:
@@ -69,20 +60,9 @@ class DensityAnomalyScorer:
         n_windows = len(embedded_windows)
 
         # choose strategy based on dataset size
-        use_faiss = (
-            HAS_FAISS
-            and config.use_faiss_threshold is not None
-            and n_windows >= config.use_faiss_threshold
-        )
-        use_mmap = (
-            config.use_mmap_threshold is not None
-            and n_windows >= config.use_mmap_threshold
-            and not use_faiss  # FAISS takes precedence
-        )
+        use_mmap = config.use_mmap_threshold is not None and n_windows >= config.use_mmap_threshold
 
-        if use_faiss:
-            return self._score_windows_faiss(embedded_windows, config)
-        elif use_mmap:
+        if use_mmap:
             return self._score_windows_mmap(embedded_windows, config)
         else:
             return self._score_windows_inmemory(embedded_windows, config)
@@ -194,73 +174,3 @@ class DensityAnomalyScorer:
             # clean up temporary file
             if temp_path.exists():
                 temp_path.unlink()
-
-    def _score_windows_faiss(
-        self,
-        embedded_windows: Sequence[tuple[TextWindow, npt.NDArray[np.floating[Any]]]],
-        config: AnalysisConfig,
-    ) -> list[ScoredWindow]:
-        """Score windows using FAISS for fast approximate k-NN (lowest RAM, fastest).
-
-        Args:
-            embedded_windows: Sequence of (window, embedding) pairs
-            config: Analysis configuration
-
-        Returns:
-            List of scored windows
-        """
-        if not HAS_FAISS:
-            warnings.warn(
-                "FAISS not available, falling back to memory-mapped approach. "
-                "Install faiss-cpu or faiss-gpu for better performance on large logs.",
-                UserWarning,
-                stacklevel=2,
-            )
-            return self._score_windows_mmap(embedded_windows, config)
-
-        windows = [window for window, _ in embedded_windows]
-        embeddings = np.array([embedding for _, embedding in embedded_windows], dtype=np.float32)
-
-        n_windows = len(embeddings)
-        embedding_dim = embeddings.shape[1]
-        n_neighbors = self._calculate_n_neighbors(config, n_windows)
-
-        # normalize embeddings so inner product = cosine similarity
-        faiss.normalize_L2(embeddings)
-
-        # create FAISS index
-        index = faiss.IndexFlatIP(embedding_dim)
-
-        # move to GPU if available
-        if hasattr(faiss, "StandardGpuResources"):
-            try:
-                res = faiss.StandardGpuResources()
-                index = faiss.index_cpu_to_gpu(res, 0, index)
-            except Exception:
-                # fallback to CPU if GPU fails
-                pass
-
-        index.add(embeddings)
-
-        # query k-nearest neighbors
-        distances, _ = index.search(embeddings, n_neighbors)
-
-        # convert inner product (cosine similarity) to cosine distance
-        # after normalization, inner product equals cosine similarity
-        distances = 1.0 - distances
-
-        # calculate scores
-        scored_windows = []
-        for window_idx, window in enumerate(windows):
-            # skip first distance (self) and take mean of remaining
-            neighbor_distances = distances[window_idx][1:]
-            score = float(np.mean(neighbor_distances))
-
-            # ensure non-negative scores (handle numerical precision issues)
-            score = max(0.0, score)
-
-            scored_windows.append(
-                ScoredWindow(window=window, score=score, embedding=embeddings[window_idx])
-            )
-
-        return scored_windows

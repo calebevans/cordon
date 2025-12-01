@@ -94,13 +94,11 @@ podman run -v $(pwd)/logs:/logs cordon:latest \
 # CPU-only (uses pre-cached model)
 podman run -v $(pwd)/logs:/logs cordon:latest \
   --backend llama-cpp \
-  --use-faiss \
   /logs/system.log
 
 # With GPU (requires libkrun on macOS)
 podman run --device /dev/dri -v $(pwd)/logs:/logs cordon:latest \
   --backend llama-cpp \
-  --use-faiss \
   --n-gpu-layers 10 \
   /logs/system.log
 ```
@@ -145,7 +143,7 @@ podman machine start
 # Note: GPU passthrough is enabled by default with libkrun
 # The --device /dev/dri flag is optional
 podman run -v $(pwd)/logs:/logs cordon:latest \
-  --backend llama-cpp --use-faiss --n-gpu-layers 10 /logs/system.log
+  --backend llama-cpp --n-gpu-layers 10 /logs/system.log
 ```
 
 ### Linux with NVIDIA
@@ -157,7 +155,7 @@ sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 # Run with CUDA
 podman run --hooks-dir=/usr/share/containers/oci/hooks.d/ \
   -v $(pwd)/logs:/logs:z cordon:latest \
-  --backend llama-cpp --use-faiss --n-gpu-layers 10 /logs/system.log
+  --backend llama-cpp --n-gpu-layers 10 /logs/system.log
 ```
 
 ### Linux with AMD/Intel
@@ -169,7 +167,7 @@ sudo dnf install mesa-vulkan-drivers vulkan-tools      # Fedora/RHEL
 
 # Run with Vulkan
 podman run --device /dev/dri -v $(pwd)/logs:/logs cordon:latest \
-  --backend llama-cpp --use-faiss --n-gpu-layers 10 /logs/system.log
+  --backend llama-cpp --n-gpu-layers 10 /logs/system.log
 ```
 
 ## SELinux Volume Labels

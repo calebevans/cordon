@@ -883,11 +883,6 @@ def main():
         help="Custom name for run directory (default: auto timestamp)",
     )
     parser.add_argument(
-        "--use-faiss",
-        action="store_true",
-        help="Use FAISS for k-NN (better performance on large logs)",
-    )
-    parser.add_argument(
         "--batch-size",
         type=int,
         default=32,
@@ -984,7 +979,6 @@ def main():
         model_name=args.model,
         device=args.device,
         batch_size=args.batch_size,
-        use_faiss_threshold=1 if args.use_faiss else None,
     )
 
     print("Cordon Configuration:")
@@ -994,7 +988,6 @@ def main():
     print(f"  Model: {config.model_name}")
     print(f"  Device: {config.device or 'auto-detect'}")
     print(f"  Batch size: {config.batch_size}")
-    print(f"  Use FAISS: {args.use_faiss}")
     print()
 
     # save parameters if output directory specified (skip if resuming)
@@ -1008,7 +1001,6 @@ def main():
             "model": args.model,
             "device": args.device or "auto-detect",
             "batch_size": args.batch_size,
-            "use_faiss": args.use_faiss,
             "runs": args.runs,
             "seed": args.seed,
             "timestamp": datetime.now().isoformat(),

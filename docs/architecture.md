@@ -252,13 +252,11 @@ Merged block: lines 10-30 (score=max(0.15, 0.18, 0.12) = 0.18)
 1. **Lazy loading**: Read log lines on-demand
 2. **Streaming embeddings**: Process in batches, don't store all at once
 3. **Memory-mapped arrays**: Store embeddings on disk for huge logs
-4. **FAISS indexing**: Approximate k-NN for millions of windows
 
 **Automatic scaling:**
 ```python
 < 50K windows:  In-memory NumPy arrays (fastest)
 ≥ 50K windows:  Memory-mapped arrays (RAM-efficient, auto-enabled)
-Optional:       FAISS approximate search (for very large logs, must be installed)
 ```
 ### Batching Strategy
 
