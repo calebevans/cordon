@@ -102,10 +102,10 @@ print(output)
 # Advanced configuration
 config = AnalysisConfig(
     window_size=10,
-    stride=5,
     k_neighbors=10,
     anomaly_percentile=0.05,
-    device="cuda"
+    device="cuda",
+    batch_size=64
 )
 analyzer = SemanticLogAnalyzer(config)
 result = analyzer.analyze_file_detailed(Path("app.log"))
@@ -217,10 +217,10 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 
 | Parameter | Default | CLI Flag | Description |
 |-----------|---------|----------|-------------|
-| `window_size` | 5 | `--window-size` | Lines per window |
-| `stride` | 2 | `--stride` | Lines to skip between windows |
+| `window_size` | 5 | `--window-size` | Lines per window (non-overlapping) |
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
+| `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
 
 ### Backend Options
 
@@ -250,7 +250,7 @@ Run `cordon --help` for full CLI documentation.
 **For verbose system logs**, use larger-context models:
 ```bash
 # BAAI/bge-base-en-v1.5 supports 512 tokens (~8-10 verbose lines)
-cordon --model-name "BAAI/bge-base-en-v1.5" --window-size 8 --stride 4 your.log
+cordon --model-name "BAAI/bge-base-en-v1.5" --window-size 8 your.log
 ```
 
 **See [Configuration Guidelines](./docs/architecture.md#configuration-guidelines) for detailed recommendations.**
@@ -280,4 +280,4 @@ Cordon automatically chooses the best approach:
 | Memory-Mapped | 50k-500k windows | ~50-100MB | Moderate |
 | FAISS | >500k windows | ~50MB | Fast |
 
-**What's a "window"?** A window is a sliding chunk of N consecutive log lines (default: 10 lines). A 10,000-line log with window_size=10 and stride=5 creates ~2,000 windows.
+**What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 5 lines). A 10,000-line log with window_size=5 creates 2,000 windows.

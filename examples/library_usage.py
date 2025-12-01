@@ -9,10 +9,10 @@ def main() -> None:
     # create a custom configuration
     config = AnalysisConfig(
         window_size=10,
-        stride=5,
         k_neighbors=5,
         anomaly_percentile=0.1,
         model_name="all-MiniLM-L6-v2",
+        batch_size=32,
         device="cpu",  # or "cuda", "mps", or None for auto-detect
     )
 

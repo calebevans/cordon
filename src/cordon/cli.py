@@ -65,12 +65,6 @@ def parse_args() -> argparse.Namespace:
         help="Number of lines per window (default: 5)",
     )
     config_group.add_argument(
-        "--stride",
-        type=int,
-        default=2,
-        help="Step size for sliding window in lines (default: 2)",
-    )
-    config_group.add_argument(
         "--k-neighbors",
         type=int,
         default=5,
@@ -178,7 +172,6 @@ def main() -> None:
     try:
         config = AnalysisConfig(
             window_size=args.window_size,
-            stride=args.stride,
             k_neighbors=args.k_neighbors,
             anomaly_percentile=args.anomaly_percentile,
             model_name=args.model_name,

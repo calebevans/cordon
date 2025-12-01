@@ -139,9 +139,9 @@ class TransformerVectorizer:
                     f"  • Coverage: ~{coverage_pct:.0f}% of each window\n"
                     f"\n"
                     f"Recommendations:\n"
-                    f"  1. Reduce window size: --window-size {lines_that_fit} --stride {lines_that_fit // 2}\n"
+                    f"  1. Reduce window size: --window-size {lines_that_fit}\n"
                     f"  2. Use larger model: --model-name BAAI/bge-base-en-v1.5 (512 tokens)\n"
-                    f"  3. Accept partial coverage (overlapping windows still capture all lines)\n"
+                    f"  3. Accept partial coverage (non-overlapping windows may miss some context)\n"
                     f"{'=' * 70}\n",
                     UserWarning,
                     stacklevel=3,
