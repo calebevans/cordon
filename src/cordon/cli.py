@@ -95,6 +95,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Device for model inference (default: auto-detect)",
     )
+    config_group.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Parallel workers for scoring (default: half of CPU cores)",
+    )
 
     # output options
     output_group = parser.add_argument_group("output options")
@@ -172,6 +178,7 @@ def main() -> None:
             model_name=args.model_name,
             batch_size=args.batch_size,
             device=args.device,
+            scoring_workers=args.workers,
             backend=args.backend,
             model_path=str(args.model_path) if args.model_path else None,
             n_gpu_layers=args.n_gpu_layers,

@@ -61,6 +61,7 @@ class TestAnalysisConfig:
         assert config.model_name == "all-MiniLM-L6-v2"
         assert config.batch_size == 32
         assert config.device is None
+        assert config.scoring_workers is None  # defaults to half of cores at runtime
 
     def test_custom_config(self) -> None:
         """Test custom configuration values."""

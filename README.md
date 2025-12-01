@@ -211,6 +211,7 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
+| `scoring_workers` | Auto | `--workers` | Parallel workers for k-NN scoring (default: half of CPU cores) |
 
 ### Backend Options
 

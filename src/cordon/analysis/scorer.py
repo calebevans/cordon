@@ -1,3 +1,4 @@
+import os
 import tempfile
 from collections.abc import Sequence
 from pathlib import Path
@@ -9,6 +10,23 @@ from sklearn.neighbors import NearestNeighbors
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import ScoredWindow, TextWindow
+
+
+def _get_n_jobs(config: AnalysisConfig) -> int:
+    """Calculate number of parallel jobs for k-NN.
+
+    Args:
+        config: Analysis configuration
+
+    Returns:
+        Number of parallel workers to use
+    """
+    if config.scoring_workers is not None:
+        return config.scoring_workers
+
+    # Default: use half of available cores (minimum 1)
+    cpu_count = os.cpu_count() or 1
+    return max(1, cpu_count // 2)
 
 
 class DensityAnomalyScorer:
@@ -89,10 +107,11 @@ class DensityAnomalyScorer:
         n_samples = len(embeddings)
         n_neighbors = self._calculate_n_neighbors(config, n_samples)
 
-        knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine")
+        n_jobs = _get_n_jobs(config)
+        knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine", n_jobs=n_jobs)
         knn.fit(embeddings)
 
-        # query all points
+        # query all points (parallelized via n_jobs)
         distances, _ = knn.kneighbors(embeddings)
 
         # calculate scores (average distance to k nearest neighbors, excluding self)
@@ -150,10 +169,11 @@ class DensityAnomalyScorer:
             # build k-NN index
             n_neighbors = self._calculate_n_neighbors(config, n_windows)
 
-            knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine")
+            n_jobs = _get_n_jobs(config)
+            knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine", n_jobs=n_jobs)
             knn.fit(embeddings_mmap)
 
-            # query all points and calculate scores
+            # query all points and calculate scores (parallelized via n_jobs)
             distances, _ = knn.kneighbors(embeddings_mmap)
             scored_windows = []
             for window_idx, window in enumerate(windows):

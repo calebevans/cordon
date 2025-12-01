@@ -13,6 +13,7 @@ class AnalysisConfig:
     batch_size: int = 32
     device: str | None = None
     use_mmap_threshold: int | None = 50000  # switch to mmap at 50k windows
+    scoring_workers: int | None = None  # parallel workers for k-NN (None = half of cores)
     backend: str = "sentence-transformers"  # or "llama-cpp"
     model_path: str | None = None  # GGUF model file path
     n_ctx: int = 2048  # llama.cpp context size
