@@ -109,17 +109,27 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Show detailed statistics in addition to anomalous blocks",
     )
+    output_group.add_argument(
+        "--output",
+        "-o",
+        type=Path,
+        default=None,
+        help="Save anomalous blocks to file (default: print to stdout)",
+    )
 
     return parser.parse_args()
 
 
-def analyze_file(log_path: Path, analyzer: SemanticLogAnalyzer, detailed: bool) -> None:
+def analyze_file(
+    log_path: Path, analyzer: SemanticLogAnalyzer, detailed: bool, output_path: Path | None = None
+) -> None:
     """Analyze a single log file and print results.
 
     Args:
         log_path: Path to the log file
         analyzer: Configured SemanticLogAnalyzer instance
         detailed: Whether to show detailed statistics
+        output_path: Optional path to save anomalous blocks (None = stdout)
     """
     # verify file exists and is readable
     if not log_path.exists():
@@ -156,11 +166,23 @@ def analyze_file(log_path: Path, analyzer: SemanticLogAnalyzer, detailed: bool) 
 
         print(f"\n{'Significant Blocks':^80}")
         print("=" * 80)
-        print(result.output)
+
+        # write output to file or stdout
+        if output_path:
+            output_path.write_text(result.output)
+            print(f"Anomalous blocks written to: {output_path}")
+        else:
+            print(result.output)
     else:
         # run simple analysis
         output = analyzer.analyze_file(log_path)
-        print(output)
+
+        # write output to file or stdout
+        if output_path:
+            output_path.write_text(output)
+            print(f"Anomalous blocks written to: {output_path}")
+        else:
+            print(output)
 
     print()
 
@@ -217,7 +239,7 @@ def main() -> None:
 
     # analyze each log file
     for log_path in args.logfiles:
-        analyze_file(log_path, analyzer, args.detailed)
+        analyze_file(log_path, analyzer, args.detailed, args.output)
 
 
 if __name__ == "__main__":
