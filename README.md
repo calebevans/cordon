@@ -74,6 +74,12 @@ cordon app.log error.log
 # With options
 cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 app.log
 
+# Save results to file
+cordon --output anomalies.xml system.log
+
+# Show detailed statistics and save results
+cordon --detailed --output results.xml app.log
+
 # llama.cpp backend (for containers)
 cordon --backend llama-cpp system.log
 ```
@@ -211,6 +217,7 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
+| `scoring_workers` | Auto | `--workers` | Parallel workers for k-NN scoring (default: half of CPU cores) |
 
 ### Backend Options
 
@@ -221,6 +228,13 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `device` | Auto | `--device` | Device (cuda/mps/cpu) |
 | `model_path` | None | `--model-path` | GGUF model path (llama-cpp) |
 | `n_gpu_layers` | 0 | `--n-gpu-layers` | GPU layers (llama-cpp) |
+
+### Output Options
+
+| Parameter | Default | CLI Flag | Description |
+|-----------|---------|----------|-------------|
+| `detailed` | False | `--detailed` | Show detailed statistics (timing, score distribution) |
+| `output` | None | `--output`, `-o` | Save anomalous blocks to file (default: stdout) |
 
 Run `cordon --help` for full CLI documentation.
 

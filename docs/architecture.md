@@ -272,6 +272,34 @@ Benefits:
 Trade-off: Larger batches use more VRAM but are faster
 ```
 
+### Parallel k-NN Scoring
+
+**Challenge**: k-NN distance calculations can be slow for large datasets.
+
+**Solution**: Cordon parallelizes the k-NN query phase across multiple CPU cores.
+
+```python
+scoring_workers = None  # Default: half of CPU cores
+
+# Examples:
+# 8-core machine → 4 workers
+# 16-core machine → 8 workers
+
+# Override via CLI:
+cordon --workers 2 system.log  # Use 2 workers (lighter)
+cordon --workers 8 system.log  # Use 8 workers (faster)
+```
+
+**Why half of cores by default?**
+- **Good speedup**: Parallelizing distance calculations provides meaningful performance gains
+- **System-friendly**: Leaves cores free for OS and other applications
+- **No memory duplication**: The embedding index is shared across workers (copy-on-write)
+- **Avoids bottlenecks**: Full core usage can saturate memory bandwidth
+
+**When to adjust:**
+- **`--workers 1`**: Minimal CPU impact, useful on shared systems
+- **`--workers N`** (higher): Faster scoring when you have cores to spare
+
 ### Hardware Acceleration
 
 **Device auto-detection:**
