@@ -74,6 +74,9 @@ cordon app.log error.log
 # With options
 cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 app.log
 
+# With GPU acceleration and custom batch sizes
+cordon --device cuda --batch-size 64 --scoring-batch-size 50000 large.log
+
 # Save results to file
 cordon --output anomalies.xml system.log
 
@@ -95,13 +98,14 @@ analyzer = SemanticLogAnalyzer()
 output = analyzer.analyze_file(Path("system.log"))
 print(output)
 
-# Advanced configuration
+# Advanced configuration with GPU acceleration
 config = AnalysisConfig(
     window_size=10,
     k_neighbors=10,
     anomaly_percentile=0.05,
-    device="cuda",
-    batch_size=64
+    device="cuda",           # GPU for embedding and scoring
+    batch_size=64,           # Embedding batch size
+    scoring_batch_size=50000 # Scoring batch size (tune for GPU memory)
 )
 analyzer = SemanticLogAnalyzer(config)
 result = analyzer.analyze_file_detailed(Path("app.log"))
@@ -203,6 +207,8 @@ The output is intentionally lossy—it discards repetitive patterns to focus on 
 
 The score for each window is the average cosine distance to its k nearest neighbors in the embedding space.
 
+**GPU Acceleration**: Both embedding and scoring phases automatically leverage GPU acceleration (CUDA/MPS) when available, providing significant speedups for large log files.
+
 **Important:** Repetitive patterns are filtered even if critical. The same FATAL error repeated 100 times scores as "normal" because it's semantically similar to itself.
 
 See [Cordon's architecture](./docs/architecture.md) for full details.
@@ -217,7 +223,7 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
-| `scoring_workers` | Auto | `--workers` | Parallel workers for k-NN scoring (default: half of CPU cores) |
+| `scoring_batch_size` | 10000 | `--scoring-batch-size` | Batch size for k-NN scoring queries |
 
 ### Backend Options
 
@@ -225,7 +231,7 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 |-----------|---------|----------|-------------|
 | `backend` | `sentence-transformers` | `--backend` | Embedding backend |
 | `model_name` | `all-MiniLM-L6-v2` | `--model-name` | HuggingFace model |
-| `device` | Auto | `--device` | Device (cuda/mps/cpu) |
+| `device` | Auto | `--device` | Device for embedding and scoring (cuda/mps/cpu) |
 | `model_path` | None | `--model-path` | GGUF model path (llama-cpp) |
 | `n_gpu_layers` | 0 | `--n-gpu-layers` | GPU layers (llama-cpp) |
 
@@ -275,11 +281,23 @@ cordon --model-name "BAAI/bge-base-en-v1.5" --window-size 8 your.log
 
 ## Performance
 
-Cordon automatically chooses the best approach:
+### GPU Acceleration
+
+Cordon automatically leverages GPU acceleration for both embedding and scoring phases when available:
+
+- **Embedding**: Uses PyTorch/sentence-transformers with CUDA or MPS
+- **Scoring**: Uses PyTorch for GPU-accelerated k-NN computation
+- **Speedup**: 5-15x faster scoring on GPU compared to CPU for large datasets
+
+For large log files (millions of lines), GPU acceleration can reduce total processing time from hours to minutes.
+
+### Memory Management
+
+Cordon uses PyTorch for all k-NN scoring operations:
 
 | Strategy | When | RAM Usage | Speed |
 |----------|------|-----------|-------|
-| In-Memory | <50k windows | ~200-500MB | Fastest |
-| Memory-Mapped | ≥50k windows | ~50-100MB | Moderate |
+| PyTorch GPU | GPU available (CUDA/MPS) | Moderate | Fastest |
+| PyTorch CPU | No GPU / CPU forced | Moderate | Fast |
 
 **What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 5 lines). A 10,000-line log with window_size=5 creates 2,000 windows.

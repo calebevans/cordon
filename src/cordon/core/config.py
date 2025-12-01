@@ -12,8 +12,7 @@ class AnalysisConfig:
     model_name: str = "all-MiniLM-L6-v2"
     batch_size: int = 32
     device: str | None = None
-    use_mmap_threshold: int | None = 50000  # switch to mmap at 50k windows
-    scoring_workers: int | None = None  # parallel workers for k-NN (None = half of cores)
+    scoring_batch_size: int = 10000  # batch size for k-NN scoring queries
     backend: str = "sentence-transformers"  # or "llama-cpp"
     model_path: str | None = None  # GGUF model file path
     n_ctx: int = 2048  # llama.cpp context size
@@ -30,6 +29,8 @@ class AnalysisConfig:
             raise ValueError("anomaly_percentile must be between 0.0 and 1.0")
         if self.batch_size < 1:
             raise ValueError("batch_size must be >= 1")
+        if self.scoring_batch_size < 1:
+            raise ValueError("scoring_batch_size must be >= 1")
         if self.device is not None and self.device not in ("cuda", "mps", "cpu"):
             raise ValueError("device must be 'cuda', 'mps', 'cpu', or None")
 

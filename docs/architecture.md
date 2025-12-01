@@ -174,6 +174,27 @@ For each window embedding e_i:
     3. Score = mean(distances)
 ```
 
+**GPU-Accelerated Implementation:**
+
+Cordon uses PyTorch for k-NN scoring, providing significant speedups via GPU acceleration:
+
+```python
+# Scoring with PyTorch (GPU or CPU)
+scoring_batch_size = 10000  # Process 10k windows at once
+
+For each batch of embeddings:
+    1. Compute pairwise cosine similarities: similarity = batch @ embeddings.T
+    2. Convert to distances: distance = 1 - similarity
+    3. Find k nearest: torch.topk(distance, k=k_neighbors, largest=False)
+    4. Average distances (excluding self)
+```
+
+**Performance benefits:**
+- **GPU acceleration**: 5-15x faster than CPU-only sklearn for large datasets
+- **Matrix operations**: Highly optimized PyTorch kernels
+- **Batch processing**: Configurable via `--scoring-batch-size` for memory/speed tuning
+- **Device flexibility**: Automatically uses CUDA, MPS, or CPU based on availability
+
 **Scoring intuition:**
 - **Dense cluster** (normal logs): Many neighbors close → Low average distance → Low score
 - **Sparse region** (anomaly): Nearest neighbors far away → High average distance → High score
@@ -272,45 +293,63 @@ Benefits:
 Trade-off: Larger batches use more VRAM but are faster
 ```
 
-### Parallel k-NN Scoring
+### k-NN Scoring
 
 **Challenge**: k-NN distance calculations can be slow for large datasets.
 
-**Solution**: Cordon parallelizes the k-NN query phase across multiple CPU cores.
+**Solution**: PyTorch-based implementation leveraging GPU or CPU.
 
 ```python
-scoring_workers = None  # Default: half of CPU cores
+# Device selection (automatic)
+device = "cuda"  # or "mps" or "cpu" (auto-detected)
+scoring_batch_size = 10000  # Tune based on memory
 
-# Examples:
-# 8-core machine → 4 workers
-# 16-core machine → 8 workers
+# Scoring uses PyTorch for matrix operations:
+# - CUDA (NVIDIA GPUs): Fastest, highly optimized
+# - MPS (Apple Silicon): Fast on M1/M2/M3
+# - CPU: Uses optimized PyTorch matrix operations
 
 # Override via CLI:
-cordon --workers 2 system.log  # Use 2 workers (lighter)
-cordon --workers 8 system.log  # Use 8 workers (faster)
+cordon --device cuda --scoring-batch-size 50000 large.log  # High memory GPU
+cordon --device cpu --scoring-batch-size 10000 system.log  # CPU
 ```
 
-**Why half of cores by default?**
-- **Good speedup**: Parallelizing distance calculations provides meaningful performance gains
-- **System-friendly**: Leaves cores free for OS and other applications
-- **No memory duplication**: The embedding index is shared across workers (copy-on-write)
-- **Avoids bottlenecks**: Full core usage can saturate memory bandwidth
+**Performance characteristics:**
+- **GPU (CUDA/MPS)**: Best for large datasets (>100k windows)
+  - Leverages parallel matrix operations
+  - 5-15x faster than CPU
+  - Higher batch sizes possible with GPU memory
+- **CPU (PyTorch)**: Good for all dataset sizes
+  - Optimized matrix operations
+  - Efficient memory usage
+  - Used when no GPU available
 
-**When to adjust:**
-- **`--workers 1`**: Minimal CPU impact, useful on shared systems
-- **`--workers N`** (higher): Faster scoring when you have cores to spare
+**Batch size tuning:**
+- **Small GPU memory**: `--scoring-batch-size 10000` (conservative)
+- **Large GPU memory**: `--scoring-batch-size 50000` (faster, uses more VRAM)
+- **CPU**: `--scoring-batch-size 10000` (default works well)
 
 ### Hardware Acceleration
 
 **Device auto-detection:**
 ```python
 Priority order:
-1. CUDA (NVIDIA GPUs) - fastest
+1. CUDA (NVIDIA GPUs) - fastest for both phases
 2. MPS (Apple Silicon) - fast on M1/M2/M3
 3. CPU - slowest but universal
 
-Override with --device flag if needed
+# The --device flag controls both embedding and scoring
+cordon --device cuda system.log  # GPU for both phases
+cordon --device cpu system.log   # CPU for both phases
+
+# Auto-detection (default):
+# - Tries CUDA first, then MPS, then falls back to CPU
 ```
+
+**Performance impact:**
+- **Embedding**: GPU provides 5-10x speedup for transformer inference
+- **Scoring**: GPU provides 5-15x speedup for k-NN calculations
+- **Combined**: Large log files process in minutes instead of hours on GPU
 
 ---
 

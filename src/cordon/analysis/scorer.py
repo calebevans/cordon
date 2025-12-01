@@ -1,33 +1,16 @@
-import os
-import tempfile
 from collections.abc import Sequence
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 import numpy.typing as npt
-from sklearn.neighbors import NearestNeighbors
+import torch
 from tqdm import tqdm
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import ScoredWindow, TextWindow
 
-
-def _get_n_jobs(config: AnalysisConfig) -> int:
-    """Calculate number of parallel jobs for k-NN.
-
-    Args:
-        config: Analysis configuration
-
-    Returns:
-        Number of parallel workers to use
-    """
-    if config.scoring_workers is not None:
-        return config.scoring_workers
-
-    # Default: use half of available cores (minimum 1)
-    cpu_count = os.cpu_count() or 1
-    return max(1, cpu_count // 2)
+# Constants
+_SCORING_PROGRESS_DESC = "Scoring embeddings   "
 
 
 class DensityAnomalyScorer:
@@ -40,6 +23,25 @@ class DensityAnomalyScorer:
     For large datasets, automatically switches to memory-mapped storage to
     reduce RAM usage.
     """
+
+    def _detect_device(self, config: AnalysisConfig) -> str:
+        """Detect the best available device for scoring.
+
+        Args:
+            config: Analysis configuration with optional device setting
+
+        Returns:
+            Device string: 'cuda', 'mps', or 'cpu'
+        """
+        if config.device is not None:
+            return config.device
+
+        if torch.cuda.is_available():
+            return "cuda"
+        elif torch.backends.mps.is_available():
+            return "mps"
+        else:
+            return "cpu"
 
     def _calculate_n_neighbors(self, config: AnalysisConfig, n_samples: int) -> int:
         """Calculate the number of neighbors to use for k-NN.
@@ -54,12 +56,153 @@ class DensityAnomalyScorer:
         num_neighbors = config.k_neighbors
         return min(num_neighbors + 1, n_samples)
 
+    def _score_windows_gpu(
+        self,
+        embedded_windows: Sequence[tuple[TextWindow, npt.NDArray[np.floating[Any]]]],
+        config: AnalysisConfig,
+        device: str,
+    ) -> list[ScoredWindow]:
+        """Score windows using GPU acceleration (CUDA or MPS).
+
+        Args:
+            embedded_windows: Sequence of (window, embedding) pairs
+            config: Analysis configuration
+            device: GPU device ('cuda' or 'mps')
+
+        Returns:
+            List of scored windows
+        """
+        # extract windows and embeddings
+        windows = [window for window, _ in embedded_windows]
+        embeddings_np = np.array([embedding for _, embedding in embedded_windows], dtype=np.float32)
+        n_samples = len(embeddings_np)
+
+        # convert to PyTorch tensor on GPU
+        embeddings_tensor = torch.from_numpy(embeddings_np).to(device)
+
+        # calculate number of neighbors
+        n_neighbors = self._calculate_n_neighbors(config, n_samples)
+
+        # process in batches to avoid GPU OOM
+        query_batch_size = config.scoring_batch_size
+        scored_windows = []
+
+        for batch_start in tqdm(
+            range(0, n_samples, query_batch_size),
+            desc=_SCORING_PROGRESS_DESC,
+            unit="batch",
+            total=(n_samples + query_batch_size - 1) // query_batch_size,
+        ):
+            batch_end = min(batch_start + query_batch_size, n_samples)
+            batch_embeddings = embeddings_tensor[batch_start:batch_end]
+
+            # compute cosine similarity: similarity = batch @ all_embeddings.T
+            # embeddings are already normalized, so this gives cosine similarity
+            similarities = torch.mm(batch_embeddings, embeddings_tensor.T)
+
+            # convert to distance: distance = 1 - similarity
+            distances = 1.0 - similarities
+
+            # find k+1 nearest neighbors (including self)
+            neighbor_distances, _ = torch.topk(
+                distances, k=n_neighbors, dim=1, largest=False, sorted=True
+            )
+
+            # move results back to CPU for processing
+            neighbor_distances_cpu = neighbor_distances.cpu().numpy()
+
+            # calculate scores for this batch
+            for local_idx, global_idx in enumerate(range(batch_start, batch_end)):
+                window = windows[global_idx]
+                embedding = embeddings_np[global_idx]
+
+                # skip first distance (self = 0) and take mean of remaining
+                neighbor_dists = neighbor_distances_cpu[local_idx][1:]
+                score = float(np.mean(neighbor_dists))
+
+                scored_windows.append(ScoredWindow(window=window, score=score, embedding=embedding))
+
+            # clear GPU cache after each batch for memory management
+            if device == "cuda":
+                torch.cuda.empty_cache()
+            # MPS doesn't have empty_cache equivalent
+
+        return scored_windows
+
+    def _score_windows_cpu_pytorch(
+        self,
+        embedded_windows: Sequence[tuple[TextWindow, npt.NDArray[np.floating[Any]]]],
+        config: AnalysisConfig,
+    ) -> list[ScoredWindow]:
+        """Score windows using PyTorch on CPU.
+
+        Args:
+            embedded_windows: Sequence of (window, embedding) pairs
+            config: Analysis configuration
+
+        Returns:
+            List of scored windows
+        """
+        # extract windows and embeddings
+        windows = [window for window, _ in embedded_windows]
+        embeddings_np = np.array([embedding for _, embedding in embedded_windows], dtype=np.float32)
+        n_samples = len(embeddings_np)
+
+        # convert to PyTorch tensor on CPU
+        embeddings_tensor = torch.from_numpy(embeddings_np)
+
+        # calculate number of neighbors
+        n_neighbors = self._calculate_n_neighbors(config, n_samples)
+
+        # process in batches
+        query_batch_size = config.scoring_batch_size
+        scored_windows = []
+
+        for batch_start in tqdm(
+            range(0, n_samples, query_batch_size),
+            desc=_SCORING_PROGRESS_DESC,
+            unit="batch",
+            total=(n_samples + query_batch_size - 1) // query_batch_size,
+        ):
+            batch_end = min(batch_start + query_batch_size, n_samples)
+            batch_embeddings = embeddings_tensor[batch_start:batch_end]
+
+            # compute cosine similarity: similarity = batch @ all_embeddings.T
+            similarities = torch.mm(batch_embeddings, embeddings_tensor.T)
+
+            # convert to distance: distance = 1 - similarity
+            distances = 1.0 - similarities
+
+            # find k+1 nearest neighbors (including self)
+            neighbor_distances, _ = torch.topk(
+                distances, k=n_neighbors, dim=1, largest=False, sorted=True
+            )
+
+            # convert to numpy for processing
+            neighbor_distances_np = neighbor_distances.numpy()
+
+            # calculate scores for this batch
+            for local_idx, global_idx in enumerate(range(batch_start, batch_end)):
+                window = windows[global_idx]
+                embedding = embeddings_np[global_idx]
+
+                # skip first distance (self = 0) and take mean of remaining
+                neighbor_dists = neighbor_distances_np[local_idx][1:]
+                score = float(np.mean(neighbor_dists))
+
+                scored_windows.append(ScoredWindow(window=window, score=score, embedding=embedding))
+
+        return scored_windows
+
     def score_windows(
         self,
         embedded_windows: Sequence[tuple[TextWindow, npt.NDArray[np.floating[Any]]]],
         config: AnalysisConfig,
     ) -> list[ScoredWindow]:
         """Score windows based on k-NN density.
+
+        This is the central routing function that selects the appropriate
+        scoring implementation based on available hardware and configuration.
 
         Args:
             embedded_windows: Sequence of (window, embedding) pairs
@@ -76,154 +219,13 @@ class DensityAnomalyScorer:
             window, embedding = embedded_windows[0]
             return [ScoredWindow(window=window, score=0.0, embedding=embedding)]
 
-        n_windows = len(embedded_windows)
+        # detect best available device
+        device = self._detect_device(config)
 
-        # choose strategy based on dataset size
-        use_mmap = config.use_mmap_threshold is not None and n_windows >= config.use_mmap_threshold
-
-        if use_mmap:
-            return self._score_windows_mmap(embedded_windows, config)
+        # route to appropriate PyTorch implementation
+        if device in ("cuda", "mps"):
+            # use GPU-accelerated implementation
+            return self._score_windows_gpu(embedded_windows, config, device)
         else:
-            return self._score_windows_inmemory(embedded_windows, config)
-
-    def _score_windows_inmemory(
-        self,
-        embedded_windows: Sequence[tuple[TextWindow, npt.NDArray[np.floating[Any]]]],
-        config: AnalysisConfig,
-    ) -> list[ScoredWindow]:
-        """Score windows using in-memory arrays (fast, but uses more RAM).
-
-        Args:
-            embedded_windows: Sequence of (window, embedding) pairs
-            config: Analysis configuration
-
-        Returns:
-            List of scored windows
-        """
-        # extract embeddings into matrix
-        windows = [window for window, _ in embedded_windows]
-        embeddings = np.array([embedding for _, embedding in embedded_windows])
-
-        # build k-NN index
-        n_samples = len(embeddings)
-        n_neighbors = self._calculate_n_neighbors(config, n_samples)
-
-        n_jobs = _get_n_jobs(config)
-        knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine", n_jobs=n_jobs)
-        knn.fit(embeddings)
-
-        # query in batches with progress bar
-        query_batch_size = 10000
-        scored_windows = []
-
-        for batch_start in tqdm(
-            range(0, n_samples, query_batch_size),
-            desc="Scoring embeddings   ",
-            unit="batch",
-            total=(n_samples + query_batch_size - 1) // query_batch_size,
-        ):
-            batch_end = min(batch_start + query_batch_size, n_samples)
-            batch_embeddings = embeddings[batch_start:batch_end]
-
-            # query batch (parallelized via n_jobs)
-            distances, _ = knn.kneighbors(batch_embeddings)
-
-            # calculate scores for this batch
-            for local_idx, global_idx in enumerate(range(batch_start, batch_end)):
-                window = windows[global_idx]
-                embedding = embeddings[global_idx]
-
-                # skip first distance (self = 0) and take mean of remaining
-                neighbor_distances = distances[local_idx][1:]
-                score = float(np.mean(neighbor_distances))
-
-                scored_windows.append(ScoredWindow(window=window, score=score, embedding=embedding))
-
-        return scored_windows
-
-    def _score_windows_mmap(
-        self,
-        embedded_windows: Sequence[tuple[TextWindow, npt.NDArray[np.floating[Any]]]],
-        config: AnalysisConfig,
-    ) -> list[ScoredWindow]:
-        """Score windows using memory-mapped storage (lower RAM, slightly slower).
-
-        Args:
-            embedded_windows: Sequence of (window, embedding) pairs
-            config: Analysis configuration
-
-        Returns:
-            List of scored windows
-        """
-        windows = [window for window, _ in embedded_windows]
-        n_windows = len(windows)
-
-        # embedding dimension from first embedding
-        first_embedding = embedded_windows[0][1]
-        embedding_dim = len(first_embedding)
-
-        # create temporary memory-mapped file
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".dat")
-        temp_path = Path(temp_file.name)
-        temp_file.close()
-
-        try:
-            # memory-mapped array for embeddings
-            embeddings_mmap = np.memmap(
-                temp_path,
-                dtype="float32",
-                mode="w+",
-                shape=(n_windows, embedding_dim),
-            )
-
-            # copy embeddings to mmap and flush to disk
-            for window_idx, (_, embedding) in enumerate(embedded_windows):
-                embeddings_mmap[window_idx] = embedding
-
-            embeddings_mmap.flush()
-
-            # build k-NN index
-            n_neighbors = self._calculate_n_neighbors(config, n_windows)
-
-            n_jobs = _get_n_jobs(config)
-            knn = NearestNeighbors(n_neighbors=n_neighbors, metric="cosine", n_jobs=n_jobs)
-            knn.fit(embeddings_mmap)
-
-            # query in batches with progress bar
-            query_batch_size = 10000  # balance between progress updates and overhead
-            scored_windows = []
-
-            for batch_start in tqdm(
-                range(0, n_windows, query_batch_size),
-                desc="Scoring embeddings   ",
-                unit="batch",
-                total=(n_windows + query_batch_size - 1) // query_batch_size,
-            ):
-                batch_end = min(batch_start + query_batch_size, n_windows)
-                batch_embeddings = embeddings_mmap[batch_start:batch_end]
-
-                # query batch (parallelized via n_jobs)
-                distances, _ = knn.kneighbors(batch_embeddings)
-
-                # calculate scores for this batch
-                for local_idx, global_idx in enumerate(range(batch_start, batch_end)):
-                    window = windows[global_idx]
-
-                    # skip first distance (self = 0) and take mean of remaining
-                    neighbor_distances = distances[local_idx][1:]
-                    score = float(np.mean(neighbor_distances))
-
-                    scored_windows.append(
-                        ScoredWindow(
-                            window=window,
-                            score=score,
-                            embedding=embeddings_mmap[global_idx].copy(),
-                        )
-                    )
-
-            return scored_windows
-
-        finally:
-            # clean up temporary file
-            if temp_path.exists():
-                temp_path.unlink()
+            # use PyTorch CPU implementation
+            return self._score_windows_cpu_pytorch(embedded_windows, config)
