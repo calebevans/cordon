@@ -230,6 +230,16 @@ class DensityAnomalyScorer:
 
         # create FAISS index
         index = faiss.IndexFlatIP(embedding_dim)
+
+        # move to GPU if available
+        if hasattr(faiss, "StandardGpuResources"):
+            try:
+                res = faiss.StandardGpuResources()
+                index = faiss.index_cpu_to_gpu(res, 0, index)
+            except Exception:
+                # fallback to CPU if GPU fails
+                pass
+
         index.add(embeddings)
 
         # query k-nearest neighbors

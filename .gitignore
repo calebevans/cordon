@@ -213,3 +213,6 @@ __marimo__/
 # Keep the models/ directory structure but ignore downloaded models
 models/*.gguf
 models/*/*.gguf
+
+# Benchmark datasets (large files - download with benchmark/download.py)
+benchmark/data/

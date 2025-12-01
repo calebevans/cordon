@@ -1,0 +1,13 @@
+dataset: hdfs_v1
+sample_size: 50000
+window_size: 2
+stride: 2
+k_neighbors: 5
+anomaly_percentile: 0.05
+model: BAAI/bge-large-en-v1.5
+device: cuda
+batch_size: 512
+use_faiss: false
+runs: 10
+seed: 42
+timestamp: '2025-11-28T15:50:39.461813'

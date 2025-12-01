@@ -1,0 +1,119 @@
+{
+  "traditional": {
+    "precision": 0.0096,
+    "recall": 0.08888888888888889,
+    "f1": 0.017328519855595668,
+    "true_positives": 24,
+    "false_positives": 2476,
+    "false_negatives": 246,
+    "flagged_lines": 2500,
+    "anomaly_lines": 270,
+    "total_lines": 50000
+  },
+  "template_coverage": {
+    "unique_templates_found": 13,
+    "unique_templates_total": 16,
+    "template_recall": 0.8125,
+    "template_precision": 1.0,
+    "template_f1": 0.896551724137931,
+    "found_templates": [
+      "E11",
+      "E16",
+      "E18",
+      "E2",
+      "E21",
+      "E22",
+      "E25",
+      "E26",
+      "E27",
+      "E5",
+      "E6",
+      "E7",
+      "E9"
+    ],
+    "missed_templates": [
+      "E20",
+      "E23",
+      "E29"
+    ]
+  },
+  "rare_detection": {
+    "rare_templates_found": 12,
+    "rare_templates_total": 15,
+    "rare_template_recall": 0.8,
+    "found_rare": [
+      "E11",
+      "E16",
+      "E18",
+      "E2",
+      "E21",
+      "E22",
+      "E25",
+      "E26",
+      "E27",
+      "E6",
+      "E7",
+      "E9"
+    ],
+    "missed_rare": [
+      "E20",
+      "E23",
+      "E29"
+    ],
+    "threshold": 100
+  },
+  "frequency_weighted_recall": 0.508170169765606,
+  "template_counts": {
+    "E5": 138,
+    "E22": 79,
+    "E7": 39,
+    "E9": 24,
+    "E26": 31,
+    "E11": 24,
+    "E2": 6,
+    "E23": 14,
+    "E21": 16,
+    "E20": 2,
+    "E27": 3,
+    "E25": 5,
+    "E18": 5,
+    "E6": 4,
+    "E16": 4,
+    "E29": 1
+  },
+  "anomaly_templates": [
+    "E11",
+    "E16",
+    "E18",
+    "E2",
+    "E20",
+    "E21",
+    "E22",
+    "E23",
+    "E25",
+    "E26",
+    "E27",
+    "E29",
+    "E5",
+    "E6",
+    "E7",
+    "E9"
+  ],
+  "sampled_sessions": 4511,
+  "anomaly_sessions": 79,
+  "flagged_templates_detail": [
+    "E11",
+    "E16",
+    "E18",
+    "E2",
+    "E21",
+    "E22",
+    "E25",
+    "E26",
+    "E27",
+    "E5",
+    "E6",
+    "E7",
+    "E9"
+  ]
+}

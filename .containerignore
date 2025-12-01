@@ -68,6 +68,7 @@ temp/
 .gitlab-ci.yml
 
 # Project-specific
+benchmark/
 examples/
 tests/
 *.md

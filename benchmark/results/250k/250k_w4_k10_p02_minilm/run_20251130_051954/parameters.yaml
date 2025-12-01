@@ -1,0 +1,13 @@
+dataset: hdfs_v1
+sample_size: 250000
+window_size: 4
+stride: 4
+k_neighbors: 10
+anomaly_percentile: 0.02
+model: sentence-transformers/all-MiniLM-L6-v2
+device: cuda
+batch_size: 32
+use_faiss: false
+runs: 10
+seed: 42
+timestamp: '2025-11-30T05:19:54.236864'
