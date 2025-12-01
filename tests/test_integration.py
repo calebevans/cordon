@@ -25,7 +25,6 @@ class TestIntegration:
         try:
             config = AnalysisConfig(
                 window_size=5,
-                stride=2,
                 k_neighbors=3,
                 anomaly_percentile=0.1,
                 device="cpu",

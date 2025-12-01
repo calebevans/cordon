@@ -7,7 +7,6 @@ class AnalysisConfig:
     """Global configuration for the analysis pipeline."""
 
     window_size: int = 5
-    stride: int = 2
     k_neighbors: int = 5
     anomaly_percentile: float = 0.1
     model_name: str = "all-MiniLM-L6-v2"
@@ -25,8 +24,6 @@ class AnalysisConfig:
         """Validate configuration parameters."""
         if self.window_size < 1:
             raise ValueError("window_size must be >= 1")
-        if self.stride < 1:
-            raise ValueError("stride must be >= 1")
         if self.k_neighbors < 1:
             raise ValueError("k_neighbors must be >= 1")
         if not 0.0 <= self.anomaly_percentile <= 1.0:

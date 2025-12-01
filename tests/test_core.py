@@ -56,7 +56,6 @@ class TestAnalysisConfig:
         """Test default configuration values."""
         config = AnalysisConfig()
         assert config.window_size == 5
-        assert config.stride == 2
         assert config.k_neighbors == 5
         assert config.anomaly_percentile == 0.1
         assert config.model_name == "all-MiniLM-L6-v2"
@@ -67,13 +66,11 @@ class TestAnalysisConfig:
         """Test custom configuration values."""
         config = AnalysisConfig(
             window_size=20,
-            stride=10,
             k_neighbors=10,
             anomaly_percentile=0.05,
             device="cpu",
         )
         assert config.window_size == 20
-        assert config.stride == 10
         assert config.k_neighbors == 10
         assert config.anomaly_percentile == 0.05
         assert config.device == "cpu"

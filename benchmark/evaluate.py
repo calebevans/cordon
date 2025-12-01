@@ -830,12 +830,6 @@ def main():
         help="Cordon window size",
     )
     parser.add_argument(
-        "--stride",
-        type=int,
-        default=2,
-        help="Cordon stride",
-    )
-    parser.add_argument(
         "--k-neighbors",
         type=int,
         default=5,
@@ -985,7 +979,6 @@ def main():
     # configure Cordon
     config = AnalysisConfig(
         window_size=args.window_size,
-        stride=args.stride,
         k_neighbors=args.k_neighbors,
         anomaly_percentile=args.anomaly_percentile,
         model_name=args.model,
@@ -996,7 +989,6 @@ def main():
 
     print("Cordon Configuration:")
     print(f"  Window size: {config.window_size}")
-    print(f"  Stride: {config.stride}")
     print(f"  K-neighbors: {config.k_neighbors}")
     print(f"  Anomaly percentile: {config.anomaly_percentile:.2%}")
     print(f"  Model: {config.model_name}")
@@ -1011,7 +1003,6 @@ def main():
             "dataset": args.dataset,
             "sample_size": sample_size,
             "window_size": args.window_size,
-            "stride": args.stride,
             "k_neighbors": args.k_neighbors,
             "anomaly_percentile": args.anomaly_percentile,
             "model": args.model,

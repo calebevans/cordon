@@ -1,4 +1,3 @@
-import warnings
 from collections import deque
 from collections.abc import Iterator
 
@@ -7,38 +6,26 @@ from cordon.core.types import TextWindow
 
 
 class SlidingWindowSegmenter:
-    """Convert line stream into overlapping text windows with line tracking.
+    """Convert line stream into non-overlapping text windows with line tracking.
 
-    This segmenter uses a sliding window approach to create overlapping chunks
-    of text from a stream of lines. Each window maintains references to its
-    original line numbers for downstream processing.
+    This segmenter creates non-overlapping chunks of text from a stream of lines.
+    Each window maintains references to its original line numbers for downstream
+    processing.
     """
 
     def segment(
         self, lines: Iterator[tuple[int, str]], config: AnalysisConfig
     ) -> Iterator[TextWindow]:
-        """Segment lines into overlapping text windows.
+        """Segment lines into non-overlapping text windows.
 
         Args:
             lines: Iterator of (line_number, line_content) tuples
-            config: Analysis configuration with window_size and stride
+            config: Analysis configuration with window_size
 
         Yields:
             TextWindow instances with content and line tracking
-
-        Warnings:
-            Issues a warning if stride > window_size (creates gaps)
         """
         window_size = config.window_size
-        stride = config.stride
-
-        # warn about gaps
-        if stride > window_size:
-            warnings.warn(
-                f"stride ({stride}) > window_size ({window_size}) creates gaps " "between windows",
-                UserWarning,
-                stacklevel=2,
-            )
 
         # use deque without maxlen to handle variable-length buffers
         buffer: deque[tuple[int, str]] = deque()
@@ -62,9 +49,8 @@ class SlidingWindowSegmenter:
 
                 window_id += 1
 
-                # remove first 'stride' items for next window
-                for _ in range(min(stride, len(buffer))):
-                    buffer.popleft()
+                # clear buffer for next non-overlapping window
+                buffer.clear()
 
         # handle final partial window
         if len(buffer) > 0:

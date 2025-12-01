@@ -94,21 +94,18 @@ Cordon uses a **density-based anomaly detection** approach in **semantic embeddi
 ```python
 # Configuration (defaults)
 window_size = 5  # Lines per window
-stride = 2       # Lines to advance between windows
 
 # Example
 Log lines:  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-Window 1:   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-Window 2:         [6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-Window 3:                     [11, 12, 13, 14, 15, ...]
+Window 1:   [1, 2, 3, 4, 5]
+Window 2:               [6, 7, 8, 9, 10]
+Window 3:                           [11, 12, 13, 14, 15]
 ```
 
-**Why overlapping windows?**
-- **Boundary handling**: Anomalies at window edges appear in multiple windows
-- **Context preservation**: Each window has sufficient surrounding context
-- **Robust detection**: Reduces sensitivity to window alignment
-
-**Trade-off**: More windows = more computation, but better accuracy.
+**Non-overlapping windows provide:**
+- **Clear boundaries**: Each log line appears in exactly one window
+- **Efficient processing**: Fewer windows to analyze
+- **Better anomaly isolation**: Anomalies are not normalized across overlapping windows
 
 ### 2. Semantic Embedding
 
@@ -161,7 +158,6 @@ window_size=50: ~2,500-3,000 tokens → exceeds 256 limit → only first ~4 line
 1. **Match window_size to token limits**: For 50-60 token/line logs, use `window_size=4` with `all-MiniLM-L6-v2`
 2. **Use larger-context models**: Switch to `BAAI/bge-base-en-v1.5` for 512-token windows (~8 lines)
 3. **Check your logs**: Run a sample through a tokenizer to estimate tokens per line
-4. **Overlapping windows help**: Even with truncation, overlapping windows ensure all log lines appear at the start of some window
 
 **Trade-off**: Larger context models are slower to encode but provide better semantic understanding of longer windows.
 
@@ -315,23 +311,13 @@ Example (50 token/line logs):
 - BAAI/bge-base-en-v1.5 (512 tokens): window_size ≤ 10
 ```
 
-**Step 3: Set stride for overlap**
-```
-Recommended: stride = window_size / 2 (50% overlap)
-
-This ensures:
-- Every line appears at the start of some window (fully analyzed)
-- Anomalies at boundaries are captured
-- Sufficient context for semantic understanding
-```
-
 **Common configurations:**
 
 | Log Type | Tokens/Line | Recommended Config |
 |----------|-------------|-------------------|
-| **Compact** (app logs) | 20-30 | `window_size=5, stride=2` (default) ✓ |
-| **Standard** (web server) | 40-50 | `window_size=5, stride=2` (default) ✓ |
-| **Verbose** (system logs) | 50-70 | `window_size=4, stride=2` or use larger model |
+| **Compact** (app logs) | 20-30 | `window_size=8` (default works) ✓ |
+| **Standard** (web server) | 40-50 | `window_size=5` (default) ✓ |
+| **Verbose** (system logs) | 50-70 | `window_size=4` or use larger model |
 | **Very verbose** (debug logs) | 80+ | Use `BAAI/bge-base-en-v1.5` with `window_size=6` |
 
 ---
