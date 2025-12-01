@@ -52,13 +52,6 @@ For llama.cpp backend (GPU acceleration in containers):
 uv pip install -e ".[llama-cpp]"
 ```
 
-For FAISS support (better performance on large logs):
-
-```bash
-uv pip install -e ".[faiss-cpu]"  # CPU
-uv pip install -e ".[faiss-gpu]"  # GPU
-```
-
 ### Container Installation
 
 ```bash
@@ -81,11 +74,8 @@ cordon app.log error.log
 # With options
 cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 app.log
 
-# With FAISS for large logs
-cordon --use-faiss large.log
-
 # llama.cpp backend (for containers)
-cordon --backend llama-cpp --use-faiss system.log
+cordon --backend llama-cpp system.log
 ```
 
 ### Python Library
@@ -129,13 +119,13 @@ Best for container deployments with GPU acceleration via Vulkan.
 
 ```bash
 # Auto-downloads model on first run
-cordon --backend llama-cpp --use-faiss system.log
+cordon --backend llama-cpp system.log
 
 # With GPU acceleration
-cordon --backend llama-cpp --use-faiss --n-gpu-layers 10 system.log
+cordon --backend llama-cpp --n-gpu-layers 10 system.log
 
 # Custom model
-cordon --backend llama-cpp --use-faiss --model-path ./model.gguf system.log
+cordon --backend llama-cpp --model-path ./model.gguf system.log
 ```
 
 See [llama.cpp Guide](./docs/llama-cpp.md) for details on models, performance, and GPU setup.
@@ -163,7 +153,7 @@ make container-run DIR=/path/to/logs ARGS="/logs/system.log"
 
 # With GPU (requires Podman with libkrun)
 podman run --device /dev/dri -v /path/to/logs:/logs:Z ghcr.io/calebevans/cordon:latest \
-  --backend llama-cpp --use-faiss --n-gpu-layers 10 /logs/system.log
+  --backend llama-cpp --n-gpu-layers 10 /logs/system.log
 ```
 
 See [Container Guide](./docs/CONTAINER.md) for full details.
@@ -231,7 +221,6 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `device` | Auto | `--device` | Device (cuda/mps/cpu) |
 | `model_path` | None | `--model-path` | GGUF model path (llama-cpp) |
 | `n_gpu_layers` | 0 | `--n-gpu-layers` | GPU layers (llama-cpp) |
-| `use_faiss` | False | `--use-faiss` | Use FAISS for large logs |
 
 Run `cordon --help` for full CLI documentation.
 
@@ -277,7 +266,6 @@ Cordon automatically chooses the best approach:
 | Strategy | When | RAM Usage | Speed |
 |----------|------|-----------|-------|
 | In-Memory | <50k windows | ~200-500MB | Fastest |
-| Memory-Mapped | 50k-500k windows | ~50-100MB | Moderate |
-| FAISS | >500k windows | ~50MB | Fast |
+| Memory-Mapped | ≥50k windows | ~50-100MB | Moderate |
 
 **What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 5 lines). A 10,000-line log with window_size=5 creates 2,000 windows.

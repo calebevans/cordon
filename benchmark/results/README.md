@@ -311,7 +311,6 @@ Traditional line-level F1 scores (observed: 5-8%) are low by design. Cordon igno
 
 **All Tests:**
 - **Device:** CUDA (GPU acceleration)
-- **FAISS:** Disabled (exact k-NN)
 - **Seed:** 42 (reproducible sampling)
 - **Runs:** 10 per configuration
 

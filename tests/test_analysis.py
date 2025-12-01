@@ -1,17 +1,11 @@
 """Tests for analysis module."""
 
-import importlib.util
-
 import numpy as np
-import pytest
 
 from cordon.analysis.scorer import DensityAnomalyScorer
 from cordon.analysis.thresholder import Thresholder
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import ScoredWindow, TextWindow
-
-# Check if FAISS is available
-HAS_FAISS = importlib.util.find_spec("faiss") is not None
 
 
 class TestDensityAnomalyScorer:
@@ -103,34 +97,6 @@ class TestDensityAnomalyScorer:
         assert len(scored_mmap) == len(scored_mem)
         for sw_mmap, sw_mem in zip(scored_mmap, scored_mem, strict=False):
             assert abs(sw_mmap.score - sw_mem.score) < 1e-5
-
-    @pytest.mark.skipif(not HAS_FAISS, reason="FAISS not installed")
-    def test_faiss_strategy_consistency(self) -> None:
-        """Test that FAISS strategy produces consistent results with in-memory."""
-        # create enough windows to potentially trigger FAISS
-        windows = [
-            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
-            for i in range(1, 101)
-        ]
-        # create diverse embeddings
-        embeddings = [np.random.randn(10) for _ in range(100)]
-        embeddings = [e / np.linalg.norm(e) for e in embeddings]
-        embedded = list(zip(windows, embeddings, strict=False))
-
-        # test with FAISS enabled (low threshold)
-        config_faiss = AnalysisConfig(k_neighbors=5, use_faiss_threshold=50)
-        scorer = DensityAnomalyScorer()
-        scored_faiss = scorer.score_windows(embedded, config_faiss)
-
-        # test with in-memory (high threshold)
-        config_mem = AnalysisConfig(k_neighbors=5, use_faiss_threshold=1000000)
-        scored_mem = scorer.score_windows(embedded, config_mem)
-
-        # FAISS is approximate, so allow slightly larger differences
-        assert len(scored_faiss) == len(scored_mem)
-        for sw_faiss, sw_mem in zip(scored_faiss, scored_mem, strict=False):
-            # FAISS should be very close but not exact
-            assert abs(sw_faiss.score - sw_mem.score) < 0.01
 
 
 class TestThresholder:

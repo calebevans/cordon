@@ -70,17 +70,15 @@ The default GGUF model is automatically downloaded on first use:
 
 ```bash
 # CPU-only
-cordon --backend llama-cpp --use-faiss /path/to/logfile.log
+cordon --backend llama-cpp /path/to/logfile.log
 
 # GPU-accelerated (offload 10 layers)
 cordon --backend llama-cpp \
-    --use-faiss \
     --n-gpu-layers 10 \
     /path/to/logfile.log
 
 # All GPU layers (maximum acceleration)
 cordon --backend llama-cpp \
-    --use-faiss \
     --n-gpu-layers -1 \
     /path/to/logfile.log
 ```
@@ -89,7 +87,6 @@ cordon --backend llama-cpp \
 
 ```bash
 cordon --backend llama-cpp \
-    --use-faiss \
     --model-path ~/models/custom.gguf \
     --n-gpu-layers 10 \
     /path/to/logfile.log
@@ -99,7 +96,6 @@ cordon --backend llama-cpp \
 
 ```bash
 cordon --backend llama-cpp \
-    --use-faiss \
     --n-gpu-layers 10 \           # GPU layer offloading
     --n-ctx 2048 \                # Context size
     --n-threads 8 \               # CPU threads
@@ -124,7 +120,6 @@ make container-build
 # The --device /dev/dri flag is optional
 podman run -v ./logs:/logs cordon:latest \
     --backend llama-cpp \
-    --use-faiss \
     --n-gpu-layers 10 \
     /logs/system.log
 
@@ -132,14 +127,12 @@ podman run -v ./logs:/logs cordon:latest \
 podman run --hooks-dir=/usr/share/containers/oci/hooks.d/ \
     -v ./logs:/logs:z cordon:latest \
     --backend llama-cpp \
-    --use-faiss \
     --n-gpu-layers 10 \
     /logs/system.log
 
 # Linux with AMD/Intel (Vulkan)
 podman run --device /dev/dri -v ./logs:/logs:z cordon:latest \
     --backend llama-cpp \
-    --use-faiss \
     --n-gpu-layers 10 \
     /logs/system.log
 ```
@@ -161,5 +154,5 @@ podman run --device /dev/dri -v ./logs:/logs:z cordon:latest \
 wget https://huggingface.co/second-state/All-MiniLM-L6-v2-Embedding-GGUF/resolve/main/all-MiniLM-L6-v2-Q4_K_M.gguf
 
 # Use with Cordon
-cordon --backend llama-cpp --use-faiss --model-path ./all-MiniLM-L6-v2-Q4_K_M.gguf logs/system.log
+cordon --backend llama-cpp --model-path ./all-MiniLM-L6-v2-Q4_K_M.gguf logs/system.log
 ```

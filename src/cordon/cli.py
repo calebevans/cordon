@@ -95,11 +95,6 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Device for model inference (default: auto-detect)",
     )
-    config_group.add_argument(
-        "--use-faiss",
-        action="store_true",
-        help="Use FAISS for faster k-NN search on large logs",
-    )
 
     # output options
     output_group = parser.add_argument_group("output options")
@@ -177,7 +172,6 @@ def main() -> None:
             model_name=args.model_name,
             batch_size=args.batch_size,
             device=args.device,
-            use_faiss_threshold=0 if args.use_faiss else None,
             backend=args.backend,
             model_path=str(args.model_path) if args.model_path else None,
             n_gpu_layers=args.n_gpu_layers,
