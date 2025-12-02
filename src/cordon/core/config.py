@@ -9,6 +9,12 @@ class AnalysisConfig:
     window_size: int = 4
     k_neighbors: int = 5
     anomaly_percentile: float = 0.1
+    anomaly_range_min: float | None = (
+        None  # Lower bound for range mode (e.g., 0.05 = exclude top 5%)
+    )
+    anomaly_range_max: float | None = (
+        None  # Upper bound for range mode (e.g., 0.15 = include up to 15%)
+    )
     model_name: str = "all-MiniLM-L6-v2"
     batch_size: int = 32
     device: str | None = None
@@ -27,6 +33,24 @@ class AnalysisConfig:
             raise ValueError("k_neighbors must be >= 1")
         if not 0.0 <= self.anomaly_percentile <= 1.0:
             raise ValueError("anomaly_percentile must be between 0.0 and 1.0")
+
+        # Validate anomaly range parameters
+        if (self.anomaly_range_min is None) != (self.anomaly_range_max is None):
+            raise ValueError(
+                "anomaly_range_min and anomaly_range_max must both be set or both be None"
+            )
+
+        if self.anomaly_range_min is not None:
+            # Type narrowing: if min is not None, max is also not None (checked above)
+            assert self.anomaly_range_max is not None
+
+            if not 0.0 <= self.anomaly_range_min <= 1.0:
+                raise ValueError("anomaly_range_min must be between 0.0 and 1.0")
+            if not 0.0 <= self.anomaly_range_max <= 1.0:
+                raise ValueError("anomaly_range_max must be between 0.0 and 1.0")
+            if self.anomaly_range_min >= self.anomaly_range_max:
+                raise ValueError("anomaly_range_min must be less than anomaly_range_max")
+
         if self.batch_size < 1:
             raise ValueError("batch_size must be >= 1")
         if self.scoring_batch_size is not None and self.scoring_batch_size < 1:
