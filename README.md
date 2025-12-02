@@ -13,6 +13,19 @@ Cordon uses transformer-based embeddings and density-based scoring to identify s
 - **Noise Reduction**: Filters out repetitive logs, keeping only unusual patterns
 - **Multiple Backends**: sentence-transformers (default) or llama.cpp for containers
 
+## Requirements
+
+### GPU Requirements (Optional but Recommended)
+
+For GPU acceleration, you need:
+- **NVIDIA GPU**: Pascal architecture or newer (GTX 10-series, RTX series, Tesla P/V/A/H series)
+- **Compute Capability**: 6.0 or higher
+- **Compatible GPUs**: GTX 1050+, RTX 20/30/40 series, Tesla P100+, V100, A100, H100
+
+**Not compatible**: GTX 900-series or older (Maxwell/Kepler architectures)
+
+CPU mode is always available as a fallback.
+
 ## Installation
 
 ### From PyPI (Recommended)

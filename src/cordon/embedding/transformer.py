@@ -37,16 +37,64 @@ class TransformerVectorizer:
 
         Returns:
             Device string: 'cuda', 'mps', or 'cpu'
+
+        Raises:
+            RuntimeError: If CUDA device is incompatible
         """
         if self.config.device is not None:
-            return self.config.device
+            device = self.config.device
+            # validate CUDA compatibility if CUDA requested
+            if device == "cuda" and torch.cuda.is_available():
+                self._check_cuda_compatibility()
+            return device
 
+        # auto-detect device priority: cuda > mps > cpu
         if torch.cuda.is_available():
+            self._check_cuda_compatibility()
             return "cuda"
         elif torch.backends.mps.is_available():
             return "mps"
         else:
             return "cpu"
+
+    def _check_cuda_compatibility(self) -> None:
+        """Check if CUDA GPU is compatible with current PyTorch build.
+
+        Raises:
+            RuntimeError: If GPU compute capability is too old for PyTorch
+        """
+        if not torch.cuda.is_available():
+            return
+
+        # get compute capability
+        device_props = torch.cuda.get_device_properties(0)
+        compute_capability = f"{device_props.major}.{device_props.minor}"
+        gpu_name = device_props.name
+
+        # PyTorch 2.0+ requires compute capability >= 6.0 (Pascal or newer)
+        if device_props.major < 6:
+            raise RuntimeError(
+                f"\n{'=' * 70}\n"
+                f"GPU COMPATIBILITY ERROR\n"
+                f"{'=' * 70}\n"
+                f"GPU: {gpu_name}\n"
+                f"Compute Capability: {compute_capability}\n"
+                f"\n"
+                f"PyTorch 2.0+ requires compute capability >= 6.0 (Pascal architecture or newer).\n"
+                f"Your GPU has compute capability {compute_capability}, which is not supported.\n"
+                f"\n"
+                f"Options:\n"
+                f"1. Use CPU mode: --device cpu\n"
+                f"   (Still benefits from PyTorch optimizations we added)\n"
+                f"\n"
+                f"2. Use a newer GPU (Pascal/GTX 10-series or later)\n"
+                f"\n"
+                f"3. Use llama.cpp backend for CPU inference:\n"
+                f"   cordon --backend llama-cpp --n-threads 8 <file>\n"
+                f"\n"
+                f"Supported GPUs: GTX 10-series, RTX series, Tesla P/V/A series, or newer\n"
+                f"{'=' * 70}\n"
+            )
 
     def embed_windows(
         self, windows: Iterable[TextWindow]
