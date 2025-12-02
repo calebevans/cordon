@@ -509,14 +509,8 @@ def main():
     parser.add_argument(
         "--window-size",
         type=int,
-        default=5,
-        help="Window size",
-    )
-    parser.add_argument(
-        "--stride",
-        type=int,
-        default=2,
-        help="Stride",
+        default=4,
+        help="Window size (non-overlapping windows)",
     )
     parser.add_argument(
         "--k-neighbors",
@@ -598,7 +592,6 @@ def main():
     print("Generating embeddings...")
     config = AnalysisConfig(
         window_size=args.window_size,
-        stride=args.stride,
         k_neighbors=args.k_neighbors,
         model_name=args.model,
     )

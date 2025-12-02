@@ -826,8 +826,8 @@ def main():
     parser.add_argument(
         "--window-size",
         type=int,
-        default=5,
-        help="Cordon window size",
+        default=4,
+        help="Cordon window size (non-overlapping)",
     )
     parser.add_argument(
         "--k-neighbors",
@@ -851,7 +851,7 @@ def main():
         type=str,
         default=None,
         choices=["cuda", "mps", "cpu"],
-        help="Device to use for embeddings (default: auto-detect)",
+        help="Device to use for embedding and scoring (default: auto-detect)",
     )
     parser.add_argument(
         "--runs",
@@ -887,6 +887,12 @@ def main():
         type=int,
         default=32,
         help="Batch size for embedding generation (default: 32, increase for faster processing on high-VRAM GPUs)",
+    )
+    parser.add_argument(
+        "--scoring-batch-size",
+        type=int,
+        default=None,
+        help="Batch size for k-NN scoring queries (default: auto-detect based on GPU memory)",
     )
     parser.add_argument(
         "--resume",
@@ -979,6 +985,7 @@ def main():
         model_name=args.model,
         device=args.device,
         batch_size=args.batch_size,
+        scoring_batch_size=args.scoring_batch_size,
     )
 
     print("Cordon Configuration:")

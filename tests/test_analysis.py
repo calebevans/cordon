@@ -1,6 +1,7 @@
 """Tests for analysis module."""
 
 import numpy as np
+import torch
 
 from cordon.analysis.scorer import DensityAnomalyScorer
 from cordon.analysis.thresholder import Thresholder
@@ -72,31 +73,147 @@ class TestDensityAnomalyScorer:
         # outlier (last window) should have highest score
         assert scored[-1].score > scored[0].score
 
-    def test_mmap_strategy_consistency(self) -> None:
-        """Test that memory-mapped strategy produces consistent results."""
-        # create enough windows to trigger mmap (if threshold is set low)
+    def test_large_dataset_consistency(self) -> None:
+        """Test that PyTorch handles large datasets consistently."""
+        # create enough windows to test scaling
         windows = [
             TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
             for i in range(1, 101)
         ]
         # create diverse embeddings
-        embeddings = [np.random.randn(10) for _ in range(100)]
+        np.random.seed(42)
+        embeddings = [np.random.randn(10).astype(np.float32) for _ in range(100)]
         embeddings = [e / np.linalg.norm(e) for e in embeddings]
         embedded = list(zip(windows, embeddings, strict=False))
 
-        # test with mmap enabled (low threshold)
-        config_mmap = AnalysisConfig(k_neighbors=5, use_mmap_threshold=50)
+        # test with different batch sizes - should produce consistent results
+        config_small_batch = AnalysisConfig(k_neighbors=5, scoring_batch_size=20, device="cpu")
         scorer = DensityAnomalyScorer()
-        scored_mmap = scorer.score_windows(embedded, config_mmap)
+        scored_small = scorer.score_windows(embedded, config_small_batch)
 
-        # test with in-memory (high threshold)
-        config_mem = AnalysisConfig(k_neighbors=5, use_mmap_threshold=1000000)
-        scored_mem = scorer.score_windows(embedded, config_mem)
+        config_large_batch = AnalysisConfig(k_neighbors=5, scoring_batch_size=50, device="cpu")
+        scored_large = scorer.score_windows(embedded, config_large_batch)
 
-        # results should be very similar
-        assert len(scored_mmap) == len(scored_mem)
-        for sw_mmap, sw_mem in zip(scored_mmap, scored_mem, strict=False):
-            assert abs(sw_mmap.score - sw_mem.score) < 1e-5
+        # results should be identical regardless of batch size
+        assert len(scored_small) == len(scored_large)
+        for sw_small, sw_large in zip(scored_small, scored_large, strict=False):
+            assert abs(sw_small.score - sw_large.score) < 1e-6
+
+    def test_device_detection(self) -> None:
+        """Test that device detection respects config and auto-detects correctly."""
+        scorer = DensityAnomalyScorer()
+
+        # test explicit device settings
+        config_cpu = AnalysisConfig(device="cpu")
+        assert scorer._detect_device(config_cpu) == "cpu"
+
+        config_cuda = AnalysisConfig(device="cuda")
+        assert scorer._detect_device(config_cuda) == "cuda"
+
+        config_mps = AnalysisConfig(device="mps")
+        assert scorer._detect_device(config_mps) == "mps"
+
+        # test auto-detection (should return one of the supported devices)
+        config_auto = AnalysisConfig()
+        device = scorer._detect_device(config_auto)
+        assert device in ("cuda", "mps", "cpu")
+
+    def test_pytorch_scoring_cpu(self) -> None:
+        """Test that PyTorch scoring works correctly on CPU."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 11)
+        ]
+        # create diverse embeddings
+        np.random.seed(42)
+        embeddings = [np.random.randn(10).astype(np.float32) for _ in range(10)]
+        embeddings = [e / np.linalg.norm(e) for e in embeddings]
+        embedded = list(zip(windows, embeddings, strict=False))
+
+        # test with CPU device explicitly
+        config = AnalysisConfig(k_neighbors=3, device="cpu", scoring_batch_size=5)
+        scorer = DensityAnomalyScorer()
+        scored = scorer.score_windows(embedded, config)
+
+        # verify results
+        assert len(scored) == 10
+        for sw in scored:
+            assert sw.score >= 0.0
+            assert isinstance(sw.score, float)
+            assert len(sw.embedding) == 10
+
+    def test_gpu_scoring_when_available(self) -> None:
+        """Test that GPU scoring works when GPU is available."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 11)
+        ]
+        embeddings = [np.random.randn(8).astype(np.float32) for _ in range(10)]
+        embeddings = [e / np.linalg.norm(e) for e in embeddings]
+        embedded = list(zip(windows, embeddings, strict=False))
+
+        # only run if GPU is available
+        if torch.cuda.is_available():
+            device = "cuda"
+        elif torch.backends.mps.is_available():
+            device = "mps"
+        else:
+            # skip test if no GPU available
+            return
+
+        config = AnalysisConfig(k_neighbors=3, device=device, scoring_batch_size=5)
+        scorer = DensityAnomalyScorer()
+        scored = scorer._score_windows_gpu(embedded, config, device)
+
+        # verify results
+        assert len(scored) == 10
+        for sw in scored:
+            assert sw.score >= 0.0
+            assert isinstance(sw.score, float)
+
+    def test_scoring_batch_size_configuration(self) -> None:
+        """Test that scoring_batch_size parameter is properly used."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 26)
+        ]
+        embeddings = [np.random.randn(5).astype(np.float32) for _ in range(25)]
+        embeddings = [e / np.linalg.norm(e) for e in embeddings]
+        embedded = list(zip(windows, embeddings, strict=False))
+
+        # test with different batch sizes (should all work without error)
+        for batch_size in [5, 10, 25, 100]:
+            config = AnalysisConfig(k_neighbors=3, device="cpu", scoring_batch_size=batch_size)
+            scorer = DensityAnomalyScorer()
+            scored = scorer.score_windows(embedded, config)
+            assert len(scored) == 25
+
+        # test auto-detection (None)
+        config_auto = AnalysisConfig(k_neighbors=3, device="cpu", scoring_batch_size=None)
+        scorer_auto = DensityAnomalyScorer()
+        scored_auto = scorer_auto.score_windows(embedded, config_auto)
+        assert len(scored_auto) == 25
+
+    def test_pytorch_gpu_availability(self) -> None:
+        """Test that PyTorch GPU implementation runs if GPU is available."""
+        # this test will use GPU if available, otherwise skip to CPU
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 11)
+        ]
+        embeddings = [np.random.randn(8).astype(np.float32) for _ in range(10)]
+        embeddings = [e / np.linalg.norm(e) for e in embeddings]
+        embedded = list(zip(windows, embeddings, strict=False))
+
+        # test with auto-detected device
+        config = AnalysisConfig(k_neighbors=3, scoring_batch_size=5)
+        scorer = DensityAnomalyScorer()
+        scored = scorer.score_windows(embedded, config)
+
+        # should work regardless of GPU availability
+        assert len(scored) == 10
+        for sw in scored:
+            assert sw.score >= 0.0
 
 
 class TestThresholder:

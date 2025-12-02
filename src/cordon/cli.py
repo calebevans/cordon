@@ -61,8 +61,8 @@ def parse_args() -> argparse.Namespace:
     config_group.add_argument(
         "--window-size",
         type=int,
-        default=5,
-        help="Number of lines per window (default: 5)",
+        default=4,
+        help="Number of lines per window (default: 4)",
     )
     config_group.add_argument(
         "--k-neighbors",
@@ -93,13 +93,13 @@ def parse_args() -> argparse.Namespace:
         type=str,
         choices=["cuda", "mps", "cpu"],
         default=None,
-        help="Device for model inference (default: auto-detect)",
+        help="Device for embedding and scoring (default: auto-detect)",
     )
     config_group.add_argument(
-        "--workers",
+        "--scoring-batch-size",
         type=int,
         default=None,
-        help="Parallel workers for scoring (default: half of CPU cores)",
+        help="Batch size for k-NN scoring queries (default: auto-detect based on GPU memory)",
     )
 
     # output options
@@ -200,7 +200,7 @@ def main() -> None:
             model_name=args.model_name,
             batch_size=args.batch_size,
             device=args.device,
-            scoring_workers=args.workers,
+            scoring_batch_size=args.scoring_batch_size,
             backend=args.backend,
             model_path=str(args.model_path) if args.model_path else None,
             n_gpu_layers=args.n_gpu_layers,

@@ -55,13 +55,13 @@ class TestAnalysisConfig:
     def test_default_config(self) -> None:
         """Test default configuration values."""
         config = AnalysisConfig()
-        assert config.window_size == 5
+        assert config.window_size == 4
         assert config.k_neighbors == 5
         assert config.anomaly_percentile == 0.1
         assert config.model_name == "all-MiniLM-L6-v2"
         assert config.batch_size == 32
         assert config.device is None
-        assert config.scoring_workers is None  # defaults to half of cores at runtime
+        assert config.scoring_batch_size is None  # auto-detect by default
 
     def test_custom_config(self) -> None:
         """Test custom configuration values."""

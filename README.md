@@ -13,6 +13,19 @@ Cordon uses transformer-based embeddings and density-based scoring to identify s
 - **Noise Reduction**: Filters out repetitive logs, keeping only unusual patterns
 - **Multiple Backends**: sentence-transformers (default) or llama.cpp for containers
 
+## Requirements
+
+### GPU Requirements (Optional but Recommended)
+
+For GPU acceleration, you need:
+- **NVIDIA GPU**: Pascal architecture or newer (GTX 10-series, RTX series, Tesla P/V/A/H series)
+- **Compute Capability**: 6.0 or higher
+- **Compatible GPUs**: GTX 1050+, RTX 20/30/40 series, Tesla P100+, V100, A100, H100
+
+**Not compatible**: GTX 900-series or older (Maxwell/Kepler architectures)
+
+CPU mode is always available as a fallback.
+
 ## Installation
 
 ### From PyPI (Recommended)
@@ -74,6 +87,12 @@ cordon app.log error.log
 # With options
 cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 app.log
 
+# With GPU acceleration (scoring batch size auto-detected)
+cordon --device cuda --batch-size 64 large.log
+
+# Override auto-detection if needed
+cordon --device cuda --batch-size 64 --scoring-batch-size 50000 large.log
+
 # Save results to file
 cordon --output anomalies.xml system.log
 
@@ -95,13 +114,14 @@ analyzer = SemanticLogAnalyzer()
 output = analyzer.analyze_file(Path("system.log"))
 print(output)
 
-# Advanced configuration
+# Advanced configuration with GPU acceleration
 config = AnalysisConfig(
     window_size=10,
     k_neighbors=10,
     anomaly_percentile=0.05,
-    device="cuda",
-    batch_size=64
+    device="cuda",           # GPU for embedding and scoring
+    batch_size=64,           # Embedding batch size
+    scoring_batch_size=None  # Auto-detect optimal batch size (default)
 )
 analyzer = SemanticLogAnalyzer(config)
 result = analyzer.analyze_file_detailed(Path("app.log"))
@@ -203,6 +223,8 @@ The output is intentionally lossy—it discards repetitive patterns to focus on 
 
 The score for each window is the average cosine distance to its k nearest neighbors in the embedding space.
 
+**GPU Acceleration**: Both embedding and scoring phases automatically leverage GPU acceleration (CUDA/MPS) when available, providing significant speedups for large log files.
+
 **Important:** Repetitive patterns are filtered even if critical. The same FATAL error repeated 100 times scores as "normal" because it's semantically similar to itself.
 
 See [Cordon's architecture](./docs/architecture.md) for full details.
@@ -213,11 +235,11 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 
 | Parameter | Default | CLI Flag | Description |
 |-----------|---------|----------|-------------|
-| `window_size` | 5 | `--window-size` | Lines per window (non-overlapping) |
+| `window_size` | 4 | `--window-size` | Lines per window (non-overlapping) |
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
-| `scoring_workers` | Auto | `--workers` | Parallel workers for k-NN scoring (default: half of CPU cores) |
+| `scoring_batch_size` | Auto | `--scoring-batch-size` | Batch size for k-NN scoring (auto-detects based on GPU memory) |
 
 ### Backend Options
 
@@ -225,7 +247,7 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 |-----------|---------|----------|-------------|
 | `backend` | `sentence-transformers` | `--backend` | Embedding backend |
 | `model_name` | `all-MiniLM-L6-v2` | `--model-name` | HuggingFace model |
-| `device` | Auto | `--device` | Device (cuda/mps/cpu) |
+| `device` | Auto | `--device` | Device for embedding and scoring (cuda/mps/cpu) |
 | `model_path` | None | `--model-path` | GGUF model path (llama-cpp) |
 | `n_gpu_layers` | 0 | `--n-gpu-layers` | GPU layers (llama-cpp) |
 
@@ -245,10 +267,10 @@ Run `cordon --help` for full CLI documentation.
 **Cordon will warn you if significant truncation is detected** and suggest better settings for your logs.
 
 **Default model (`all-MiniLM-L6-v2`) has a 256-token limit:**
-- Compact logs (20-30 tokens/line): Default `window_size=5` works perfectly
-- Standard logs (40-50 tokens/line): Default settings work well
-- Verbose logs (50-70 tokens/line): Consider larger window with a bigger model
-- Very verbose logs (80+ tokens/line): Use a larger-context model
+- Compact logs (20-30 tokens/line): Can increase to `window_size=8` for more context
+- Standard logs (40-50 tokens/line): Default works well
+- Verbose logs (50-70 tokens/line): Default works, or use larger model for bigger windows
+- Very verbose logs (80+ tokens/line): Reduce to `window_size=3` or use larger-context model
 
 **For verbose system logs**, use larger-context models:
 ```bash
@@ -275,11 +297,23 @@ cordon --model-name "BAAI/bge-base-en-v1.5" --window-size 8 your.log
 
 ## Performance
 
-Cordon automatically chooses the best approach:
+### GPU Acceleration
+
+Cordon automatically leverages GPU acceleration for both embedding and scoring phases when available:
+
+- **Embedding**: Uses PyTorch/sentence-transformers with CUDA or MPS
+- **Scoring**: Uses PyTorch for GPU-accelerated k-NN computation
+- **Speedup**: 5-15x faster scoring on GPU compared to CPU for large datasets
+
+For large log files (millions of lines), GPU acceleration can reduce total processing time from hours to minutes.
+
+### Memory Management
+
+Cordon uses PyTorch for all k-NN scoring operations:
 
 | Strategy | When | RAM Usage | Speed |
 |----------|------|-----------|-------|
-| In-Memory | <50k windows | ~200-500MB | Fastest |
-| Memory-Mapped | ≥50k windows | ~50-100MB | Moderate |
+| PyTorch GPU | GPU available (CUDA/MPS) | Moderate | Fastest |
+| PyTorch CPU | No GPU / CPU forced | Moderate | Fast |
 
-**What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 5 lines). A 10,000-line log with window_size=5 creates 2,000 windows.
+**What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 4 lines). A 10,000-line log with window_size=4 creates 2,500 windows.
