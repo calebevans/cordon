@@ -235,7 +235,7 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 
 | Parameter | Default | CLI Flag | Description |
 |-----------|---------|----------|-------------|
-| `window_size` | 5 | `--window-size` | Lines per window (non-overlapping) |
+| `window_size` | 4 | `--window-size` | Lines per window (non-overlapping) |
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
@@ -267,10 +267,10 @@ Run `cordon --help` for full CLI documentation.
 **Cordon will warn you if significant truncation is detected** and suggest better settings for your logs.
 
 **Default model (`all-MiniLM-L6-v2`) has a 256-token limit:**
-- Compact logs (20-30 tokens/line): Default `window_size=5` works perfectly
-- Standard logs (40-50 tokens/line): Default settings work well
-- Verbose logs (50-70 tokens/line): Consider larger window with a bigger model
-- Very verbose logs (80+ tokens/line): Use a larger-context model
+- Compact logs (20-30 tokens/line): Can increase to `window_size=8` for more context
+- Standard logs (40-50 tokens/line): Default works well
+- Verbose logs (50-70 tokens/line): Default works, or use larger model for bigger windows
+- Very verbose logs (80+ tokens/line): Reduce to `window_size=3` or use larger-context model
 
 **For verbose system logs**, use larger-context models:
 ```bash
@@ -316,4 +316,4 @@ Cordon uses PyTorch for all k-NN scoring operations:
 | PyTorch GPU | GPU available (CUDA/MPS) | Moderate | Fastest |
 | PyTorch CPU | No GPU / CPU forced | Moderate | Fast |
 
-**What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 5 lines). A 10,000-line log with window_size=5 creates 2,000 windows.
+**What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 4 lines). A 10,000-line log with window_size=4 creates 2,500 windows.

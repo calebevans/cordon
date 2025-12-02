@@ -93,13 +93,14 @@ Cordon uses a **density-based anomaly detection** approach in **semantic embeddi
 
 ```python
 # Configuration (defaults)
-window_size = 5  # Lines per window
+window_size = 4  # Lines per window
 
 # Example
-Log lines:  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-Window 1:   [1, 2, 3, 4, 5]
-Window 2:               [6, 7, 8, 9, 10]
-Window 3:                           [11, 12, 13, 14, 15]
+Log lines:  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+Window 1:   [1, 2, 3, 4]
+Window 2:           [5, 6, 7, 8]
+Window 3:                   [9, 10, 11, 12]
+Window 4:                           [13, 14, 15, 16]
 ```
 
 **Non-overlapping windows provide:**
@@ -145,7 +146,8 @@ BAAI/bge-large-en:     512 tokens (1024-dim embeddings)
 
 **Example with verbose system logs** (typical: 50-60 tokens per line):
 ```
-window_size=5:  ~250-300 tokens → fits in 256 limit → all lines analyzed ✓
+window_size=4:  ~200-240 tokens → fits in 256 limit → all lines analyzed ✓ (default)
+window_size=5:  ~250-300 tokens → fits in 256 limit → most lines analyzed ✓
 window_size=10: ~500-600 tokens → exceeds 256 limit → only first ~4 lines analyzed
 window_size=50: ~2,500-3,000 tokens → exceeds 256 limit → only first ~4 lines analyzed
 ```
@@ -380,10 +382,10 @@ Example (50 token/line logs):
 
 | Log Type | Tokens/Line | Recommended Config |
 |----------|-------------|-------------------|
-| **Compact** (app logs) | 20-30 | `window_size=8` (default works) ✓ |
-| **Standard** (web server) | 40-50 | `window_size=5` (default) ✓ |
-| **Verbose** (system logs) | 50-70 | `window_size=4` or use larger model |
-| **Very verbose** (debug logs) | 80+ | Use `BAAI/bge-base-en-v1.5` with `window_size=6` |
+| **Compact** (app logs) | 20-30 | Increase to `window_size=8` for more context |
+| **Standard** (web server) | 40-50 | Default `window_size=4` ✓ |
+| **Verbose** (system logs) | 50-70 | Default `window_size=4` ✓ or use larger model |
+| **Very verbose** (debug logs) | 80+ | Reduce to `window_size=3` or use larger model |
 
 ---
 

@@ -6,7 +6,7 @@ from pathlib import Path
 class AnalysisConfig:
     """Global configuration for the analysis pipeline."""
 
-    window_size: int = 5
+    window_size: int = 4
     k_neighbors: int = 5
     anomaly_percentile: float = 0.1
     model_name: str = "all-MiniLM-L6-v2"

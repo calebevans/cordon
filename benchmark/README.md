@@ -25,9 +25,10 @@ python benchmark/download.py hdfs_v1
 # 3. Run full benchmark (recommended)
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model BAAI/bge-large-en-v1.5 \
+  --device cuda --batch-size 64 \
   --runs 5 --seed 42 \
   --generate-plots --output-dir benchmark/runs
 
@@ -49,7 +50,7 @@ python benchmark/evaluate.py hdfs_v1 \
 # Run evaluation only (prints to console)
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model BAAI/bge-large-en-v1.5
 ```
@@ -60,7 +61,7 @@ python benchmark/evaluate.py hdfs_v1 \
 # Generate visualizations separately (if needed)
 python benchmark/visualize.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 \
   --model BAAI/bge-large-en-v1.5
 ```
@@ -85,14 +86,23 @@ python -c "import cordon; import matplotlib; import yaml"
 
 ### Optional: GPU Acceleration
 
-**For Embedding Generation (CUDA/MPS):**
+**For Embedding and Scoring (CUDA/MPS):**
+
+Cordon now uses GPU acceleration for both embedding generation and k-NN scoring, providing significant speedups.
 
 ```bash
-# NVIDIA GPUs
+# NVIDIA GPUs (Pascal/GTX 10-series or newer)
 uv pip install torch --index-url https://download.pytorch.org/whl/cu121
+
+# Use with --device cuda flag
+python benchmark/evaluate.py hdfs_v1 --device cuda --batch-size 64
 ```
 
-Apple Silicon (M1/M2/M3): MPS support is already included. Cordon automatically detects and uses the best device.
+**GPU Requirements:**
+- NVIDIA: Compute capability >= 6.0 (GTX 1050+, RTX series, Tesla P/V/A/H series)
+- Apple Silicon (M1/M2/M3): MPS support included, auto-detected
+
+Cordon automatically detects and uses the best device. Both embedding AND scoring are GPU-accelerated.
 
 **For Visualization (UMAP):**
 
@@ -131,7 +141,7 @@ The code automatically detects and uses GPU-accelerated UMAP (cuML) if available
 ```bash
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model BAAI/bge-large-en-v1.5 \
   --runs 5 --seed 42 \
@@ -142,7 +152,7 @@ python benchmark/evaluate.py hdfs_v1 \
 ```bash
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model BAAI/bge-large-en-v1.5
 ```
@@ -160,7 +170,7 @@ Measures semantic uniqueness detection using template coverage metrics.
 ```bash
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model BAAI/bge-large-en-v1.5 \
   --runs 5 --seed 42 \
@@ -190,11 +200,15 @@ benchmark/runs/my_experiment/
 
 **Core Options:**
 - `--sample-size`: Number of lines (default: 100000, use 'full' for all 11M)
-- `--window-size`: Window size (default: 5, recommended: 4)
-- `--stride`: Stride (default: 2, recommended: 4 to match window-size)
+- `--window-size`: Window size (default: 4, non-overlapping windows)
 - `--k-neighbors`: K-neighbors for density (default: 5, recommended: 10)
 - `--anomaly-percentile`: Threshold percentile (default: 0.1, recommended: 0.02)
 - `--model`: Embedding model (default: all-MiniLM-L6-v2, recommended: BAAI/bge-large-en-v1.5)
+
+**Performance Options:**
+- `--device`: Device for embedding and scoring (default: auto-detect, choices: cuda/mps/cpu)
+- `--batch-size`: Embedding batch size (default: 32, increase for GPU)
+- `--scoring-batch-size`: Scoring batch size (default: auto-detect based on GPU memory)
 
 **Statistical Options:**
 - `--runs`: Number of runs for statistics (default: 1)
@@ -288,7 +302,7 @@ Generate visualizations separately (if not using `--generate-plots`):
 ```bash
 python benchmark/visualize.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 \
   --model BAAI/bge-large-en-v1.5
 ```
@@ -329,8 +343,9 @@ See [METHODOLOGY.md](METHODOLOGY.md) for detailed metric definitions and evaluat
 
 **Configuration:**
 ```
-window_size: 4, stride: 4, k_neighbors: 10
+window_size: 4 (non-overlapping), k_neighbors: 10
 anomaly_percentile: 0.02, model: BAAI/bge-large-en-v1.5
+device: cuda (GPU-accelerated embedding and scoring)
 ```
 
 See [results/README.md](results/README.md) for complete benchmark results across multiple runs.
@@ -344,7 +359,7 @@ python benchmark/download.py hdfs_v1
 # 2. Run full benchmark (evaluation + visualizations)
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model BAAI/bge-large-en-v1.5 \
   --runs 5 --seed 42 \

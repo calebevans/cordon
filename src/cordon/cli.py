@@ -61,8 +61,8 @@ def parse_args() -> argparse.Namespace:
     config_group.add_argument(
         "--window-size",
         type=int,
-        default=5,
-        help="Number of lines per window (default: 5)",
+        default=4,
+        help="Number of lines per window (default: 4)",
     )
     config_group.add_argument(
         "--k-neighbors",
