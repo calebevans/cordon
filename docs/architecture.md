@@ -211,7 +211,9 @@ Score 0.30: "FATAL: Database corruption detected" (rare, semantically unique)
 
 ### 4. Thresholding
 
-**Selects top anomalies using percentile-based threshold.**
+**Selects anomalies using percentile-based or range-based filtering.**
+
+#### Percentile Mode (Default)
 
 ```python
 anomaly_percentile = 0.1  # Keep top 10% most anomalous
@@ -227,6 +229,35 @@ anomaly_percentile = 0.1  # Keep top 10% most anomalous
 - **Robust**: Not sensitive to score scale variations
 
 **Trade-off**: Very uniform logs might flag near-identical content as "anomalous."
+
+#### Range Mode (Advanced)
+
+**Filters for anomalies within a specific percentile band, excluding the most extreme.**
+
+```python
+anomaly_range_min = 0.05  # Exclude top 5% (most extreme)
+anomaly_range_max = 0.15  # Include up to 15% (keep next 10%)
+
+1. Compute all window scores: [0.01, 0.02, 0.03, ..., 0.35]
+2. Calculate upper threshold (95th percentile): upper = 0.30
+3. Calculate lower threshold (85th percentile): lower = 0.20
+4. Select windows where lower <= score < upper
+```
+
+**When to use range mode:**
+- **Filter startup noise**: Exclude the most extreme anomalies that might be initialization issues
+- **Focus on moderate anomalies**: Find unusual patterns that aren't outliers
+- **Known issues**: Exclude top X% if you know certain errors are expected but want to see what else is unusual
+- **Iterative analysis**: After reviewing top anomalies, look at the next tier
+
+**Example use case**:
+```bash
+# First pass: see top 5% most anomalous
+cordon --anomaly-percentile 0.05 app.log > top5.xml
+
+# Second pass: exclude those, see next 10%
+cordon --anomaly-range 0.05 0.15 app.log > next10.xml
+```
 
 ### 5. Merging
 

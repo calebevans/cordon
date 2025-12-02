@@ -6,7 +6,7 @@ from cordon import AnalysisConfig, SemanticLogAnalyzer
 
 def main() -> None:
     """Demonstrate basic library usage."""
-    # create a custom configuration
+    # Example 1: Percentile mode (default) - keep top 10% most anomalous
     config = AnalysisConfig(
         window_size=10,
         k_neighbors=5,
@@ -22,7 +22,7 @@ def main() -> None:
     # analyze a log file (simple API)
     log_path = Path("sample.log")
     output = analyzer.analyze_file(log_path)
-    print("Anomalous blocks:")
+    print("Anomalous blocks (percentile mode):")
     print(output)
 
     # or use detailed API for statistics
@@ -36,6 +36,22 @@ def main() -> None:
     print(f"  Max: {result.score_distribution['max']:.4f}")
     print("\nOutput:")
     print(result.output)
+
+    # Example 2: Range mode - exclude top 5%, keep next 10%
+    print("\n" + "=" * 60)
+    print("Range mode: exclude top 5%, keep next 10%")
+    print("=" * 60)
+    config_range = AnalysisConfig(
+        window_size=10,
+        k_neighbors=5,
+        anomaly_range_min=0.05,  # exclude top 5% (most extreme)
+        anomaly_range_max=0.15,  # include up to 15% (keep next 10%)
+        device="cpu",
+    )
+    analyzer_range = SemanticLogAnalyzer(config_range)
+    result_range = analyzer_range.analyze_file_detailed(log_path)
+    print(f"  Significant windows: {result_range.significant_windows}")
+    print("  (Excludes the most extreme anomalies, focuses on moderate ones)")
 
 
 if __name__ == "__main__":

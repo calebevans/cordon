@@ -87,6 +87,9 @@ cordon app.log error.log
 # With options
 cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 app.log
 
+# Filter to a percentile range (exclude top 5%, keep next 10%)
+cordon --anomaly-range 0.05 0.15 app.log
+
 # With GPU acceleration (scoring batch size auto-detected)
 cordon --device cuda --batch-size 64 large.log
 
@@ -122,6 +125,17 @@ config = AnalysisConfig(
     device="cuda",           # GPU for embedding and scoring
     batch_size=64,           # Embedding batch size
     scoring_batch_size=None  # Auto-detect optimal batch size (default)
+)
+analyzer = SemanticLogAnalyzer(config)
+result = analyzer.analyze_file_detailed(Path("app.log"))
+
+# Using anomaly range mode (exclude top 5%, keep next 10%)
+config = AnalysisConfig(
+    window_size=10,
+    k_neighbors=10,
+    anomaly_range_min=0.05,  # Exclude top 5% (most extreme anomalies)
+    anomaly_range_max=0.15,  # Include up to 15% (keep next 10%)
+    device="cuda",
 )
 analyzer = SemanticLogAnalyzer(config)
 result = analyzer.analyze_file_detailed(Path("app.log"))
@@ -238,8 +252,14 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `window_size` | 4 | `--window-size` | Lines per window (non-overlapping) |
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
+| `anomaly_range_min` | None | `--anomaly-range MIN MAX` | Lower bound for range mode (exclude top X%) |
+| `anomaly_range_max` | None | `--anomaly-range MIN MAX` | Upper bound for range mode (include up to Y%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
 | `scoring_batch_size` | Auto | `--scoring-batch-size` | Batch size for k-NN scoring (auto-detects based on GPU memory) |
+
+**Note on Filtering Modes:**
+- **Percentile Mode** (default): `--anomaly-percentile 0.1` keeps the top 10% most anomalous windows
+- **Range Mode**: `--anomaly-range 0.05 0.15` excludes the top 5% (most extreme) and keeps the next 10% (moderately anomalous). Useful for filtering out known issues or startup noise while focusing on unusual-but-not-extreme patterns.
 
 ### Backend Options
 
@@ -288,12 +308,38 @@ cordon --model-name "BAAI/bge-base-en-v1.5" --window-size 8 your.log
 - **Initial Triage**: First-pass screening of unfamiliar logs to find "what's unusual here?"
 - **Anomaly Detection**: Surface semantically unique events (rare errors, state transitions, unusual clusters)
 - **Exploratory Analysis**: Discover unexpected patterns without knowing what to search for
+- **Iterative Investigation**: Use range mode to exclude known issues and focus on the next tier of anomalies
 
 ### What Cordon Is NOT Good For
 
 - Complete error analysis (repetitive errors filtered)
 - Specific error hunting (use grep/structured logging)
 - Compliance logging (this is lossy by design)
+
+### Choosing Between Percentile and Range Mode
+
+**Use Percentile Mode** (`--anomaly-percentile`) when:
+- First time analyzing a log file
+- You want the most anomalous content
+- Simple, straightforward filtering
+
+**Use Range Mode** (`--anomaly-range`) when:
+- You want to exclude known extreme anomalies (startup errors, expected failures)
+- Investigating the "next tier" of unusual patterns
+- The top percentile is dominated by things like start-up logs
+- You need to focus on moderately anomalous patterns
+
+**Example workflow:**
+```bash
+# Step 1: Find the most extreme anomalies
+cordon --anomaly-percentile 0.05 app.log > top5.xml
+
+# Step 2: After reviewing, exclude those and see the next tier
+cordon --anomaly-range 0.05 0.15 app.log > next10.xml
+
+# Step 3: Focus on moderate anomalies, excluding startup noise
+cordon --anomaly-range 0.02 0.10 app.log > filtered.xml
+```
 
 ## Performance
 

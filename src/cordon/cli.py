@@ -77,6 +77,14 @@ def parse_args() -> argparse.Namespace:
         help="Percentile of windows to retain, e.g., 0.1 = top 10%% (default: 0.1)",
     )
     config_group.add_argument(
+        "--anomaly-range",
+        type=float,
+        nargs=2,
+        metavar=("MIN", "MAX"),
+        default=None,
+        help="Percentile range window, e.g., '0.05 0.15' excludes top 5%%, keeps next 10%%",
+    )
+    config_group.add_argument(
         "--model-name",
         type=str,
         default="all-MiniLM-L6-v2",
@@ -191,12 +199,30 @@ def main() -> None:
     """Main entry point for the CLI."""
     args = parse_args()
 
+    # handle anomaly range vs percentile mutual exclusivity
+    anomaly_range_min = None
+    anomaly_range_max = None
+    anomaly_percentile = args.anomaly_percentile
+
+    if args.anomaly_range is not None:
+        # Using range mode
+        anomaly_range_min = args.anomaly_range[0]
+        anomaly_range_max = args.anomaly_range[1]
+        # Keep default percentile value (not used in range mode)
+        if args.anomaly_percentile != 0.1:
+            print(
+                "Warning: --anomaly-percentile is ignored when using --anomaly-range",
+                file=sys.stderr,
+            )
+
     # create configuration from arguments
     try:
         config = AnalysisConfig(
             window_size=args.window_size,
             k_neighbors=args.k_neighbors,
-            anomaly_percentile=args.anomaly_percentile,
+            anomaly_percentile=anomaly_percentile,
+            anomaly_range_min=anomaly_range_min,
+            anomaly_range_max=anomaly_range_max,
             model_name=args.model_name,
             batch_size=args.batch_size,
             device=args.device,
@@ -222,6 +248,16 @@ def main() -> None:
         print(f"GPU layers: {config.n_gpu_layers}")
         if config.n_threads:
             print(f"Threads: {config.n_threads}")
+
+    # Display filtering mode
+    if config.anomaly_range_min is not None:
+        # Type narrowing: if min is not None, max is also not None (enforced in config)
+        assert config.anomaly_range_max is not None
+        print(
+            f"Filtering mode: Range (exclude top {config.anomaly_range_min*100:.1f}%, keep up to {config.anomaly_range_max*100:.1f}%)"
+        )
+    else:
+        print(f"Filtering mode: Percentile (top {config.anomaly_percentile*100:.1f}%)")
     print()
 
     try:

@@ -84,3 +84,56 @@ class TestAnalysisConfig:
             AnalysisConfig(anomaly_percentile=1.5)
         with pytest.raises(ValueError):
             AnalysisConfig(device="gpu")
+
+    def test_range_mode_valid(self) -> None:
+        """Test that valid range configurations are accepted."""
+        config = AnalysisConfig(anomaly_range_min=0.05, anomaly_range_max=0.15)
+        assert config.anomaly_range_min == 0.05
+        assert config.anomaly_range_max == 0.15
+
+    def test_range_mode_both_required(self) -> None:
+        """Test that both range parameters must be set together."""
+        # only min set - should fail
+        with pytest.raises(ValueError, match="must both be set"):
+            AnalysisConfig(anomaly_range_min=0.05)
+
+        # only max set - should fail
+        with pytest.raises(ValueError, match="must both be set"):
+            AnalysisConfig(anomaly_range_max=0.15)
+
+    def test_range_mode_bounds_validation(self) -> None:
+        """Test that range bounds are validated."""
+        # min out of range
+        with pytest.raises(ValueError, match="anomaly_range_min must be between"):
+            AnalysisConfig(anomaly_range_min=-0.1, anomaly_range_max=0.15)
+
+        with pytest.raises(ValueError, match="anomaly_range_min must be between"):
+            AnalysisConfig(anomaly_range_min=1.5, anomaly_range_max=2.0)
+
+        # max out of range
+        with pytest.raises(ValueError, match="anomaly_range_max must be between"):
+            AnalysisConfig(anomaly_range_min=0.05, anomaly_range_max=-0.1)
+
+        with pytest.raises(ValueError, match="anomaly_range_max must be between"):
+            AnalysisConfig(anomaly_range_min=0.05, anomaly_range_max=1.5)
+
+    def test_range_mode_min_less_than_max(self) -> None:
+        """Test that range_min must be less than range_max."""
+        # min >= max should fail
+        with pytest.raises(ValueError, match="must be less than"):
+            AnalysisConfig(anomaly_range_min=0.15, anomaly_range_max=0.05)
+
+        # equal values should fail
+        with pytest.raises(ValueError, match="must be less than"):
+            AnalysisConfig(anomaly_range_min=0.1, anomaly_range_max=0.1)
+
+    def test_range_mode_with_default_percentile(self) -> None:
+        """Test that range mode works with default percentile value."""
+        # should be valid - percentile is ignored in range mode
+        config = AnalysisConfig(
+            anomaly_range_min=0.05,
+            anomaly_range_max=0.15,
+            anomaly_percentile=0.1,  # default value
+        )
+        assert config.anomaly_range_min == 0.05
+        assert config.anomaly_range_max == 0.15

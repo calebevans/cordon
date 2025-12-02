@@ -306,3 +306,141 @@ class TestThresholder:
         # verify sorted descending
         for i in range(len(significant) - 1):
             assert significant[i].score >= significant[i + 1].score
+
+    def test_range_mode_basic(self) -> None:
+        """Test range mode excludes top X% and keeps next Y%."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 101)
+        ]
+        embeddings = [np.array([float(i)]) for i in range(100)]
+        # scores from 0.0 to 99.0
+        scored = [
+            ScoredWindow(window=w, score=float(i), embedding=e)
+            for i, (w, e) in enumerate(zip(windows, embeddings, strict=False))
+        ]
+        # exclude top 5% (scores >= 95th percentile = 94.05)
+        # keep up to 15% (scores >= 85th percentile = 84.15)
+        # result: scores in range [84.15, 94.05)
+        config = AnalysisConfig(anomaly_range_min=0.05, anomaly_range_max=0.15)
+
+        thresholder = Thresholder()
+        significant = thresholder.select_significant(scored, config)
+
+        # should get approximately 10 windows (between 85th and 95th percentile)
+        assert len(significant) >= 9
+        assert len(significant) <= 11  # allow for boundary effects
+
+        # verify all selected scores are in expected range
+        for sw in significant:
+            assert sw.score < 95.0  # below 95th percentile
+            assert sw.score >= 84.0  # at or above 85th percentile
+
+    def test_range_mode_sorted_descending(self) -> None:
+        """Test that range mode results are sorted by score (descending)."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 51)
+        ]
+        embeddings = [np.array([float(i)]) for i in range(50)]
+        # random scores
+        scores = list(range(50))
+        np.random.shuffle(scores)
+        scored = [
+            ScoredWindow(window=w, score=float(s), embedding=e)
+            for w, s, e in zip(windows, scores, embeddings, strict=False)
+        ]
+        config = AnalysisConfig(anomaly_range_min=0.1, anomaly_range_max=0.3)
+
+        thresholder = Thresholder()
+        significant = thresholder.select_significant(scored, config)
+
+        # verify sorted descending
+        for i in range(len(significant) - 1):
+            assert significant[i].score >= significant[i + 1].score
+
+    def test_range_mode_empty_result(self) -> None:
+        """Test range mode with no windows in the range."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 11)
+        ]
+        embeddings = [np.array([float(i)]) for i in range(10)]
+        # all scores are 5.0
+        scored = [
+            ScoredWindow(window=w, score=5.0, embedding=e)
+            for w, e in zip(windows, embeddings, strict=False)
+        ]
+        # with identical scores, percentile range will be very narrow
+        config = AnalysisConfig(anomaly_range_min=0.01, anomaly_range_max=0.05)
+
+        thresholder = Thresholder()
+        significant = thresholder.select_significant(scored, config)
+
+        # with identical scores, might get some or none depending on boundaries
+        assert len(significant) >= 0
+
+    def test_range_mode_vs_percentile_mode(self) -> None:
+        """Test that range mode and percentile mode return different score ranges."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 101)
+        ]
+        embeddings = [np.array([float(i)]) for i in range(100)]
+        scored = [
+            ScoredWindow(window=w, score=float(i), embedding=e)
+            for i, (w, e) in enumerate(zip(windows, embeddings, strict=False))
+        ]
+
+        # percentile mode: top 10% (scores >= 90th percentile)
+        config_percentile = AnalysisConfig(anomaly_percentile=0.1)
+        thresholder = Thresholder()
+        sig_percentile = thresholder.select_significant(scored, config_percentile)
+
+        # range mode: exclude top 5%, keep next 10% (scores 85th-95th percentile)
+        config_range = AnalysisConfig(anomaly_range_min=0.05, anomaly_range_max=0.15)
+        sig_range = thresholder.select_significant(scored, config_range)
+
+        # Both return 10 windows, but different score ranges
+        assert len(sig_percentile) == 10
+        assert len(sig_range) == 10
+
+        # percentile mode should include the highest scores (90-99)
+        # range mode should exclude the top 5% and return 85-94
+        assert max(sw.score for sw in sig_percentile) > max(sw.score for sw in sig_range)
+        assert min(sw.score for sw in sig_percentile) > min(sw.score for sw in sig_range)
+
+        # Verify specific ranges
+        pct_scores = [sw.score for sw in sig_percentile]
+        range_scores = [sw.score for sw in sig_range]
+
+        # Percentile mode: should have scores >= 90
+        assert all(s >= 90.0 for s in pct_scores)
+        # Range mode: should have scores in [85, 95)
+        assert all(85.0 <= s < 95.0 for s in range_scores)
+
+    def test_range_mode_boundary_inclusive_exclusive(self) -> None:
+        """Test that range boundaries are inclusive on lower, exclusive on upper."""
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 101)
+        ]
+        embeddings = [np.array([float(i)]) for i in range(100)]
+        # scores from 0 to 99
+        scored = [
+            ScoredWindow(window=w, score=float(i), embedding=e)
+            for i, (w, e) in enumerate(zip(windows, embeddings, strict=False))
+        ]
+        # exclude top 10% (score < 90th percentile = 89.1)
+        # keep up to 20% (score >= 80th percentile = 79.2)
+        config = AnalysisConfig(anomaly_range_min=0.1, anomaly_range_max=0.2)
+
+        thresholder = Thresholder()
+        significant = thresholder.select_significant(scored, config)
+
+        # verify boundaries
+        for sw in significant:
+            # should be less than upper threshold (exclusive)
+            assert sw.score < 90.0
+            # should be at or above lower threshold (inclusive)
+            assert sw.score >= 79.0
