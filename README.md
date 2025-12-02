@@ -87,7 +87,10 @@ cordon app.log error.log
 # With options
 cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 app.log
 
-# With GPU acceleration and custom batch sizes
+# With GPU acceleration (scoring batch size auto-detected)
+cordon --device cuda --batch-size 64 large.log
+
+# Override auto-detection if needed
 cordon --device cuda --batch-size 64 --scoring-batch-size 50000 large.log
 
 # Save results to file
@@ -118,7 +121,7 @@ config = AnalysisConfig(
     anomaly_percentile=0.05,
     device="cuda",           # GPU for embedding and scoring
     batch_size=64,           # Embedding batch size
-    scoring_batch_size=50000 # Scoring batch size (tune for GPU memory)
+    scoring_batch_size=None  # Auto-detect optimal batch size (default)
 )
 analyzer = SemanticLogAnalyzer(config)
 result = analyzer.analyze_file_detailed(Path("app.log"))
@@ -236,7 +239,7 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `k_neighbors` | 5 | `--k-neighbors` | Number of neighbors for density calculation |
 | `anomaly_percentile` | 0.1 | `--anomaly-percentile` | Top N% to keep (0.1 = 10%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
-| `scoring_batch_size` | 10000 | `--scoring-batch-size` | Batch size for k-NN scoring queries |
+| `scoring_batch_size` | Auto | `--scoring-batch-size` | Batch size for k-NN scoring (auto-detects based on GPU memory) |
 
 ### Backend Options
 

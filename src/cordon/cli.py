@@ -98,8 +98,8 @@ def parse_args() -> argparse.Namespace:
     config_group.add_argument(
         "--scoring-batch-size",
         type=int,
-        default=10000,
-        help="Batch size for k-NN scoring queries (default: 10000)",
+        default=None,
+        help="Batch size for k-NN scoring queries (default: auto-detect based on GPU memory)",
     )
 
     # output options

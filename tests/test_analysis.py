@@ -188,6 +188,12 @@ class TestDensityAnomalyScorer:
             scored = scorer.score_windows(embedded, config)
             assert len(scored) == 25
 
+        # test auto-detection (None)
+        config_auto = AnalysisConfig(k_neighbors=3, device="cpu", scoring_batch_size=None)
+        scorer_auto = DensityAnomalyScorer()
+        scored_auto = scorer_auto.score_windows(embedded, config_auto)
+        assert len(scored_auto) == 25
+
     def test_pytorch_gpu_availability(self) -> None:
         """Test that PyTorch GPU implementation runs if GPU is available."""
         # this test will use GPU if available, otherwise skip to CPU

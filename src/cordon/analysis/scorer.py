@@ -86,6 +86,46 @@ class DensityAnomalyScorer:
         num_neighbors = config.k_neighbors
         return min(num_neighbors + 1, n_samples)
 
+    def _auto_detect_batch_size(self, n_samples: int, device: str) -> int:
+        """Auto-detect optimal batch size based on available memory.
+
+        Args:
+            n_samples: Total number of samples in the dataset
+            device: Device string ('cuda', 'mps', or 'cpu')
+
+        Returns:
+            Optimal batch size for scoring
+        """
+        if device == "cpu":
+            # CPU: use conservative default
+            return 10000
+
+        if device == "cuda":
+            try:
+                # Get available GPU memory
+                props = torch.cuda.get_device_properties(0)
+                total_memory_gb = props.total_memory / 1024**3
+
+                # Target: use ~10% of GPU memory for distance matrix
+                # distance_matrix = batch_size × n_samples × 4 bytes (float32)
+                target_memory_gb = total_memory_gb * 0.1
+                batch_size = int((target_memory_gb * 1024**3) / (n_samples * 4))
+
+                # reasonable bounds: 1k to 100k
+                return max(1000, min(batch_size, 100000))
+            except Exception:
+                return 10000
+
+        if device == "mps":
+            # MPS: conservative estimate (Apple doesn't expose memory info easily)
+            # assume ~10GB available, use similar calculation
+            target_memory_gb = 1.0  # 10% of assumed 10GB
+            batch_size = int((target_memory_gb * 1024**3) / (n_samples * 4))
+            return max(1000, min(batch_size, 50000))
+
+        # fallback
+        return 10000
+
     def _score_windows_gpu(
         self,
         embedded_windows: Sequence[tuple[TextWindow, npt.NDArray[np.floating[Any]]]],
@@ -113,9 +153,20 @@ class DensityAnomalyScorer:
         # calculate number of neighbors
         n_neighbors = self._calculate_n_neighbors(config, n_samples)
 
-        # process in batches to avoid GPU OOM
-        query_batch_size = config.scoring_batch_size
+        # determine batch size (auto-detect if not specified)
+        if config.scoring_batch_size is None:
+            query_batch_size = self._auto_detect_batch_size(n_samples, device)
+        else:
+            query_batch_size = config.scoring_batch_size
+
         scored_windows = []
+
+        # compute chunk size for similarity calculation to avoid OOM
+        # aim for ~1GB of similarity matrix per chunk
+        bytes_per_element = 4  # float32
+        target_memory_gb = 1
+        chunk_size = int((target_memory_gb * 1024**3) / (query_batch_size * bytes_per_element))
+        chunk_size = min(chunk_size, n_samples)  # don't exceed total samples
 
         for batch_start in tqdm(
             range(0, n_samples, query_batch_size),
@@ -125,21 +176,36 @@ class DensityAnomalyScorer:
         ):
             batch_end = min(batch_start + query_batch_size, n_samples)
             batch_embeddings = embeddings_tensor[batch_start:batch_end]
+            batch_size_actual = batch_end - batch_start
 
-            # compute cosine similarity: similarity = batch @ all_embeddings.T
-            # embeddings are already normalized, so this gives cosine similarity
-            similarities = torch.mm(batch_embeddings, embeddings_tensor.T)
-
-            # convert to distance: distance = 1 - similarity
-            distances = 1.0 - similarities
-
-            # find k+1 nearest neighbors (including self)
-            neighbor_distances, _ = torch.topk(
-                distances, k=n_neighbors, dim=1, largest=False, sorted=True
+            # track top-k distances across chunks (more memory efficient)
+            # initialize with large values
+            top_k_distances = torch.full(
+                (batch_size_actual, n_neighbors), float("inf"), dtype=torch.float32, device=device
             )
 
+            # compute similarities in chunks and maintain top-k
+            for chunk_start in range(0, n_samples, chunk_size):
+                chunk_end = min(chunk_start + chunk_size, n_samples)
+                chunk_embeddings = embeddings_tensor[chunk_start:chunk_end]
+
+                # compute cosine similarity for this chunk
+                similarities = torch.mm(batch_embeddings, chunk_embeddings.T)
+
+                # convert to distance (clamp to handle floating point errors)
+                # cosine similarity can be slightly > 1.0 due to floating point precision
+                chunk_distances = torch.clamp(1.0 - similarities, min=0.0, max=2.0)
+
+                # combine with existing top-k
+                combined_distances = torch.cat([top_k_distances, chunk_distances], dim=1)
+
+                # find new top-k from combined
+                top_k_distances, _ = torch.topk(
+                    combined_distances, k=n_neighbors, dim=1, largest=False, sorted=True
+                )
+
             # move results back to CPU for processing
-            neighbor_distances_cpu = neighbor_distances.cpu().numpy()
+            neighbor_distances_cpu = top_k_distances.cpu().numpy()
 
             # calculate scores for this batch
             for local_idx, global_idx in enumerate(range(batch_start, batch_end)):
@@ -149,6 +215,9 @@ class DensityAnomalyScorer:
                 # skip first distance (self = 0) and take mean of remaining
                 neighbor_dists = neighbor_distances_cpu[local_idx][1:]
                 score = float(np.mean(neighbor_dists))
+
+                # ensure score is non-negative (handle any remaining floating point errors)
+                score = max(0.0, score)
 
                 scored_windows.append(ScoredWindow(window=window, score=score, embedding=embedding))
 
@@ -184,9 +253,20 @@ class DensityAnomalyScorer:
         # calculate number of neighbors
         n_neighbors = self._calculate_n_neighbors(config, n_samples)
 
-        # process in batches
-        query_batch_size = config.scoring_batch_size
+        # determine batch size (auto-detect if not specified)
+        if config.scoring_batch_size is None:
+            query_batch_size = self._auto_detect_batch_size(n_samples, "cpu")
+        else:
+            query_batch_size = config.scoring_batch_size
+
         scored_windows = []
+
+        # compute chunk size for similarity calculation to avoid OOM on CPU
+        # aim for ~2GB of similarity matrix per chunk on CPU (more than GPU)
+        bytes_per_element = 4  # float32
+        target_memory_gb = 2
+        chunk_size = int((target_memory_gb * 1024**3) / (query_batch_size * bytes_per_element))
+        chunk_size = min(chunk_size, n_samples)  # don't exceed total samples
 
         for batch_start in tqdm(
             range(0, n_samples, query_batch_size),
@@ -196,20 +276,36 @@ class DensityAnomalyScorer:
         ):
             batch_end = min(batch_start + query_batch_size, n_samples)
             batch_embeddings = embeddings_tensor[batch_start:batch_end]
+            batch_size_actual = batch_end - batch_start
 
-            # compute cosine similarity: similarity = batch @ all_embeddings.T
-            similarities = torch.mm(batch_embeddings, embeddings_tensor.T)
-
-            # convert to distance: distance = 1 - similarity
-            distances = 1.0 - similarities
-
-            # find k+1 nearest neighbors (including self)
-            neighbor_distances, _ = torch.topk(
-                distances, k=n_neighbors, dim=1, largest=False, sorted=True
+            # track top-k distances across chunks (more memory efficient)
+            # initialize with large values
+            top_k_distances = torch.full(
+                (batch_size_actual, n_neighbors), float("inf"), dtype=torch.float32
             )
 
+            # compute similarities in chunks and maintain top-k
+            for chunk_start in range(0, n_samples, chunk_size):
+                chunk_end = min(chunk_start + chunk_size, n_samples)
+                chunk_embeddings = embeddings_tensor[chunk_start:chunk_end]
+
+                # compute cosine similarity for this chunk
+                similarities = torch.mm(batch_embeddings, chunk_embeddings.T)
+
+                # convert to distance (clamp to handle floating point errors)
+                # cosine similarity can be slightly > 1.0 due to floating point precision
+                chunk_distances = torch.clamp(1.0 - similarities, min=0.0, max=2.0)
+
+                # combine with existing top-k
+                combined_distances = torch.cat([top_k_distances, chunk_distances], dim=1)
+
+                # find new top-k from combined
+                top_k_distances, _ = torch.topk(
+                    combined_distances, k=n_neighbors, dim=1, largest=False, sorted=True
+                )
+
             # convert to numpy for processing
-            neighbor_distances_np = neighbor_distances.numpy()
+            neighbor_distances_np = top_k_distances.numpy()
 
             # calculate scores for this batch
             for local_idx, global_idx in enumerate(range(batch_start, batch_end)):

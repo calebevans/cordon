@@ -61,7 +61,7 @@ class TestAnalysisConfig:
         assert config.model_name == "all-MiniLM-L6-v2"
         assert config.batch_size == 32
         assert config.device is None
-        assert config.scoring_batch_size == 10000
+        assert config.scoring_batch_size is None  # auto-detect by default
 
     def test_custom_config(self) -> None:
         """Test custom configuration values."""
