@@ -63,13 +63,13 @@ Cordon uses a **density-based anomaly detection** approach in **semantic embeddi
 ### High-Level Algorithm
 
 ```
-1. Chunk logs into overlapping windows (e.g., 10 lines per window)
+1. Chunk logs into non-overlapping windows (e.g., 10 lines per window)
 2. Embed each window using a transformer model → 384-dimensional vectors
 3. For each embedding, compute k-NN distance to find "neighbors"
 4. Score = average distance to k nearest neighbors
 5. Higher score = farther from neighbors = more anomalous
 6. Keep top X% highest-scoring windows
-7. Merge overlapping windows into contiguous blocks
+7. Merge adjacent windows into contiguous blocks
 ```
 
 ### Why This Works
@@ -261,7 +261,7 @@ cordon --anomaly-range 0.05 0.15 app.log > next10.xml
 
 ### 5. Merging
 
-**Combines overlapping significant windows into contiguous blocks.**
+**Combines adjacent significant windows into contiguous blocks.**
 
 ```python
 Significant windows (line ranges):
@@ -275,7 +275,7 @@ Merged block: lines 10-30 (score=max(0.15, 0.18, 0.12) = 0.18)
 **Why merge?**
 - **Reduces redundancy**: Same anomaly shouldn't appear 5 times
 - **Preserves context**: Extended anomalous sequences stay together
-- **Cleaner output**: One block instead of overlapping fragments
+- **Cleaner output**: One block instead of separate fragments
 
 **Algorithm**: Interval merging with score tracking (similar to interval scheduling).
 

@@ -1,7 +1,6 @@
 dataset: hdfs_v1
 sample_size: 100000
 window_size: 3
-stride: 3
 k_neighbors: 7
 anomaly_percentile: 0.05
 model: BAAI/bge-large-en-v1.5

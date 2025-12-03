@@ -318,25 +318,21 @@ Traditional line-level F1 scores (observed: 5-8%) are low by design. Cordon igno
 
 **Baseline (w5_k10_p02):**
 - window_size: 5
-- stride: 5 (non-overlapping)
 - k_neighbors: 10
 - anomaly_percentile: 0.02 (top 2%)
 
 **50k Tuned (w2_k5):**
 - window_size: 2 (smaller for limited data)
-- stride: 2 (non-overlapping)
 - k_neighbors: 5 (lower density requirement)
 - anomaly_percentile: 0.02/0.05/0.10 (threshold variants)
 
 **100k Tuned (w3_k7):**
 - window_size: 3
-- stride: 3
 - k_neighbors: 7
 - anomaly_percentile: 0.05
 
 **250k Tuned (w4_k8):**
 - window_size: 4
-- stride: 4
 - k_neighbors: 8
 - anomaly_percentile: 0.04
 
@@ -537,7 +533,7 @@ To reproduce any test:
 # BGE-large example (100k)
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 5 --stride 5 \
+  --window-size 5 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model BAAI/bge-large-en-v1.5 \
   --device cuda --batch-size 512 \
@@ -548,7 +544,7 @@ python benchmark/evaluate.py hdfs_v1 \
 # MiniLM example (100k)
 python benchmark/evaluate.py hdfs_v1 \
   --sample-size 100000 \
-  --window-size 4 --stride 4 \
+  --window-size 4 \
   --k-neighbors 10 --anomaly-percentile 0.02 \
   --model sentence-transformers/all-MiniLM-L6-v2 \
   --device cuda --batch-size 32 \

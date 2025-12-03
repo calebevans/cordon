@@ -223,11 +223,11 @@ The output is intentionally lossy—it discards repetitive patterns to focus on 
 ### Pipeline
 
 1. **Ingestion**: Read log file line-by-line
-2. **Segmentation**: Create overlapping windows of N lines
+2. **Segmentation**: Create non-overlapping windows of N lines
 3. **Vectorization**: Embed windows using transformer models
 4. **Scoring**: Calculate k-NN density scores
 5. **Thresholding**: Select top X% based on scores
-6. **Merging**: Combine overlapping significant windows
+6. **Merging**: Combine adjacent significant windows
 7. **Formatting**: Generate XML-tagged output
 
 ### Scoring

@@ -503,7 +503,7 @@ def plot_model_comparison(results_dir: Path, output_dir: Path):
     
     ax.set_xlabel("Sample Size (thousands of lines)", fontsize=12, fontweight='bold')
     ax.set_ylabel("Template Recall", fontsize=12, fontweight='bold')
-    ax.set_title("Model Comparison: BGE-Large vs MiniLM\n(Both using k=10, p=0.02, stride=window_size)",
+    ax.set_title("Model Comparison: BGE-Large vs MiniLM\n(Both using k=10, p=0.02)",
                 fontsize=14, fontweight='bold')
     ax.set_xticks(x)
     ax.set_xticklabels([f"{s}k" if s < 1000 else f"{s//1000}M" for s in sample_sizes])
