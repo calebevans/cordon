@@ -1,10 +1,15 @@
 # Cordon
 
+[![PyPI version](https://img.shields.io/pypi/v/cordon.svg)](https://pypi.org/project/cordon/)
+[![License](https://img.shields.io/github/license/calebevans/cordon.svg)](https://github.com/calebevans/cordon/blob/main/LICENSE)
+
 **Semantic anomaly detection for system log files**
 
 Cordon uses transformer-based embeddings and density-based scoring to identify semantically unusual patterns in large log files, designed to reduce massive logs down to the most anomalous sections for analysis.
 
 **Key principle:** Repetitive patterns (even errors) are considered "normal background." Cordon surfaces unusual, rare, or clustered events that stand out semantically from the bulk of the logs.
+
+> 📖 For an in-depth explanation of the methodology, see my Red Hat Developer article: [Semantic anomaly detection in log files with Cordon](https://developers.redhat.com/articles/2025/12/09/semantic-anomaly-detection-log-files-cordon).
 
 ## Features
 
