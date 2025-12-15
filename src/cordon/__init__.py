@@ -2,7 +2,7 @@ from cordon.core.config import AnalysisConfig
 from cordon.core.types import AnalysisResult, MergedBlock, ScoredWindow, TextWindow
 from cordon.pipeline import SemanticLogAnalyzer
 
-__version__ = "0.1.0"
+__version__ = "0.2.1"
 
 __all__ = [
     "SemanticLogAnalyzer",
