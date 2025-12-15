@@ -8,7 +8,7 @@ def main() -> None:
     """Demonstrate basic library usage."""
     # Example 1: Percentile mode (default) - keep top 10% most anomalous
     config = AnalysisConfig(
-        window_size=10,
+        window_size=4,
         k_neighbors=5,
         anomaly_percentile=0.1,
         model_name="all-MiniLM-L6-v2",
@@ -20,7 +20,7 @@ def main() -> None:
     analyzer = SemanticLogAnalyzer(config)
 
     # analyze a log file (simple API)
-    log_path = Path("sample.log")
+    log_path = Path(__file__).parent / "apache_sample.log"
     output = analyzer.analyze_file(log_path)
     print("Anomalous blocks (percentile mode):")
     print(output)
@@ -42,7 +42,7 @@ def main() -> None:
     print("Range mode: exclude top 5%, keep next 10%")
     print("=" * 60)
     config_range = AnalysisConfig(
-        window_size=10,
+        window_size=4,
         k_neighbors=5,
         anomaly_range_min=0.05,  # exclude top 5% (most extreme)
         anomaly_range_max=0.15,  # include up to 15% (keep next 10%)
