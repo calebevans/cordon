@@ -58,7 +58,7 @@ Modern LLM-driven log analysis faces:
 
 ## Technical Approach
 
-Cordon uses a **density-based anomaly detection** approach in **semantic embedding space**.
+Cordon uses **density scoring for anomaly detection** in **semantic embedding space**.
 
 ### High-Level Algorithm
 
@@ -211,7 +211,7 @@ Score 0.30: "FATAL: Database corruption detected" (rare, semantically unique)
 
 ### 4. Thresholding
 
-**Selects anomalies using percentile-based or range-based filtering.**
+**Selects anomalies using percentile or range filtering.**
 
 #### Percentile Mode (Default)
 
@@ -349,7 +349,7 @@ Trade-off: Larger batches use more VRAM but are faster
 
 **Challenge**: k-NN distance calculations can be slow for large datasets.
 
-**Solution**: PyTorch-based implementation leveraging GPU or CPU.
+**Solution**: PyTorch implementation leveraging GPU or CPU.
 
 ```python
 # Device selection (automatic)

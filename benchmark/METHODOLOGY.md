@@ -1,8 +1,8 @@
-# Benchmark Methodology: Template-Based Evaluation for Semantic Anomaly Detection
+# Benchmark Methodology: Template-Level Evaluation for Semantic Anomaly Detection
 
 **Dataset:** HDFS v1 from Loghub
 
-This evaluation methodology measures semantic anomaly detection systems that prioritize **uniqueness over frequency**. Traditional line-level metrics (Precision, Recall, F1) don't work well for systems designed to ignore repetitive patterns. Instead, this uses **template-based coverage metrics** that measure the diversity of anomaly types detected rather than the quantity of instances flagged.
+This evaluation methodology measures semantic anomaly detection systems that prioritize **uniqueness over frequency**. Traditional line-level metrics (Precision, Recall, F1) don't work well for systems designed to ignore repetitive patterns. Instead, this uses **template-level coverage metrics** that measure the diversity of anomaly types detected rather than the quantity of instances flagged.
 
 The approach uses line-level template attribution (only credits templates in flagged lines).
 
@@ -21,7 +21,7 @@ Finding all 10,000 instances of a repetitive error scores better than finding 5 
 
 ### What Semantic Uniqueness Detection Does
 
-Cordon uses embedding-based density estimation to identify patterns that are **semantically isolated** in log space. It assigns high scores to rare, unusual patterns and low scores to repetitive patterns (even if labeled as errors).
+Cordon uses embedding density estimation to identify patterns that are **semantically isolated** in log space. It assigns high scores to rare, unusual patterns and low scores to repetitive patterns (even if labeled as errors).
 
 This is a different task than traditional anomaly detection, so it needs different evaluation metrics that measure diversity of types detected rather than completeness of instance coverage.
 
@@ -29,7 +29,7 @@ This is a different task than traditional anomaly detection, so it needs differe
 
 ## Methodology
 
-### Template-Based Evaluation
+### Template-Level Evaluation
 
 Instead of counting line instances, count **unique anomaly types** (templates) detected.
 

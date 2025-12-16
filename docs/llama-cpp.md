@@ -6,8 +6,8 @@ This guide explains how to use Cordon with the llama.cpp backend for GPU-acceler
 
 Cordon supports two embedding backends:
 
-1. **sentence-transformers** (default): PyTorch-based, best for native installations
-2. **llama.cpp**: GGUF-based, enables GPU acceleration in containers via Vulkan
+1. **sentence-transformers** (default): Uses PyTorch, best for native installations
+2. **llama.cpp**: Uses GGUF models, enables GPU acceleration in containers via Vulkan
 
 ## Why llama.cpp?
 

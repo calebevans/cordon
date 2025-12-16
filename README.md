@@ -5,7 +5,7 @@
 
 **Semantic anomaly detection for system log files**
 
-Cordon uses transformer-based embeddings and density-based scoring to identify semantically unusual patterns in large log files, designed to reduce massive logs down to the most anomalous sections for analysis.
+Cordon uses transformer embeddings and k-NN density scoring to identify semantically unusual patterns in large log files, reducing massive logs to the most anomalous sections for analysis.
 
 **Key principle:** Repetitive patterns (even errors) are considered "normal background." Cordon surfaces unusual, rare, or clustered events that stand out semantically from the bulk of the logs.
 
@@ -14,7 +14,7 @@ Cordon uses transformer-based embeddings and density-based scoring to identify s
 ## Features
 
 - **Semantic Analysis**: Uses transformer models to understand log content meaning, not just keyword matching
-- **Density-Based Scoring**: Identifies anomalies using k-NN distance in embedding space
+- **k-NN Density Scoring**: Identifies anomalies using k-NN distance in embedding space
 - **Noise Reduction**: Filters out repetitive logs, keeping only unusual patterns
 - **Multiple Backends**: sentence-transformers (default) or llama.cpp for containers
 

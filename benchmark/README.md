@@ -133,7 +133,7 @@ The code automatically detects and uses GPU-accelerated UMAP (cuML) if available
 
 ## Scripts
 
-### 1. `evaluate.py` - Template-Based Evaluation (Primary Script)
+### 1. `evaluate.py` - Template-Level Evaluation (Primary Script)
 
 **All-in-one script** for running evaluations with optional visualizations and structured output.
 

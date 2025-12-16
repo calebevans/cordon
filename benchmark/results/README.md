@@ -113,7 +113,7 @@ HDFS logs represent highly structured, repetitive logging with only 29 template 
 Several templates (E5, E9, E11, E22, E26) appear in both normal and anomalous sessions. These templates are not inherently anomalous; their anomaly status depends on context and co-occurrence with other events.
 
 **Imbalanced Frequency:**
-Rare templates (e.g., E2 with 1 occurrence) are extremely difficult to detect through density-based methods, as they have no similar neighbors to establish a local density baseline.
+Rare templates (e.g., E2 with 1 occurrence) are extremely difficult to detect through density scoring, as they have no similar neighbors to establish a local density baseline.
 
 **Low Semantic Diversity:**
 With only 29 event types over 11M lines, HDFS has exceptionally low semantic diversity. Most real-world application logs have much higher diversity, which may lead to:
@@ -171,7 +171,7 @@ When sampling N lines from 11M total, the specific templates present vary signif
 
 The high variance at small sample sizes (CV 20-33%) indicates that results are highly dependent on *which* specific portion of the log file is sampled. With only 50k-250k lines from an 11M dataset of highly structured HDFS logs, random sampling may miss entire templates or capture non-representative distributions.
 
-**Important Note:** This variance is likely exacerbated by HDFS logs' repetitive, template-based structure where only 29 event types exist. Application logs or other log types with greater semantic diversity per line may show better stability at smaller sample sizes, as each sample is more likely to contain diverse patterns.
+**Important Note:** This variance is likely exacerbated by HDFS logs' repetitive, template-heavy structure where only 29 event types exist. Application logs or other log types with greater semantic diversity per line may show better stability at smaller sample sizes, as each sample is more likely to contain diverse patterns.
 
 At 1M lines (~9% of total dataset), sampling captures a more representative cross-section, leading to stable results across repeated runs with different random offsets.
 
@@ -291,7 +291,7 @@ These templates are reliably detected because they:
 
 ![Traditional vs Template Metrics](analysis_graphs/traditional_vs_template_metrics.png)
 
-Traditional line-level F1 scores (observed: 5-8%) are low by design. Cordon ignores repetitive patterns and optimizes for diversity of types detected, not total instance coverage. Template-based metrics better reflect this approach by measuring unique pattern types found rather than counting all anomalous lines.
+Traditional line-level F1 scores (observed: 5-8%) are low by design. Cordon ignores repetitive patterns and optimizes for diversity of types detected, not total instance coverage. Template-level metrics better reflect this approach by measuring unique pattern types found rather than counting all anomalous lines.
 
 ---
 
@@ -340,7 +340,7 @@ Traditional line-level F1 scores (observed: 5-8%) are low by design. Cordon igno
 
 ## Metrics Explanation
 
-### Template-Based Metrics (Primary)
+### Template-Level Metrics (Primary)
 
 **Template Recall:** Fraction of unique anomaly template types detected
 - **Interpretation:** Measures diversity of anomaly patterns found
@@ -408,7 +408,7 @@ Results are based on random samples with seed=42. Different seeds would produce 
 
 ### Methodology Limitations
 
-**Percentile-Based Thresholding:**
+**Percentile Thresholding:**
 Using anomaly_percentile (e.g., top 2%) is adaptive but may flag near-identical content as "anomalous" in very uniform logs. Absolute threshold methods may be more appropriate for some use cases.
 
 **k-NN Density Assumptions:**
@@ -446,7 +446,7 @@ Results depend on the quality of semantic embeddings. Different models may produ
 4. **Effective rare template detection:** 90% recall of rare templates at 5M sample
 
 **What Cordon Does Not Do Well (on HDFS logs):**
-1. **Variable on small samples of repetitive logs:** CV >20% for samples <250k lines of HDFS; results highly variable on this structured, template-based dataset. Less repetitive log types may perform better.
+1. **Variable on small samples of repetitive logs:** CV >20% for samples <250k lines of HDFS; results highly variable on this structured, template-heavy dataset. Less repetitive log types may perform better.
 2. **Misses extremely rare events:** Templates with 1-5 occurrences often missed (~71% detection rate)
 3. **No instance coverage:** Traditional F1 of 5-8% indicates most instances of known errors are ignored
 4. **Sensitive to sampling on sparse datasets:** At small sizes with limited template diversity (29 types in HDFS), which specific lines are sampled matters significantly
@@ -461,7 +461,7 @@ Results depend on the quality of semantic embeddings. Different models may produ
 - Exploring unfamiliar logs to discover what kinds of errors exist
 
 **Exercise Caution When:**
-- Working with small samples (<100k lines) of highly repetitive, template-based logs (like HDFS)
+- Working with small samples (<100k lines) of highly repetitive, template-heavy logs (like HDFS)
 - Logs have limited semantic diversity (e.g., only 29 event types over millions of lines)
 - Results may be more stable on smaller samples if logs have high semantic variability per line
 
@@ -472,7 +472,7 @@ Results depend on the quality of semantic embeddings. Different models may produ
 
 ### Comparison to Alternatives
 
-**vs Traditional Anomaly Detection (frequency-based, regex):**
+**vs Traditional Anomaly Detection (frequency counting, regex):**
 - Cordon: Better at finding novel/rare patterns
 - Traditional: Better at complete coverage of known patterns
 
