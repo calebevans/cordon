@@ -16,6 +16,11 @@ def create_vectorizer(config: "AnalysisConfig") -> "Embedder":
     Returns:
         Vectorizer instance implementing the Embedder protocol
     """
+    if config.backend == "remote":
+        from cordon.embedding.remote import RemoteVectorizer
+
+        return RemoteVectorizer(config)
+
     if config.backend == "llama-cpp":
         from cordon.embedding.llama_cpp import LlamaCppVectorizer
 

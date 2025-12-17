@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     backend_group.add_argument(
         "--backend",
         type=str,
-        choices=["sentence-transformers", "llama-cpp"],
+        choices=["sentence-transformers", "llama-cpp", "remote"],
         default="sentence-transformers",
         help="Embedding backend to use (default: sentence-transformers)",
     )
@@ -54,6 +54,18 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=2048,
         help="Context size for llama.cpp (default: 2048)",
+    )
+    backend_group.add_argument(
+        "--api-key",
+        type=str,
+        default=None,
+        help="API key for remote embeddings (remote backend only, falls back to env vars)",
+    )
+    backend_group.add_argument(
+        "--endpoint",
+        type=str,
+        default=None,
+        help="Custom API endpoint URL (remote backend only)",
     )
 
     # configuration options
@@ -88,7 +100,7 @@ def parse_args() -> argparse.Namespace:
         "--model-name",
         type=str,
         default="all-MiniLM-L6-v2",
-        help="HuggingFace model name for sentence-transformers (default: all-MiniLM-L6-v2)",
+        help="Model name: HuggingFace for sentence-transformers, provider/model for remote (e.g., openai/text-embedding-3-small) (default: all-MiniLM-L6-v2)",
     )
     config_group.add_argument(
         "--batch-size",
@@ -232,6 +244,8 @@ def main() -> None:
             n_gpu_layers=args.n_gpu_layers,
             n_threads=args.n_threads,
             n_ctx=args.n_ctx,
+            api_key=args.api_key,
+            endpoint=args.endpoint,
         )
     except ValueError as error:
         print(f"Configuration error: {error}", file=sys.stderr)
@@ -248,6 +262,11 @@ def main() -> None:
         print(f"GPU layers: {config.n_gpu_layers}")
         if config.n_threads:
             print(f"Threads: {config.n_threads}")
+    elif config.backend == "remote":
+        print(f"Model: {config.model_name}")
+        if config.endpoint:
+            print(f"Endpoint: {config.endpoint}")
+        print(f"Timeout: {config.request_timeout}s")
 
     # Display filtering mode
     if config.anomaly_range_min is not None:

@@ -8,12 +8,14 @@ license = { text = "Apache-2.0" }
 authors = [
     { name = "Caleb Evans", email = "caevans@redhat.com" }
 ]
+
 dependencies = [
     "sentence-transformers>=2.2.0",
     "torch>=2.0.0",
     "numpy>=1.24.0",
     "huggingface-hub>=0.20.0",
     "tqdm>=4.65.0",
+    "litellm>=1.80.0",
 ]
 
 [project.scripts]
@@ -80,6 +82,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "cuml.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "litellm.*"
 ignore_missing_imports = true
 
 [tool.ruff]
