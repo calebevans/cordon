@@ -16,7 +16,7 @@ Cordon uses transformer embeddings and k-NN density scoring to identify semantic
 - **Semantic Analysis**: Uses transformer models to understand log content meaning, not just keyword matching
 - **k-NN Density Scoring**: Identifies anomalies using k-NN distance in embedding space
 - **Noise Reduction**: Filters out repetitive logs, keeping only unusual patterns
-- **Multiple Backends**: sentence-transformers (default) or llama.cpp for containers
+- **Multiple Backends**: sentence-transformers (default), llama.cpp for containers, or remote APIs (OpenAI, Gemini, etc.)
 
 ## Requirements
 
@@ -146,6 +146,17 @@ config = AnalysisConfig(
 )
 analyzer = SemanticLogAnalyzer(config)
 result = analyzer.analyze_file_detailed(Path("app.log"))
+
+# Using remote API backend
+import os
+config = AnalysisConfig(
+    backend="remote",
+    model_name="openai/text-embedding-3-small",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    batch_size=100,
+)
+analyzer = SemanticLogAnalyzer(config)
+result = analyzer.analyze_file_detailed(Path("app.log"))
 ```
 
 ## Example Output
@@ -214,6 +225,41 @@ cordon --backend llama-cpp --model-path ./model.gguf system.log
 ```
 
 See [llama.cpp Guide](./docs/llama-cpp.md) for details on models, performance, and GPU setup.
+
+### Remote API Backend
+
+Use remote embedding APIs from OpenAI, Gemini, Cohere, and more via LiteLLM.
+
+```bash
+# OpenAI (uses OPENAI_API_KEY env var, or pass --api-key)
+cordon --backend remote \
+  --model-name openai/text-embedding-3-small \
+  system.log
+
+# Gemini (uses GEMINI_API_KEY env var)
+cordon --backend remote \
+  --model-name gemini/text-embedding-004 \
+  system.log
+
+# Cohere (uses COHERE_API_KEY env var)
+cordon --backend remote \
+  --model-name cohere/embed-english-v3.0 \
+  system.log
+
+# Or explicitly pass API key
+cordon --backend remote \
+  --model-name openai/text-embedding-3-small \
+  --api-key $OPENAI_API_KEY \
+  system.log
+
+# Custom endpoint (OpenAI-compatible)
+cordon --backend remote \
+  --model-name text-embedding-3-small \
+  --endpoint http://localhost:8000/v1 \
+  system.log
+```
+
+**Supported providers** (via LiteLLM): OpenAI, Azure OpenAI, Gemini, Cohere, Bedrock, Voyage AI, Mistral, Hugging Face, and any OpenAI-compatible endpoint.
 
 ## Container Usage
 
@@ -310,11 +356,14 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 
 | Parameter | Default | CLI Flag | Description |
 |-----------|---------|----------|-------------|
-| `backend` | `sentence-transformers` | `--backend` | Embedding backend |
-| `model_name` | `all-MiniLM-L6-v2` | `--model-name` | HuggingFace model |
+| `backend` | `sentence-transformers` | `--backend` | Embedding backend (sentence-transformers/llama-cpp/remote) |
+| `model_name` | `all-MiniLM-L6-v2` | `--model-name` | Model name (HuggingFace for sentence-transformers, provider/model for remote) |
 | `device` | Auto | `--device` | Device for embedding and scoring (cuda/mps/cpu) |
 | `model_path` | None | `--model-path` | GGUF model path (llama-cpp) |
 | `n_gpu_layers` | 0 | `--n-gpu-layers` | GPU layers (llama-cpp) |
+| `api_key` | None | `--api-key` | API key for remote embeddings (falls back to env vars) |
+| `endpoint` | None | `--endpoint` | Custom API endpoint URL (remote) |
+| `request_timeout` | 60.0 | N/A | Request timeout in seconds (remote) |
 
 ### Output Options
 

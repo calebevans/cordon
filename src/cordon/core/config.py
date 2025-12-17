@@ -19,11 +19,14 @@ class AnalysisConfig:
     batch_size: int = 32
     device: str | None = None
     scoring_batch_size: int | None = None  # batch size for k-NN scoring (None=auto-detect)
-    backend: str = "sentence-transformers"  # or "llama-cpp"
+    backend: str = "sentence-transformers"  # or "llama-cpp" or "remote"
     model_path: str | None = None  # GGUF model file path
     n_ctx: int = 2048  # llama.cpp context size
     n_threads: int | None = None  # llama.cpp threads (None=auto)
     n_gpu_layers: int = 0  # llama.cpp GPU layer offloading
+    api_key: str | None = None  # API key for remote embeddings
+    endpoint: str | None = None  # Custom API endpoint URL
+    request_timeout: float = 60.0  # Request timeout in seconds
 
     def __post_init__(self) -> None:
         """Validate configuration parameters."""
@@ -59,9 +62,9 @@ class AnalysisConfig:
             raise ValueError("device must be 'cuda', 'mps', 'cpu', or None")
 
         # Backend validation
-        if self.backend not in ("sentence-transformers", "llama-cpp"):
+        if self.backend not in ("sentence-transformers", "llama-cpp", "remote"):
             raise ValueError(
-                f"backend must be 'sentence-transformers' or 'llama-cpp', got '{self.backend}'"
+                f"backend must be 'sentence-transformers', 'llama-cpp', or 'remote', got '{self.backend}'"
             )
 
         # llama-cpp specific validation
@@ -84,3 +87,7 @@ class AnalysisConfig:
 
         if self.n_threads is not None and self.n_threads < 1:
             raise ValueError("n_threads must be >= 1 or None for auto-detect")
+
+        # remote backend validation
+        if self.request_timeout <= 0:
+            raise ValueError("request_timeout must be > 0")
