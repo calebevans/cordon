@@ -2,14 +2,32 @@ name: CI
 
 on:
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "examples/**"
+      - "benchmark/**"
+      - "LICENSE"
+      - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - "Makefile"
   push:
     branches:
       - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "examples/**"
+      - "benchmark/**"
+      - "LICENSE"
+      - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - "Makefile"
 
 jobs:
   test:
     name: Test (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     strategy:
       fail-fast: false
       matrix:
@@ -45,7 +63,7 @@ jobs:
 
   pre-commit:
     name: Pre-commit checks
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
 
     steps:
       - name: Checkout code
@@ -67,7 +85,7 @@ jobs:
 
   container:
     name: Container build
-    runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     permissions:
       contents: read
       packages: write
