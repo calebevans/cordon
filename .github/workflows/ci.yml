@@ -10,6 +10,8 @@ on:
       - "LICENSE"
       - ".gitignore"
       - ".pre-commit-config.yaml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
       - "Makefile"
   push:
     branches:
@@ -22,6 +24,8 @@ on:
       - "LICENSE"
       - ".gitignore"
       - ".pre-commit-config.yaml"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
       - "Makefile"
 
 jobs:

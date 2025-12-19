@@ -1,0 +1,130 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in Cordon
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us diagnose and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run command '...'
+        2. With input file '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Describe what you expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: input
+    id: cordon-version
+    attributes:
+      label: Cordon Version
+      description: "Run `cordon --version` or `pip show cordon`"
+      placeholder: "e.g., 0.3.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: "Run `python --version`"
+      placeholder: "e.g., 3.12.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Container (Docker/Podman)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: OS Version
+      description: "e.g., Ubuntu 22.04, macOS 14.0, Windows 11"
+      placeholder: "e.g., Ubuntu 22.04"
+
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Backend Used
+      options:
+        - sentence-transformers (default)
+        - llama-cpp
+        - remote (OpenAI/Gemini/etc.)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device/Acceleration
+      options:
+        - CPU
+        - CUDA (NVIDIA GPU)
+        - MPS (Apple Silicon)
+        - Vulkan
+        - Unknown/Auto
+    validations:
+      required: true
+
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU Model (if applicable)
+      description: "e.g., NVIDIA RTX 3080, Apple M2"
+      placeholder: "e.g., NVIDIA RTX 3080"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Output / Logs
+      description: Paste any error messages, stack traces, or relevant log output.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (e.g., log file characteristics, custom configuration).
