@@ -42,15 +42,15 @@ Example:
 
 Traditional tools would focus on the ERROR keyword, but Cordon identifies the ERROR as anomalous because it's **semantically different** from the surrounding context.
 
-### The LLM Context Window Problem
+### LLM Context Windows
 
 Modern LLM-driven log analysis faces:
-- **Context limits**: GPT-4 has ~128K token context (≈100K log lines)
+- **Context limits**: Gemini 2.5 Pro has ~1M token context (≈800K log lines)
 - **Quality degradation**: Even when logs fit, performance degrades as context fills up (especially with repetitive content)
 - **Cost scaling**: More tokens = higher costs
 - **Signal-to-noise**: LLMs waste tokens on repetitive content, burying important information
 
-**Example**: Filling GPT-4's 128K context with raw logs would technically work, but the model's ability to extract insights diminishes significantly when processing mostly-repetitive content at that scale.
+**Example**: Filling Gemini 2.5 Pro's 1M token context with raw logs would technically work, but the model's ability to extract insights diminishes significantly when processing mostly-repetitive content at that scale.
 
 **Cordon's solution**: Reduce logs while keeping semantically interesting content. (Benchmark: 98% reduction on 1M-5M line HDFS logs with p=0.02 threshold)
 
@@ -98,9 +98,9 @@ window_size = 4  # Lines per window
 # Example
 Log lines:  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 Window 1:   [1, 2, 3, 4]
-Window 2:           [5, 6, 7, 8]
-Window 3:                   [9, 10, 11, 12]
-Window 4:                           [13, 14, 15, 16]
+Window 2:               [5, 6, 7, 8]
+Window 3:                           [9, 10, 11, 12]
+Window 4:                                          [13, 14, 15, 16]
 ```
 
 **Non-overlapping windows provide:**
@@ -118,11 +118,43 @@ Input:  "ERROR: Connection timeout\nRetrying...\nERROR: Failed"
 Output: [0.23, -0.45, 0.12, ..., 0.67]  # 384-dimensional vector
 ```
 
-**Why sentence-transformers?**
-- **Semantic understanding**: Trained on paraphrase detection
-- **Fast inference**: Efficient on CPU, even faster on GPU
-- **Reasonable size**: 384 dimensions balances expressiveness vs. memory
-- **Pre-trained**: No domain-specific training needed
+#### Embedding Backends
+
+Cordon supports multiple embedding backends to balance performance, cost, and convenience:
+
+**Local Models (sentence-transformers)**
+- **Default backend**: Fast, runs entirely on your machine
+- **No API costs**: Free inference once model is downloaded
+- **GPU acceleration**: Automatic CUDA/MPS support
+- **Offline capable**: Works without internet connection
+
+```bash
+# Default: uses all-MiniLM-L6-v2 locally
+cordon system.log
+
+# Specify a different local model
+cordon --model-name BAAI/bge-base-en-v1.5 system.log
+```
+
+**Remote Models**
+- **Cloud-hosted**: Offload computation to API providers
+- **Latest models**: Access state-of-the-art embedding models
+- **Scalable**: No local GPU required
+- **Provider flexibility**: OpenAI, Google, Cohere, and more
+
+```bash
+# OpenAI embeddings
+cordon --backend remote --model-name openai/text-embedding-3-small system.log
+
+# Google Gemini embeddings
+cordon --backend remote --model-name gemini/text-embedding-004 system.log
+
+# Custom endpoint (e.g., Azure, self-hosted)
+cordon --backend remote --model-name openai/text-embedding-3-small \
+       --endpoint https://your-endpoint.openai.azure.com system.log
+```
+
+**API keys** are read from environment variables (e.g., `OPENAI_API_KEY`, `GEMINI_API_KEY`) or passed via `--api-key`.
 
 **Key property**: Semantically similar text → nearby vectors
 ```
@@ -132,24 +164,21 @@ Output: [0.23, -0.45, 0.12, ..., 0.67]  # 384-dimensional vector
 
 #### Token Limit Constraints
 
-**Important**: Transformer models have maximum token limits that affect how much of each window is actually analyzed.
+**Important**: Embedding models have maximum token limits that affect how much of each window is actually analyzed.
 
 **Token limits by model:**
 ```
-all-MiniLM-L6-v2:      256 tokens (default, 384-dim embeddings)
-all-mpnet-base-v2:     384 tokens (768-dim embeddings)
-BAAI/bge-base-en-v1.5: 512 tokens (768-dim embeddings)
-BAAI/bge-large-en:     512 tokens (1024-dim embeddings)
+all-MiniLM-L6-v2:       256 tokens (default local, 384-dim)
+gemini/text-embedding-004: 2048 tokens (remote, 768-dim)
 ```
 
-**When a window exceeds the token limit, the transformer automatically truncates to the first N tokens.** The rest of the window content is silently ignored during embedding.
+**When a window exceeds the token limit, the model automatically truncates to the first N tokens.** The rest of the window content is silently ignored during embedding.
 
 **Example with verbose system logs** (typical: 50-60 tokens per line):
 ```
 window_size=4:  ~200-240 tokens → fits in 256 limit → all lines analyzed ✓ (default)
 window_size=5:  ~250-300 tokens → fits in 256 limit → most lines analyzed ✓
 window_size=10: ~500-600 tokens → exceeds 256 limit → only first ~4 lines analyzed
-window_size=50: ~2,500-3,000 tokens → exceeds 256 limit → only first ~4 lines analyzed
 ```
 
 **This means:** With the default model and verbose logs, large window sizes provide diminishing returns because only the beginning of each window is embedded.
@@ -158,10 +187,10 @@ window_size=50: ~2,500-3,000 tokens → exceeds 256 limit → only first ~4 line
 
 **Recommendations:**
 1. **Match window_size to token limits**: For 50-60 token/line logs, use `window_size=4` with `all-MiniLM-L6-v2`
-2. **Use larger-context models**: Switch to `BAAI/bge-base-en-v1.5` for 512-token windows (~8 lines)
+2. **Use remote models for larger windows**: Switch to `gemini/text-embedding-004` for 2048-token windows
 3. **Check your logs**: Run a sample through a tokenizer to estimate tokens per line
 
-**Trade-off**: Larger context models are slower to encode but provide better semantic understanding of longer windows.
+**Trade-off**: Remote models have API costs but support larger context windows and require no local GPU.
 
 ### 3. Anomaly Scoring
 
@@ -197,10 +226,6 @@ For each batch of embeddings:
 - **Batch processing**: Configurable via `--scoring-batch-size` for memory/speed tuning
 - **Device flexibility**: Automatically uses CUDA, MPS, or CPU based on availability
 
-**Scoring intuition:**
-- **Dense cluster** (normal logs): Many neighbors close → Low average distance → Low score
-- **Sparse region** (anomaly): Nearest neighbors far away → High average distance → High score
-- **Isolated point** (unique event): No close neighbors → Very high score
 
 **Example scores:**
 ```
@@ -271,11 +296,6 @@ Significant windows (line ranges):
 
 Merged block: lines 10-30 (score=max(0.15, 0.18, 0.12) = 0.18)
 ```
-
-**Why merge?**
-- **Reduces redundancy**: Same anomaly shouldn't appear 5 times
-- **Preserves context**: Extended anomalous sequences stay together
-- **Cleaner output**: One block instead of separate fragments
 
 **Algorithm**: Interval merging with score tracking (similar to interval scheduling).
 
@@ -404,40 +424,3 @@ cordon --device cpu system.log   # CPU for both phases
 - **Combined**: Large log files process in minutes instead of hours on GPU
 
 ---
-
-## Configuration Guidelines
-
-### Choosing Window Size
-
-**The relationship between window_size and token limits is critical for effective analysis.**
-
-**Step 1: Measure your log verbosity**
-```bash
-# Sample your log and count average tokens per line
-head -n 100 your.log | wc -c  # Rough estimate: chars ≈ 1.3x tokens
-```
-
-**Step 2: Choose window size based on model**
-```
-Token budget per window = model_token_limit
-Lines per window ≈ token_limit / tokens_per_line
-
-Example (50 token/line logs):
-- all-MiniLM-L6-v2 (256 tokens):    window_size ≤ 5
-- all-mpnet-base-v2 (384 tokens):   window_size ≤ 7
-- BAAI/bge-base-en-v1.5 (512 tokens): window_size ≤ 10
-```
-
-**Common configurations:**
-
-| Log Type | Tokens/Line | Recommended Config |
-|----------|-------------|-------------------|
-| **Compact** (app logs) | 20-30 | Increase to `window_size=8` for more context |
-| **Standard** (web server) | 40-50 | Default `window_size=4` ✓ |
-| **Verbose** (system logs) | 50-70 | Default `window_size=4` ✓ or use larger model |
-| **Very verbose** (debug logs) | 80+ | Reduce to `window_size=3` or use larger model |
-
----
-
-**Last Updated**: November 22, 2025
-**Version**: 0.1.0
