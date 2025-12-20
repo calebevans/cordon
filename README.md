@@ -17,19 +17,6 @@ Cordon uses transformer embeddings and density scoring to identify semantically 
 - **Noise Reduction**: Filters out repetitive logs, keeping only unusual patterns
 - **Multiple Backends**: sentence-transformers (default), llama.cpp for containers, or remote APIs (OpenAI, Gemini, etc.)
 
-## Requirements
-
-### GPU Requirements (Optional but Recommended)
-
-For GPU acceleration, you need:
-- **NVIDIA GPU**: Pascal architecture or newer (GTX 10-series, RTX series, Tesla P/V/A/H series)
-- **Compute Capability**: 6.0 or higher
-- **Compatible GPUs**: GTX 1050+, RTX 20/30/40 series, Tesla P100+, V100, A100, H100
-
-**Not compatible**: GTX 900-series or older (Maxwell/Kepler architectures)
-
-CPU mode is always available as a fallback.
-
 ## Installation
 
 ### From PyPI (Recommended)
@@ -445,6 +432,13 @@ Cordon automatically leverages GPU acceleration for both embedding and scoring p
 - **Speedup**: 5-15x faster scoring on GPU compared to CPU for large datasets
 
 For large log files (millions of lines), GPU acceleration can reduce total processing time from hours to minutes.
+
+**Compatible NVIDIA GPUs** (optional):
+- Pascal architecture or newer (GTX 10-series, RTX series, Tesla P/V/A/H series)
+- Compute Capability 6.0+: GTX 1050+, RTX 20/30/40 series, Tesla P100+, V100, A100, H100
+- GTX 900-series or older are not compatible
+
+CPU mode is always available, and remote backends (OpenAI, Gemini, etc.) bypass local GPU requirements entirely.
 
 ### Memory Management
 
