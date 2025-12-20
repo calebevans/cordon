@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from math import isclose
 
 import numpy as np
 
@@ -59,11 +60,11 @@ class Thresholder:
         # Single percentile mode (original behavior)
 
         # all windows, sorted by score descending
-        if config.anomaly_percentile == 1.0:
+        if isclose(config.anomaly_percentile, 1.0):
             return sorted(scored_windows, key=lambda window: window.score, reverse=True)
 
         # no windows requested
-        if config.anomaly_percentile == 0.0:
+        if isclose(config.anomaly_percentile, 0.0):
             return []
 
         # calculate percentile threshold
