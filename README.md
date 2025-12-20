@@ -2,13 +2,9 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/cordon.svg)](https://pypi.org/project/cordon/)
 [![License](https://img.shields.io/github/license/calebevans/cordon.svg)](https://github.com/calebevans/cordon/blob/main/LICENSE)
-[![PyPI Downloads](https://static.pepy.tech/personalized-badge/cordon?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=BLUE&left_text=downloads)](https://pepy.tech/projects/cordon)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/cordon?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=BLUE&left_text=downloads)](https://pepy.tech/projects/cordon)
 
-**Semantic anomaly detection for system log files**
-
-Cordon uses transformer embeddings and k-NN density scoring to identify semantically unusual patterns in large log files, reducing massive logs to the most anomalous sections for analysis.
-
-**Key principle:** Repetitive patterns (even errors) are considered "normal background." Cordon surfaces unusual, rare, or clustered events that stand out semantically from the bulk of the logs.
+Cordon uses transformer embeddings and density scoring to identify semantically unusual patterns in large log files, reducing massive logs to the most anomalous sections for analysis. Repetitive patterns (even errors) are considered "normal background." Cordon surfaces unusual, rare, or clustered events that stand out semantically from the bulk of the logs.
 
 > 🤗 **[Try Cordon in your browser](https://huggingface.co/spaces/calebdevans/cordon)** — No installation required!
 
