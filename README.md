@@ -1,8 +1,13 @@
+<div align="center">
+
 # Cordon
 
 [![PyPI version](https://img.shields.io/pypi/v/cordon.svg)](https://pypi.org/project/cordon/)
-[![License](https://img.shields.io/github/license/calebevans/cordon.svg)](https://github.com/calebevans/cordon/blob/main/LICENSE)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/cordon?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=BLUE&left_text=downloads)](https://pepy.tech/projects/cordon)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=calebevans_cordon&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=calebevans_cordon)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=calebevans_cordon&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=calebevans_cordon)
+
+</div>
 
 Cordon uses transformer embeddings and density scoring to identify semantically unusual patterns in large log files, reducing massive logs to the most anomalous sections for analysis. Repetitive patterns (even errors) are considered "normal background." Cordon surfaces unusual, rare, or clustered events that stand out semantically from the bulk of the logs.
 

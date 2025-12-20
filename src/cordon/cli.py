@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import sys
+from math import isclose
 from pathlib import Path
 
 from cordon import AnalysisConfig, SemanticLogAnalyzer
@@ -207,6 +208,36 @@ def analyze_file(
     print()
 
 
+def _print_backend_info(config: AnalysisConfig) -> None:
+    """Print backend configuration details."""
+    print(f"Backend: {config.backend}")
+    if config.backend == "sentence-transformers":
+        print(f"Model: {config.model_name}")
+        print(f"Device: {config.device or 'auto'}")
+    elif config.backend == "llama-cpp":
+        print(f"Model path: {config.model_path}")
+        print(f"GPU layers: {config.n_gpu_layers}")
+        if config.n_threads:
+            print(f"Threads: {config.n_threads}")
+    elif config.backend == "remote":
+        print(f"Model: {config.model_name}")
+        if config.endpoint:
+            print(f"Endpoint: {config.endpoint}")
+        print(f"Timeout: {config.request_timeout}s")
+
+
+def _print_filtering_mode(config: AnalysisConfig) -> None:
+    """Print filtering mode configuration."""
+    if config.anomaly_range_min is not None:
+        # Type narrowing: if min is not None, max is also not None (enforced in config)
+        assert config.anomaly_range_max is not None
+        print(
+            f"Filtering mode: Range (exclude top {config.anomaly_range_min*100:.1f}%, keep up to {config.anomaly_range_max*100:.1f}%)"
+        )
+    else:
+        print(f"Filtering mode: Percentile (top {config.anomaly_percentile*100:.1f}%)")
+
+
 def main() -> None:
     """Main entry point for the CLI."""
     args = parse_args()
@@ -221,7 +252,7 @@ def main() -> None:
         anomaly_range_min = args.anomaly_range[0]
         anomaly_range_max = args.anomaly_range[1]
         # Keep default percentile value (not used in range mode)
-        if args.anomaly_percentile != 0.1:
+        if not isclose(args.anomaly_percentile, 0.1):
             print(
                 "Warning: --anomaly-percentile is ignored when using --anomaly-range",
                 file=sys.stderr,
@@ -253,30 +284,8 @@ def main() -> None:
 
     # create analyzer
     print("Initializing analyzer...")
-    print(f"Backend: {config.backend}")
-    if config.backend == "sentence-transformers":
-        print(f"Model: {config.model_name}")
-        print(f"Device: {config.device or 'auto'}")
-    elif config.backend == "llama-cpp":
-        print(f"Model path: {config.model_path}")
-        print(f"GPU layers: {config.n_gpu_layers}")
-        if config.n_threads:
-            print(f"Threads: {config.n_threads}")
-    elif config.backend == "remote":
-        print(f"Model: {config.model_name}")
-        if config.endpoint:
-            print(f"Endpoint: {config.endpoint}")
-        print(f"Timeout: {config.request_timeout}s")
-
-    # Display filtering mode
-    if config.anomaly_range_min is not None:
-        # Type narrowing: if min is not None, max is also not None (enforced in config)
-        assert config.anomaly_range_max is not None
-        print(
-            f"Filtering mode: Range (exclude top {config.anomaly_range_min*100:.1f}%, keep up to {config.anomaly_range_max*100:.1f}%)"
-        )
-    else:
-        print(f"Filtering mode: Percentile (top {config.anomaly_percentile*100:.1f}%)")
+    _print_backend_info(config)
+    _print_filtering_mode(config)
     print()
 
     try:
