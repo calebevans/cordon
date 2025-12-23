@@ -455,3 +455,12 @@ Cordon uses PyTorch for all k-NN scoring operations:
 | PyTorch CPU | No GPU / CPU forced | Moderate | Fast |
 
 **What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 4 lines). A 10,000-line log with window_size=4 creates 2,500 windows.
+
+## Contributing
+
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Setting up your development environment
+- Running tests
+- Code style guidelines
+- Submitting pull requests
