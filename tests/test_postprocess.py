@@ -136,6 +136,9 @@ class TestOutputFormatter:
             formatter = OutputFormatter()
             output = formatter.format_blocks(blocks, temp_path)
 
+            assert '<?xml version="1.0" encoding="UTF-8"?>' in output
+            assert "<anomalies>" in output
+            assert "</anomalies>" in output
             assert '<block lines="1-2" score="0.8000">' in output
             assert "line 1\n" in output
             assert "line 2\n" in output
@@ -161,6 +164,9 @@ class TestOutputFormatter:
             formatter = OutputFormatter()
             output = formatter.format_blocks(blocks, temp_path)
 
+            assert '<?xml version="1.0" encoding="UTF-8"?>' in output
+            assert "<anomalies>" in output
+            assert "</anomalies>" in output
             assert '<block lines="1-2" score="0.8000">' in output
             assert '<block lines="5-7" score="0.9000">' in output
             assert output.count("</block>") == 2
@@ -181,6 +187,40 @@ class TestOutputFormatter:
             formatter = OutputFormatter()
             output = formatter.format_blocks(blocks, temp_path)
 
-            assert output == ""
+            assert output == '<?xml version="1.0" encoding="UTF-8"?>\n<anomalies></anomalies>'
+        finally:
+            temp_path.unlink()
+
+    def test_format_escapes_xml_special_chars(self) -> None:
+        """Test that XML special characters are properly escaped."""
+        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
+            f.write("command: test |& tee file.txt\n")
+            f.write("error: x < y && z > 10\n")
+            f.write("message: \"quoted\" & 'single'\n")
+            temp_path = Path(f.name)
+
+        try:
+            from cordon.core.types import MergedBlock
+
+            blocks = [MergedBlock(start_line=1, end_line=3, original_windows=(0,), max_score=0.8)]
+
+            formatter = OutputFormatter()
+            output = formatter.format_blocks(blocks, temp_path)
+
+            # Verify XML structure
+            assert '<?xml version="1.0" encoding="UTF-8"?>' in output
+            assert "<anomalies>" in output
+            assert "</anomalies>" in output
+            # Verify XML special characters are escaped (& < > must be escaped in text content)
+            assert "&amp;" in output
+            assert "&lt;" in output
+            assert "&gt;" in output
+            # Verify the content is properly escaped
+            assert "command: test |&amp; tee file.txt" in output
+            assert "error: x &lt; y &amp;&amp; z &gt; 10" in output
+            # Verify raw special characters are not present where they should be escaped
+            assert "|& tee" not in output  # & should be escaped
+            assert "x < y" not in output  # < should be escaped
+            assert "z > 10" not in output  # > should be escaped
         finally:
             temp_path.unlink()
