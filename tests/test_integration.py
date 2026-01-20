@@ -56,7 +56,9 @@ class TestIntegration:
             assert result.total_windows == 0
             assert result.significant_windows == 0
             assert result.merged_blocks == 0
-            assert result.output == ""
+            assert (
+                result.output == '<?xml version="1.0" encoding="UTF-8"?>\n<anomalies></anomalies>'
+            )
         finally:
             temp_path.unlink()
 

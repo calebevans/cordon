@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from cordon.core.types import MergedBlock
 
@@ -26,10 +27,10 @@ class OutputFormatter:
             Formatted string with XML tags and original content
         """
         if not merged_blocks:
-            return ""
+            return '<?xml version="1.0" encoding="UTF-8"?>\n<anomalies></anomalies>'
 
         # merged blocks are sorted by start_line from the merger
-        output_parts = []
+        output_parts = ['<?xml version="1.0" encoding="UTF-8"?>', "<anomalies>", ""]
         block_idx = 0
         current_line = 1
 
@@ -51,18 +52,31 @@ class OutputFormatter:
                         content_lines.append(next_line)
                         current_line += 1
 
-                    # format the block
+                    # format the block with indentation
                     tag = (
-                        f'<block lines="{block.start_line}-{block.end_line}" '
+                        f'  <block lines="{block.start_line}-{block.end_line}" '
                         f'score="{block.max_score:.4f}">'
                     )
                     content = "".join(content_lines)
-                    output_parts.append(f"{tag}\n{content}</block>")
+                    # Escape XML special characters to ensure valid XML output
+                    escaped_content = escape(content)
+
+                    # Indent each line of content for pretty printing
+                    # Preserve whitespace-only lines from original content
+                    indented_content = "\n".join(
+                        "    " + line if line else line for line in escaped_content.splitlines()
+                    )
+
+                    output_parts.append(f"{tag}\n{indented_content}\n  </block>")
+                    output_parts.append("")  # blank line between blocks
 
                     # move to next block
                     block_idx += 1
 
                 current_line += 1
 
-        # join blocks with double newline separator
-        return "\n\n".join(output_parts)
+        # close the root element
+        output_parts.append("</anomalies>")
+
+        # join with newlines
+        return "\n".join(output_parts)
