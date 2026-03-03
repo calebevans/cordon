@@ -28,7 +28,7 @@ jobs:
         run: python -m build
 
       - name: Upload distributions
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: release-dists
           path: dist/
@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: release-dists
           path: dist/
@@ -104,7 +104,7 @@ jobs:
           cache-to: type=gha,mode=min
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ghcr.io/${{ github.repository }}
           subject-digest: ${{ steps.push.outputs.digest }}
