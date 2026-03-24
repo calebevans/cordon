@@ -15,7 +15,7 @@ dependencies = [
     "numpy>=1.24.0",
     "huggingface-hub>=0.20.0",
     "tqdm>=4.65.0",
-    "litellm>=1.80.0",
+    "litellm>=1.80.0,<1.82.7",
     "tokenizers>=0.20.0",
 ]
 
