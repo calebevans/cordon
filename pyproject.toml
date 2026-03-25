@@ -1,6 +1,6 @@
 [project]
 name = "cordon"
-version = "0.3.3"
+version = "1.0.0"
 description = "Semantic anomaly detection for system log files"
 readme = "README.md"
 requires-python = ">=3.10"
