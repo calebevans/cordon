@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -8,18 +8,19 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ cmake git \
-    libvulkan1 vulkan-tools \
+    libvulkan1 libvulkan-dev vulkan-tools glslang-tools glslc \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir uv
 
 COPY pyproject.toml README.md LICENSE ./
-COPY src/ ./src/
-
-RUN uv pip install --system -e ".[llama-cpp]"
+RUN mkdir -p src/cordon && touch src/cordon/__init__.py
 
 RUN CMAKE_ARGS="-DGGML_VULKAN=on" \
-    uv pip install --system --no-cache-dir llama-cpp-python
+    uv pip install --system ".[llama-cpp]"
+
+COPY src/ ./src/
+RUN uv pip install --system --no-deps .
 
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')" && \
     python -c "from huggingface_hub import hf_hub_download; hf_hub_download('second-state/All-MiniLM-L6-v2-Embedding-GGUF', 'all-MiniLM-L6-v2-Q4_K_M.gguf')"

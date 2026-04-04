@@ -3,7 +3,7 @@ name = "cordon"
 version = "1.0.1"
 description = "Semantic anomaly detection for system log files"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.15"
 license = { text = "Apache-2.0" }
 authors = [
     { name = "Caleb Evans", email = "caevans@redhat.com" }
@@ -15,7 +15,7 @@ dependencies = [
     "numpy>=1.24.0",
     "huggingface-hub>=0.20.0",
     "tqdm>=4.65.0",
-    "litellm>=1.80.0,<1.82.7",
+    "litellm>=1.83.0",
     "tokenizers>=0.20.0",
 ]
 
@@ -88,9 +88,6 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "litellm.*"
 ignore_missing_imports = true
-
-[tool.uv]
-exclude-newer = "7 days"
 
 [tool.ruff]
 line-length = 100
