@@ -329,19 +329,7 @@ class TestQuietMode:
 
 
 class TestNewFlags:
-    """Tests for --fail-if-anomalies, --max-blocks, and --min-score flags."""
-
-    def test_fail_if_anomalies_flag(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Test that --fail-if-anomalies is parsed correctly."""
-        monkeypatch.setattr(sys, "argv", ["cordon", "--fail-if-anomalies", "test.log"])
-        args = parse_args()
-        assert args.fail_if_anomalies is True
-
-    def test_fail_if_anomalies_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Test that --fail-if-anomalies defaults to False."""
-        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
-        args = parse_args()
-        assert args.fail_if_anomalies is False
+    """Tests for --max-blocks and --min-score flags."""
 
     def test_max_blocks_flag(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that --max-blocks is parsed correctly."""
@@ -366,34 +354,6 @@ class TestNewFlags:
         monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
         args = parse_args()
         assert args.min_score is None
-
-    def test_analyze_file_returns_true_when_anomalies(self, tmp_path: Path) -> None:
-        """Test that analyze_file returns True when anomalies are found."""
-        log_file = tmp_path / "test.log"
-        log_file.write_text("line 1\n")
-
-        analyzer = MagicMock()
-        mock_result = MagicMock()
-        mock_result.output = "<anomalies>block</anomalies>"
-        mock_result.merged_blocks = 3
-        analyzer.analyze_file_detailed.return_value = mock_result
-
-        result = analyze_file(log_file, analyzer, detailed=False, quiet=True)
-        assert result is True
-
-    def test_analyze_file_returns_false_when_no_anomalies(self, tmp_path: Path) -> None:
-        """Test that analyze_file returns False when no anomalies are found."""
-        log_file = tmp_path / "test.log"
-        log_file.write_text("line 1\n")
-
-        analyzer = MagicMock()
-        mock_result = MagicMock()
-        mock_result.output = "<anomalies/>"
-        mock_result.merged_blocks = 0
-        analyzer.analyze_file_detailed.return_value = mock_result
-
-        result = analyze_file(log_file, analyzer, detailed=False, quiet=True)
-        assert result is False
 
 
 class TestMainEntryPoint:

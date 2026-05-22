@@ -186,12 +186,6 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Suppress all human-readable banners and progress bars, keeping only formatted output on stdout",
     )
-    output_group.add_argument(
-        "--fail-if-anomalies",
-        action="store_true",
-        help="Exit with code 2 if anomalies are found (useful for CI gating)",
-    )
-
     return parser.parse_args()
 
 
@@ -285,7 +279,7 @@ def analyze_file(
     output_path: Path | None = None,
     force: bool = False,
     quiet: bool = False,
-) -> bool:
+) -> None:
     """Analyze a single log file and print results.
 
     Args:
@@ -295,12 +289,9 @@ def analyze_file(
         output_path: Optional path to save anomalous blocks (None prints to stdout).
         force: If True, overwrite an existing output file.
         quiet: If True, suppress human-readable banners and stats.
-
-    Returns:
-        True if anomalies were found, False otherwise.
     """
     if not _validate_file(log_path):
-        return False
+        return
 
     if not quiet:
         print("=" * 80)
@@ -311,11 +302,9 @@ def analyze_file(
         result = analyzer.analyze_file_detailed(log_path)
     except Exception as error:
         print(f"Error analyzing {log_path}: {error}", file=sys.stderr)
-        return False
+        return
 
     _display_results(result, detailed, output_path, force, quiet)
-
-    return result.merged_blocks > 0
 
 
 def analyze_stdin(
@@ -324,7 +313,7 @@ def analyze_stdin(
     output_path: Path | None = None,
     force: bool = False,
     quiet: bool = False,
-) -> bool:
+) -> None:
     """Analyze log data from stdin and print results.
 
     Args:
@@ -333,9 +322,6 @@ def analyze_stdin(
         output_path: Optional path to save anomalous blocks (None prints to stdout).
         force: If True, overwrite an existing output file.
         quiet: If True, suppress human-readable banners and stats.
-
-    Returns:
-        True if anomalies were found, False otherwise.
     """
     text = sys.stdin.read()
 
@@ -348,11 +334,9 @@ def analyze_stdin(
         result = analyzer.analyze_text_detailed(text)
     except Exception as error:
         print(f"Error analyzing <stdin>: {error}", file=sys.stderr)
-        return False
+        return
 
     _display_results(result, detailed, output_path, force, quiet)
-
-    return result.merged_blocks > 0
 
 
 def _print_backend_info(config: AnalysisConfig) -> None:
@@ -462,21 +446,13 @@ def _main_impl() -> None:
         print()
 
     # analyze each log file
-    any_anomalies_found = False
     for log_path in args.logfiles:
         if str(log_path) == "-":
-            found = analyze_stdin(
-                analyzer, args.detailed, args.output, args.force, quiet=args.quiet
-            )
+            analyze_stdin(analyzer, args.detailed, args.output, args.force, quiet=args.quiet)
         else:
-            found = analyze_file(
+            analyze_file(
                 log_path, analyzer, args.detailed, args.output, args.force, quiet=args.quiet
             )
-        if found:
-            any_anomalies_found = True
-
-    if args.fail_if_anomalies and any_anomalies_found:
-        sys.exit(2)
 
 
 def main() -> None:
