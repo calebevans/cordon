@@ -1,5 +1,8 @@
 """Unit tests for remote embedder backend."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -8,6 +11,9 @@ from litellm.exceptions import AuthenticationError, RateLimitError, Timeout
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import TextWindow
+
+if TYPE_CHECKING:
+    from cordon.embedding.remote import RemoteEmbedder
 
 
 class TestRemoteEmbedderConfiguration:
@@ -51,7 +57,7 @@ class TestRemoteEmbedderEmbedding:
     """Tests for RemoteEmbedder embedding functionality."""
 
     @pytest.fixture
-    def mock_litellm_response(self):
+    def mock_litellm_response(self) -> MagicMock:
         """Create a mock response from litellm.embedding()."""
         mock_response = MagicMock()
         mock_response.data = [
@@ -60,7 +66,7 @@ class TestRemoteEmbedderEmbedding:
         return mock_response
 
     @pytest.fixture
-    def embedder(self):
+    def embedder(self) -> RemoteEmbedder:
         """Create a RemoteEmbedder instance for testing."""
         from cordon.embedding.remote import RemoteEmbedder
 

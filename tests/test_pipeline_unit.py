@@ -11,7 +11,7 @@ class TestPipelineDI:
     """Test dependency injection in SemanticLogAnalyzer."""
 
     @patch("cordon.pipeline.create_embedder")
-    def test_custom_reader(self, mock_create: MagicMock) -> None:
+    def test_custom_reader(self, mock_create: MagicMock, default_config: AnalysisConfig) -> None:
         """Test that a custom reader is used when provided."""
         mock_embedder = MagicMock()
         mock_create.return_value = mock_embedder
@@ -20,14 +20,13 @@ class TestPipelineDI:
         mock_reader = MagicMock()
         mock_reader.read_lines.return_value = iter([(1, "test line")])
 
-        config = AnalysisConfig(device="cpu")
-        analyzer = SemanticLogAnalyzer(config, reader=mock_reader)
+        analyzer = SemanticLogAnalyzer(default_config, reader=mock_reader)
         analyzer.analyze_file_detailed(Path("dummy.log"))
 
         mock_reader.read_lines.assert_called_once()
 
     @patch("cordon.pipeline.create_embedder")
-    def test_custom_formatter(self, mock_create: MagicMock) -> None:
+    def test_custom_formatter(self, mock_create: MagicMock, default_config: AnalysisConfig) -> None:
         """Test that a custom formatter is used when provided."""
         mock_embedder = MagicMock()
         mock_create.return_value = mock_embedder
@@ -39,10 +38,7 @@ class TestPipelineDI:
         mock_formatter = MagicMock()
         mock_formatter.format_blocks.return_value = "<custom/>"
 
-        config = AnalysisConfig(device="cpu")
-        analyzer = SemanticLogAnalyzer(
-            config, reader=mock_reader, formatter=mock_formatter
-        )
+        analyzer = SemanticLogAnalyzer(default_config, reader=mock_reader, formatter=mock_formatter)
         result = analyzer.analyze_file_detailed(Path("dummy.log"))
 
         mock_formatter.format_blocks.assert_called_once()
@@ -50,7 +46,7 @@ class TestPipelineDI:
 
     @patch("cordon.pipeline.create_embedder")
     def test_default_components_used_when_none_provided(
-        self, mock_create: MagicMock
+        self, mock_create: MagicMock, default_config: AnalysisConfig
     ) -> None:
         """Test that default concrete classes are used when no custom components given."""
         from cordon.analysis.scorer import DensityAnomalyScorer
@@ -62,8 +58,7 @@ class TestPipelineDI:
 
         mock_create.return_value = MagicMock()
 
-        config = AnalysisConfig(device="cpu")
-        analyzer = SemanticLogAnalyzer(config)
+        analyzer = SemanticLogAnalyzer(default_config)
 
         assert isinstance(analyzer._reader, LogFileReader)
         assert isinstance(analyzer._segmenter, SlidingWindowSegmenter)
@@ -73,7 +68,7 @@ class TestPipelineDI:
         assert isinstance(analyzer._formatter, XmlFormatter)
 
     @patch("cordon.pipeline.create_embedder")
-    def test_custom_scorer(self, mock_create: MagicMock) -> None:
+    def test_custom_scorer(self, mock_create: MagicMock, default_config: AnalysisConfig) -> None:
         """Test that a custom scorer is used when provided."""
         mock_embedder = MagicMock()
         mock_create.return_value = mock_embedder
@@ -85,10 +80,7 @@ class TestPipelineDI:
         mock_scorer = MagicMock()
         mock_scorer.score_windows.return_value = []
 
-        config = AnalysisConfig(device="cpu")
-        analyzer = SemanticLogAnalyzer(
-            config, reader=mock_reader, scorer=mock_scorer
-        )
+        analyzer = SemanticLogAnalyzer(default_config, reader=mock_reader, scorer=mock_scorer)
         analyzer.analyze_file_detailed(Path("dummy.log"))
 
         mock_scorer.score_windows.assert_called_once()

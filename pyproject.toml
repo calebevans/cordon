@@ -116,6 +116,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+markers = [
+    "integration: tests that load real models (slow, requires network)",
+]
 addopts = [
     "--cov=cordon",
     "--cov-report=term-missing",
