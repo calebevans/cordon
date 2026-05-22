@@ -1,5 +1,6 @@
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
@@ -140,4 +141,52 @@ class Scorer(Protocol):
         Returns:
             List of scored windows
         """
+        ...
+
+
+class Reader(Protocol):
+    """Protocol for log file readers."""
+
+    def read_lines(self, file_path: Path) -> Iterator[tuple[int, str]]:
+        """Read lines from a file with line number tracking."""
+        ...
+
+
+class Segmenter(Protocol):
+    """Protocol for line-to-window segmentation."""
+
+    def segment(
+        self, lines: Iterator[tuple[int, str]], config: "AnalysisConfig"
+    ) -> Iterator[TextWindow]:
+        """Segment lines into text windows."""
+        ...
+
+
+class Thresholder(Protocol):
+    """Protocol for selecting significant windows."""
+
+    def select_significant(
+        self, scored_windows: Sequence[ScoredWindow], config: "AnalysisConfig"
+    ) -> list[ScoredWindow]:
+        """Select windows above significance threshold."""
+        ...
+
+
+class Merger(Protocol):
+    """Protocol for merging overlapping windows."""
+
+    def merge_windows(self, scored_windows: Sequence[ScoredWindow]) -> list[MergedBlock]:
+        """Merge overlapping scored windows into contiguous blocks."""
+        ...
+
+
+class Formatter(Protocol):
+    """Protocol for formatting merged blocks into output."""
+
+    def format_blocks(
+        self,
+        merged_blocks: Sequence[MergedBlock],
+        lines: Sequence[tuple[int, str]],
+    ) -> str:
+        """Format merged blocks into output string."""
         ...

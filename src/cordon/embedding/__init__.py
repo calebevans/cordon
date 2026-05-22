@@ -1,10 +1,17 @@
 """Embedding module for log analysis."""
 
-from typing import TYPE_CHECKING
+import importlib
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from cordon.core.config import AnalysisConfig
     from cordon.core.types import Embedder
+
+_BACKEND_REGISTRY: dict[str, str] = {
+    "remote": "cordon.embedding.remote.RemoteEmbedder",
+    "llama-cpp": "cordon.embedding.llama_cpp.LlamaCppEmbedder",
+    "sentence-transformers": "cordon.embedding.transformer.TransformerEmbedder",
+}
 
 
 def create_embedder(config: "AnalysisConfig") -> "Embedder":
@@ -14,27 +21,22 @@ def create_embedder(config: "AnalysisConfig") -> "Embedder":
         config: Analysis configuration with backend selection.
 
     Returns:
-        Embedder instance matching the configured backend.
+        Embedder instance implementing the Embedder protocol.
 
     Raises:
         ValueError: If the backend is not recognized.
     """
-    if config.backend == "remote":
-        from cordon.embedding.remote import RemoteEmbedder
+    class_path = _BACKEND_REGISTRY.get(config.backend)
+    if class_path is None:
+        raise ValueError(
+            f"Unknown backend: {config.backend!r}. "
+            f"Available: {', '.join(sorted(_BACKEND_REGISTRY))}"
+        )
 
-        return RemoteEmbedder(config)
-
-    if config.backend == "llama-cpp":
-        from cordon.embedding.llama_cpp import LlamaCppEmbedder
-
-        return LlamaCppEmbedder(config)
-
-    if config.backend == "sentence-transformers":
-        from cordon.embedding.transformer import TransformerEmbedder
-
-        return TransformerEmbedder(config)
-
-    raise ValueError(f"Unknown backend: {config.backend}")
+    module_path, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    embedder_class = getattr(module, class_name)
+    return cast("Embedder", embedder_class(config))
 
 
 __all__ = ["create_embedder"]

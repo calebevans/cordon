@@ -4,7 +4,7 @@ from xml.sax.saxutils import escape
 from cordon.core.types import MergedBlock
 
 
-class OutputFormatter:
+class XmlFormatter:
     """Generate XML-tagged output with original line content.
 
     This formatter wraps each merged block in XML tags that specify
