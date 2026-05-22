@@ -1,4 +1,5 @@
 import time
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -90,10 +91,54 @@ class SemanticLogAnalyzer:
         Returns:
             Complete analysis result with metadata.
         """
-        start_time = time.time()
-
-        # stage 1: ingestion
         lines_list = list(self._reader.read_lines(file_path))
+        return self._analyze_lines(lines_list)
+
+    def analyze_text(self, text: str) -> str:
+        """Analyze log text and return formatted output.
+
+        Args:
+            text: Raw log text (newline-separated lines).
+
+        Returns:
+            Formatted string with significant anomaly blocks.
+        """
+        result = self.analyze_text_detailed(text)
+        return result.output
+
+    def analyze_text_detailed(self, text: str) -> AnalysisResult:
+        """Analyze log text and return detailed results.
+
+        Args:
+            text: Raw log text (newline-separated lines).
+
+        Returns:
+            Complete analysis result with metadata.
+        """
+        lines_list = list(enumerate(text.splitlines(), start=1))
+        return self._analyze_lines(lines_list)
+
+    def analyze_lines(self, lines: Sequence[tuple[int, str]]) -> AnalysisResult:
+        """Analyze pre-structured log lines and return detailed results.
+
+        Args:
+            lines: Sequence of (line_number, line_content) tuples.
+
+        Returns:
+            Complete analysis result with metadata.
+        """
+        return self._analyze_lines(list(lines))
+
+    def _analyze_lines(self, lines_list: list[tuple[int, str]]) -> AnalysisResult:
+        """Internal method that runs the analysis pipeline on pre-read lines.
+
+        Args:
+            lines_list: List of (line_number, line_content) tuples.
+
+        Returns:
+            Complete analysis result with metadata.
+        """
+        start_time = time.time()
         total_lines = len(lines_list)
 
         # stage 2: segmentation
@@ -113,13 +158,12 @@ class SemanticLogAnalyzer:
 
         # stage 6: merging
         merged = self._merger.merge_windows(significant)
-        merged_blocks = len(merged)
+        merged_blocks_count = len(merged)
         del significant
 
         # stage 7: formatting
         output = self._formatter.format_blocks(merged, lines_list)
 
-        # calculate statistics
         processing_time = time.time() - start_time
         score_distribution = self._calculate_score_distribution(scored)
         del scored
@@ -130,7 +174,7 @@ class SemanticLogAnalyzer:
             total_lines=total_lines,
             total_windows=total_windows,
             significant_windows=significant_windows,
-            merged_blocks=merged_blocks,
+            merged_blocks=merged_blocks_count,
             score_distribution=score_distribution,
             processing_time=processing_time,
         )

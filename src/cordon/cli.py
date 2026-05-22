@@ -4,7 +4,7 @@ import sys
 from math import isclose
 from pathlib import Path
 
-from cordon import AnalysisConfig, SemanticLogAnalyzer
+from cordon import AnalysisConfig, AnalysisResult, SemanticLogAnalyzer
 
 
 def parse_args() -> argparse.Namespace:
@@ -20,7 +20,7 @@ def parse_args() -> argparse.Namespace:
         "logfiles",
         type=Path,
         nargs="+",
-        help="Path(s) to log file(s) to analyze",
+        help="Path(s) to log file(s) to analyze (use '-' for stdin)",
     )
 
     # embedding backend selection
@@ -207,6 +207,45 @@ def _write_output(content: str, output_path: Path, force: bool) -> None:
         print(f"Error writing output file: {error}", file=sys.stderr)
 
 
+def _display_results(
+    result: AnalysisResult,
+    detailed: bool,
+    output_path: Path | None,
+    force: bool,
+) -> None:
+    """Display analysis results, optionally with detailed statistics.
+
+    Args:
+        result: The analysis result to display.
+        detailed: Whether to print detailed statistics before the output.
+        output_path: Optional path to save anomalous blocks (None prints to stdout).
+        force: If True, overwrite an existing output file.
+    """
+    if detailed:
+        print(f"Total lines: {result.total_lines:,}")
+        print("\nAnalysis Statistics:")
+        print(f"  Total windows created: {result.total_windows:,}")
+        print(f"  Significant windows: {result.significant_windows:,}")
+        print(f"  Merged blocks: {result.merged_blocks}")
+        print(f"  Processing time: {result.processing_time:.2f}s")
+        print("\nScore Distribution:")
+        print(f"  Min:    {result.score_distribution['min']:.4f}")
+        print(f"  Mean:   {result.score_distribution['mean']:.4f}")
+        print(f"  Median: {result.score_distribution['median']:.4f}")
+        print(f"  P90:    {result.score_distribution['p90']:.4f}")
+        print(f"  Max:    {result.score_distribution['max']:.4f}")
+
+        print(f"\n{'Significant Blocks':^80}")
+        print("=" * 80)
+
+    if output_path:
+        _write_output(result.output, output_path, force)
+    else:
+        print(result.output)
+
+    print()
+
+
 def analyze_file(
     log_path: Path,
     analyzer: SemanticLogAnalyzer,
@@ -231,41 +270,41 @@ def analyze_file(
     print("=" * 80)
 
     try:
-        if detailed:
-            result = analyzer.analyze_file_detailed(log_path)
-        else:
-            output = analyzer.analyze_file(log_path)
+        result = analyzer.analyze_file_detailed(log_path)
     except Exception as error:
         print(f"Error analyzing {log_path}: {error}", file=sys.stderr)
         return
 
-    if detailed:
-        print(f"Total lines: {result.total_lines:,}")
-        print("\nAnalysis Statistics:")
-        print(f"  Total windows created: {result.total_windows:,}")
-        print(f"  Significant windows: {result.significant_windows:,}")
-        print(f"  Merged blocks: {result.merged_blocks}")
-        print(f"  Processing time: {result.processing_time:.2f}s")
-        print("\nScore Distribution:")
-        print(f"  Min:    {result.score_distribution['min']:.4f}")
-        print(f"  Mean:   {result.score_distribution['mean']:.4f}")
-        print(f"  Median: {result.score_distribution['median']:.4f}")
-        print(f"  P90:    {result.score_distribution['p90']:.4f}")
-        print(f"  Max:    {result.score_distribution['max']:.4f}")
+    _display_results(result, detailed, output_path, force)
 
-        print(f"\n{'Significant Blocks':^80}")
-        print("=" * 80)
 
-        content = result.output
-    else:
-        content = output
+def analyze_stdin(
+    analyzer: SemanticLogAnalyzer,
+    detailed: bool,
+    output_path: Path | None = None,
+    force: bool = False,
+) -> None:
+    """Analyze log data from stdin and print results.
 
-    if output_path:
-        _write_output(content, output_path, force)
-    else:
-        print(content)
+    Args:
+        analyzer: Configured SemanticLogAnalyzer instance.
+        detailed: Whether to show detailed statistics.
+        output_path: Optional path to save anomalous blocks (None prints to stdout).
+        force: If True, overwrite an existing output file.
+    """
+    text = sys.stdin.read()
 
-    print()
+    print("=" * 80)
+    print("Analyzing: <stdin>")
+    print("=" * 80)
+
+    try:
+        result = analyzer.analyze_text_detailed(text)
+    except Exception as error:
+        print(f"Error analyzing <stdin>: {error}", file=sys.stderr)
+        return
+
+    _display_results(result, detailed, output_path, force)
 
 
 def _print_backend_info(config: AnalysisConfig) -> None:
@@ -364,7 +403,10 @@ def _main_impl() -> None:
 
     # analyze each log file
     for log_path in args.logfiles:
-        analyze_file(log_path, analyzer, args.detailed, args.output, args.force)
+        if str(log_path) == "-":
+            analyze_stdin(analyzer, args.detailed, args.output, args.force)
+        else:
+            analyze_file(log_path, analyzer, args.detailed, args.output, args.force)
 
 
 def main() -> None:

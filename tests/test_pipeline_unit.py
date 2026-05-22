@@ -131,3 +131,56 @@ class TestPipelineDI:
         config = AnalysisConfig(device="cpu", output_format="json")
         analyzer = SemanticLogAnalyzer(config)
         assert isinstance(analyzer._formatter, JsonFormatter)
+
+
+class TestAnalyzeText:
+    """Tests for text and line analysis methods."""
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_analyze_text_detailed(self, mock_create: MagicMock) -> None:
+        """Test that analyze_text_detailed correctly parses lines from text."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu")
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("line 1\nline 2\nline 3\n")
+        assert result.total_lines == 3
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_analyze_text_detailed_empty(self, mock_create: MagicMock) -> None:
+        """Test that analyze_text_detailed handles empty input."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu")
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("")
+        assert result.total_lines == 0
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_analyze_text_returns_output(self, mock_create: MagicMock) -> None:
+        """Test that analyze_text returns the formatted output string."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu")
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text("line 1\nline 2")
+        assert isinstance(result, str)
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_analyze_lines(self, mock_create: MagicMock) -> None:
+        """Test that analyze_lines processes pre-structured tuples."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu")
+        analyzer = SemanticLogAnalyzer(config)
+        lines: list[tuple[int, str]] = [(1, "hello"), (2, "world")]
+        result = analyzer.analyze_lines(lines)
+        assert result.total_lines == 2
