@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from cordon.cli import analyze_file, parse_args
+from cordon.cli import analyze_file, analyze_stdin, parse_args
 
 
 class TestParseArgs:
@@ -200,8 +200,10 @@ class TestAnalyzeFile:
 
         analyzer = MagicMock()
         mock_result = MagicMock()
-        mock_result.output = "<anomalies></anomalies>"
+        mock_result.output = "<anomalies/>"
+        mock_result.merged_blocks = 0
         analyzer.analyze_file_detailed.return_value = mock_result
+
         analyze_file(
             log_file,
             analyzer,
@@ -225,6 +227,7 @@ class TestAnalyzeFile:
         analyzer = MagicMock()
         mock_result = MagicMock()
         mock_result.output = "<anomalies>new</anomalies>"
+        mock_result.merged_blocks = 1
         analyzer.analyze_file_detailed.return_value = mock_result
 
         analyze_file(
@@ -244,6 +247,7 @@ class TestAnalyzeFile:
         analyzer = MagicMock()
         mock_result = MagicMock()
         mock_result.output = "<anomalies>results</anomalies>"
+        mock_result.merged_blocks = 0
         analyzer.analyze_file_detailed.return_value = mock_result
 
         analyze_file(log_file, analyzer, detailed=False)
@@ -279,6 +283,117 @@ class TestAnalyzeFile:
         assert "Significant windows: 3" in captured.out
         assert "Processing time: 1.23s" in captured.out
         assert "Score Distribution:" in captured.out
+
+
+class TestQuietMode:
+    """Tests for --quiet banner suppression."""
+
+    def test_quiet_suppresses_banners(
+        self, capsys: pytest.CaptureFixture[str], tmp_path: Path
+    ) -> None:
+        """Test that --quiet suppresses all human-readable banners."""
+        log_file = tmp_path / "test.log"
+        log_file.write_text("line 1\n")
+
+        analyzer = MagicMock()
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies/>"
+        mock_result.merged_blocks = 0
+        analyzer.analyze_file_detailed.return_value = mock_result
+
+        analyze_file(log_file, analyzer, detailed=True, quiet=True)
+        captured = capsys.readouterr()
+        assert "Analyzing:" not in captured.out
+        assert "=" * 80 not in captured.out
+        assert "Total lines" not in captured.out
+        assert "Score Distribution" not in captured.out
+        assert "<anomalies/>" in captured.out
+
+    def test_quiet_suppresses_stdin_banners(
+        self, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that --quiet suppresses banners for stdin analysis."""
+        monkeypatch.setattr("sys.stdin", MagicMock(read=MagicMock(return_value="line 1\n")))
+
+        analyzer = MagicMock()
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies/>"
+        mock_result.merged_blocks = 0
+        analyzer.analyze_text_detailed.return_value = mock_result
+
+        analyze_stdin(analyzer, detailed=True, quiet=True)
+        captured = capsys.readouterr()
+        assert "Analyzing:" not in captured.out
+        assert "=" * 80 not in captured.out
+        assert "<anomalies/>" in captured.out
+
+
+class TestNewFlags:
+    """Tests for --fail-if-anomalies, --max-blocks, and --min-score flags."""
+
+    def test_fail_if_anomalies_flag(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --fail-if-anomalies is parsed correctly."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--fail-if-anomalies", "test.log"])
+        args = parse_args()
+        assert args.fail_if_anomalies is True
+
+    def test_fail_if_anomalies_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --fail-if-anomalies defaults to False."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.fail_if_anomalies is False
+
+    def test_max_blocks_flag(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --max-blocks is parsed correctly."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--max-blocks", "10", "test.log"])
+        args = parse_args()
+        assert args.max_blocks == 10
+
+    def test_max_blocks_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --max-blocks defaults to None."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.max_blocks is None
+
+    def test_min_score_flag(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --min-score is parsed correctly."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--min-score", "0.5", "test.log"])
+        args = parse_args()
+        assert args.min_score == 0.5
+
+    def test_min_score_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --min-score defaults to None."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.min_score is None
+
+    def test_analyze_file_returns_true_when_anomalies(self, tmp_path: Path) -> None:
+        """Test that analyze_file returns True when anomalies are found."""
+        log_file = tmp_path / "test.log"
+        log_file.write_text("line 1\n")
+
+        analyzer = MagicMock()
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies>block</anomalies>"
+        mock_result.merged_blocks = 3
+        analyzer.analyze_file_detailed.return_value = mock_result
+
+        result = analyze_file(log_file, analyzer, detailed=False, quiet=True)
+        assert result is True
+
+    def test_analyze_file_returns_false_when_no_anomalies(self, tmp_path: Path) -> None:
+        """Test that analyze_file returns False when no anomalies are found."""
+        log_file = tmp_path / "test.log"
+        log_file.write_text("line 1\n")
+
+        analyzer = MagicMock()
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies/>"
+        mock_result.merged_blocks = 0
+        analyzer.analyze_file_detailed.return_value = mock_result
+
+        result = analyze_file(log_file, analyzer, detailed=False, quiet=True)
+        assert result is False
 
 
 class TestMainEntryPoint:

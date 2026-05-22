@@ -187,6 +187,28 @@ class TestAnalysisConfig:
         config = AnalysisConfig(token_budget=1000)
         assert config.token_budget == 1000
 
+    def test_max_blocks_validation(self) -> None:
+        """Test that invalid max_blocks values are rejected."""
+        with pytest.raises(ValueError, match="max_blocks"):
+            AnalysisConfig(max_blocks=0)
+        with pytest.raises(ValueError, match="max_blocks"):
+            AnalysisConfig(max_blocks=-1)
+        config = AnalysisConfig(max_blocks=5)
+        assert config.max_blocks == 5
+        config_none = AnalysisConfig(max_blocks=None)
+        assert config_none.max_blocks is None
+
+    def test_min_score_validation(self) -> None:
+        """Test that invalid min_score values are rejected."""
+        with pytest.raises(ValueError, match="min_score"):
+            AnalysisConfig(min_score=-0.1)
+        config = AnalysisConfig(min_score=0.0)
+        assert config.min_score == 0.0
+        config_pos = AnalysisConfig(min_score=0.5)
+        assert config_pos.min_score == 0.5
+        config_none = AnalysisConfig(min_score=None)
+        assert config_none.min_score is None
+
 
 class TestAnalysisResult:
     """Tests for AnalysisResult dataclass."""

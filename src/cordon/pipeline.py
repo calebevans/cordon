@@ -183,8 +183,19 @@ class SemanticLogAnalyzer:
 
         # stage 6: merging
         merged = self._merger.merge_windows(significant)
-        merged_blocks_count = len(merged)
         del significant
+
+        # stage 6b: post-merge filters
+        if self.config.min_score is not None:
+            merged = [b for b in merged if b.max_score >= self.config.min_score]
+
+        if self.config.max_blocks is not None and len(merged) > self.config.max_blocks:
+            merged = sorted(merged, key=lambda b: b.max_score, reverse=True)[
+                : self.config.max_blocks
+            ]
+            merged = sorted(merged, key=lambda b: b.start_line)
+
+        merged_blocks_count = len(merged)
 
         # stage 7: formatting
         output = self._formatter.format_blocks(merged, lines_list)

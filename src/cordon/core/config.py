@@ -75,6 +75,10 @@ class AnalysisConfig:
         tokenizer_encoding: tiktoken encoding name for token counting
             (default: cl100k_base, used by GPT-4/GPT-3.5).
         output_format: Output format for anomaly blocks.
+        max_blocks: Maximum number of anomaly blocks to include in output.
+            Keeps the highest-scoring blocks. None disables the limit.
+        min_score: Minimum anomaly score threshold. Blocks below this
+            score are excluded from output. None disables the threshold.
     """
 
     window_size: int = 4
@@ -99,6 +103,8 @@ class AnalysisConfig:
     token_budget: int | None = None
     tokenizer_encoding: str = "cl100k_base"
     output_format: Literal["xml", "json"] = "xml"
+    max_blocks: int | None = None
+    min_score: float | None = None
 
     def __post_init__(self) -> None:
         """Validate configuration parameters."""
@@ -131,6 +137,10 @@ class AnalysisConfig:
             )
         if self.token_budget is not None and self.token_budget < 1:
             raise ValueError("token_budget must be >= 1 if set")
+        if self.max_blocks is not None and self.max_blocks < 1:
+            raise ValueError("max_blocks must be >= 1 if set")
+        if self.min_score is not None and self.min_score < 0:
+            raise ValueError("min_score must be >= 0 if set")
 
     def _validate_anomaly_range(self) -> None:
         """Validate anomaly range parameters."""
