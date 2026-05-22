@@ -72,6 +72,18 @@ class TestParseArgs:
         args = parse_args()
         assert args.detailed is True
 
+    def test_format_json(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test --format json flag."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--format", "json", "test.log"])
+        args = parse_args()
+        assert args.output_format == "json"
+
+    def test_format_default_xml(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --format defaults to xml."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.output_format == "xml"
+
 
 class TestAnalyzeFile:
     """Tests for analyze_file function."""

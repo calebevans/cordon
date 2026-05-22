@@ -69,6 +69,7 @@ class AnalysisConfig:
         request_timeout: HTTP request timeout in seconds (remote backend).
         show_progress: Whether to display tqdm progress bars during
             embedding and scoring. Set to False for CI or library use.
+        output_format: Output format for anomaly blocks.
     """
 
     window_size: int = 4
@@ -90,6 +91,7 @@ class AnalysisConfig:
     endpoint: str | None = None
     request_timeout: float = 60.0
     show_progress: bool = True
+    output_format: Literal["xml", "json"] = "xml"
 
     def __post_init__(self) -> None:
         """Validate configuration parameters."""
@@ -115,6 +117,11 @@ class AnalysisConfig:
             raise ValueError("scoring_batch_size must be >= 1 or None for auto-detect")
         if self.device is not None and self.device not in ("cuda", "mps", "cpu"):
             raise ValueError("device must be 'cuda', 'mps', 'cpu', or None")
+        _ALLOWED_FORMATS = ("xml", "json")
+        if self.output_format not in _ALLOWED_FORMATS:
+            raise ValueError(
+                f"output_format must be one of {_ALLOWED_FORMATS}, got {self.output_format!r}"
+            )
 
     def _validate_anomaly_range(self) -> None:
         """Validate anomaly range parameters."""

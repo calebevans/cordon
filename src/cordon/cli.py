@@ -149,6 +149,14 @@ def parse_args() -> argparse.Namespace:
         help="Overwrite output file if it exists",
     )
     output_group.add_argument(
+        "--format",
+        type=str,
+        choices=["xml", "json"],
+        default="xml",
+        dest="output_format",
+        help="Output format for anomaly blocks (default: xml)",
+    )
+    output_group.add_argument(
         "--quiet",
         "-q",
         action="store_true",
@@ -329,6 +337,7 @@ def _main_impl() -> None:
             api_key=args.api_key,
             endpoint=args.endpoint,
             show_progress=not args.quiet,
+            output_format=args.output_format,
         )
     except ValueError as error:
         print(f"Configuration error: {error}", file=sys.stderr)

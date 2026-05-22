@@ -90,6 +90,7 @@ class AnalysisResult:
 
     Attributes:
         output: Formatted output string with XML tags.
+        blocks: Structured list of merged anomaly blocks.
         total_lines: Total number of lines in the input file.
         total_windows: Total number of windows created.
         significant_windows: Number of windows above threshold.
@@ -99,6 +100,7 @@ class AnalysisResult:
     """
 
     output: str
+    blocks: list[MergedBlock]
     total_lines: int
     total_windows: int
     significant_windows: int

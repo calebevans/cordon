@@ -3,7 +3,7 @@ import dataclasses
 import pytest
 
 from cordon.core.config import AnalysisConfig
-from cordon.core.types import MergedBlock, ScoredWindow, TextWindow
+from cordon.core.types import AnalysisResult, MergedBlock, ScoredWindow, TextWindow
 
 
 class TestTextWindow:
@@ -167,3 +167,52 @@ class TestAnalysisConfig:
         assert config.max_line_length is None
         config = AnalysisConfig(max_line_length=500)
         assert config.max_line_length == 500
+
+    def test_output_format_default(self) -> None:
+        """Test that output_format defaults to xml."""
+        config = AnalysisConfig()
+        assert config.output_format == "xml"
+
+    def test_output_format_json(self) -> None:
+        """Test that output_format can be set to json."""
+        config = AnalysisConfig(output_format="json")
+        assert config.output_format == "json"
+
+
+class TestAnalysisResult:
+    """Tests for AnalysisResult dataclass."""
+
+    def test_blocks_field_populated(self) -> None:
+        """Test that blocks field stores MergedBlock instances."""
+        blocks = [
+            MergedBlock(start_line=1, end_line=4, original_windows=(0,), max_score=0.5),
+            MergedBlock(start_line=10, end_line=16, original_windows=(2, 3), max_score=0.9),
+        ]
+        result = AnalysisResult(
+            output="<output>",
+            blocks=blocks,
+            total_lines=100,
+            total_windows=25,
+            significant_windows=3,
+            merged_blocks=2,
+            score_distribution={"min": 0.0, "max": 1.0, "mean": 0.5, "median": 0.5, "p90": 0.9},
+            processing_time=1.0,
+        )
+        assert result.blocks == blocks
+        assert len(result.blocks) == 2
+        assert result.blocks[0].start_line == 1
+        assert result.blocks[1].max_score == 0.9
+
+    def test_empty_blocks(self) -> None:
+        """Test that blocks field can be empty."""
+        result = AnalysisResult(
+            output="",
+            blocks=[],
+            total_lines=0,
+            total_windows=0,
+            significant_windows=0,
+            merged_blocks=0,
+            score_distribution={"min": 0.0, "max": 0.0, "mean": 0.0, "median": 0.0, "p90": 0.0},
+            processing_time=0.0,
+        )
+        assert result.blocks == []
