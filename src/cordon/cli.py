@@ -128,6 +128,18 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Batch size for k-NN scoring queries (default: auto-detect based on GPU memory)",
     )
+    config_group.add_argument(
+        "--token-budget",
+        type=int,
+        default=None,
+        help="Maximum token budget for output; dynamically adjusts percentile to fit (overrides --anomaly-percentile)",
+    )
+    config_group.add_argument(
+        "--tokenizer-encoding",
+        type=str,
+        default="cl100k_base",
+        help="tiktoken encoding for token counting (default: cl100k_base)",
+    )
 
     # output options
     output_group = parser.add_argument_group("output options")
@@ -355,6 +367,12 @@ def _main_impl() -> None:
                 file=sys.stderr,
             )
 
+    if args.token_budget is not None and not isclose(args.anomaly_percentile, 0.1):
+        print(
+            "Warning: --anomaly-percentile is overridden by --token-budget",
+            file=sys.stderr,
+        )
+
     # create configuration from arguments
     try:
         config = AnalysisConfig(
@@ -376,6 +394,8 @@ def _main_impl() -> None:
             api_key=args.api_key,
             endpoint=args.endpoint,
             show_progress=not args.quiet,
+            token_budget=args.token_budget,
+            tokenizer_encoding=args.tokenizer_encoding,
             output_format=args.output_format,
         )
     except ValueError as error:

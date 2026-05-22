@@ -90,6 +90,32 @@ class TestParseArgs:
         args = parse_args()
         assert str(args.logfiles[0]) == "-"
 
+    def test_token_budget(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test --token-budget parsing."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--token-budget", "500", "test.log"])
+        args = parse_args()
+        assert args.token_budget == 500
+
+    def test_token_budget_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --token-budget defaults to None."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.token_budget is None
+
+    def test_tokenizer_encoding(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test --tokenizer-encoding parsing."""
+        monkeypatch.setattr(
+            sys, "argv", ["cordon", "--tokenizer-encoding", "p50k_base", "test.log"]
+        )
+        args = parse_args()
+        assert args.tokenizer_encoding == "p50k_base"
+
+    def test_tokenizer_encoding_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --tokenizer-encoding defaults to cl100k_base."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.tokenizer_encoding == "cl100k_base"
+
 
 class TestAnalyzeFile:
     """Tests for analyze_file function."""

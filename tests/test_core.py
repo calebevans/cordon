@@ -178,6 +178,15 @@ class TestAnalysisConfig:
         config = AnalysisConfig(output_format="json")
         assert config.output_format == "json"
 
+    def test_token_budget_validation(self) -> None:
+        """Test that invalid token_budget values are rejected."""
+        with pytest.raises(ValueError, match="token_budget"):
+            AnalysisConfig(token_budget=0)
+        with pytest.raises(ValueError, match="token_budget"):
+            AnalysisConfig(token_budget=-1)
+        config = AnalysisConfig(token_budget=1000)
+        assert config.token_budget == 1000
+
 
 class TestAnalysisResult:
     """Tests for AnalysisResult dataclass."""

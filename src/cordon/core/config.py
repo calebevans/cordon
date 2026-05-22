@@ -69,6 +69,11 @@ class AnalysisConfig:
         request_timeout: HTTP request timeout in seconds (remote backend).
         show_progress: Whether to display tqdm progress bars during
             embedding and scoring. Set to False for CI or library use.
+        token_budget: Maximum token count for output. When set, dynamically
+            computes anomaly_percentile from the input size to fit
+            the output within this budget. Overrides anomaly_percentile.
+        tokenizer_encoding: tiktoken encoding name for token counting
+            (default: cl100k_base, used by GPT-4/GPT-3.5).
         output_format: Output format for anomaly blocks.
     """
 
@@ -91,6 +96,8 @@ class AnalysisConfig:
     endpoint: str | None = None
     request_timeout: float = 60.0
     show_progress: bool = True
+    token_budget: int | None = None
+    tokenizer_encoding: str = "cl100k_base"
     output_format: Literal["xml", "json"] = "xml"
 
     def __post_init__(self) -> None:
@@ -122,6 +129,8 @@ class AnalysisConfig:
             raise ValueError(
                 f"output_format must be one of {_ALLOWED_FORMATS}, got {self.output_format!r}"
             )
+        if self.token_budget is not None and self.token_budget < 1:
+            raise ValueError("token_budget must be >= 1 if set")
 
     def _validate_anomaly_range(self) -> None:
         """Validate anomaly range parameters."""

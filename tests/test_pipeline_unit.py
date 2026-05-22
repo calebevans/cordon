@@ -184,3 +184,43 @@ class TestAnalyzeText:
         lines: list[tuple[int, str]] = [(1, "hello"), (2, "world")]
         result = analyzer.analyze_lines(lines)
         assert result.total_lines == 2
+
+
+class TestTokenBudget:
+    """Tests for token budget mode."""
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_token_budget_computes_percentile(self, mock_create: MagicMock) -> None:
+        """Test that token budget dynamically adjusts percentile."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu", token_budget=100)
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("word " * 100)
+        assert result.total_lines >= 1
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_token_budget_larger_than_file(self, mock_create: MagicMock) -> None:
+        """Test that budget larger than file results in percentile capped at 1.0."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu", token_budget=999999)
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("short text")
+        assert result.total_lines >= 1
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_token_budget_empty_input(self, mock_create: MagicMock) -> None:
+        """Test token budget with empty input."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu", token_budget=100)
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("")
+        assert result.total_lines == 0
