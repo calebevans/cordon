@@ -67,6 +67,8 @@ class AnalysisConfig:
         api_key: API key for remote embedding providers.
         endpoint: Custom API endpoint URL (remote backend).
         request_timeout: HTTP request timeout in seconds (remote backend).
+        show_progress: Whether to display tqdm progress bars during
+            embedding and scoring. Set to False for CI or library use.
     """
 
     window_size: int = 4
@@ -87,6 +89,7 @@ class AnalysisConfig:
     api_key: str | None = None
     endpoint: str | None = None
     request_timeout: float = 60.0
+    show_progress: bool = True
 
     def __post_init__(self) -> None:
         """Validate configuration parameters."""

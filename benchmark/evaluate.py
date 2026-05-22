@@ -223,7 +223,7 @@ def run_cordon_analysis(
         scored = scorer.score_windows(embedded, config)
 
         # extract embeddings and scores for later use
-        embeddings = np.array([sw.embedding for sw in scored])
+        embeddings = np.array([emb for _, emb in embedded])
         scores = np.array([sw.score for sw in scored])
         window_ranges = [(w.window.start_line, w.window.end_line) for w in scored]
 

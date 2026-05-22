@@ -52,6 +52,7 @@ class RemoteEmbedder:
             desc="Generating embeddings",
             total=total_batches,
             unit="batch",
+            disable=not self.config.show_progress,
         ):
             batch = window_list[batch_start_idx : batch_start_idx + batch_size]
             texts = [window.content for window in batch]

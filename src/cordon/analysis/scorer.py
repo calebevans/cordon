@@ -126,6 +126,7 @@ class DensityAnomalyScorer:
             desc=_SCORING_PROGRESS_DESC,
             unit="batch",
             total=(n_samples + query_batch_size - 1) // query_batch_size,
+            disable=not config.show_progress,
         ):
             batch_end = min(batch_start + query_batch_size, n_samples)
             batch_embeddings = embeddings_tensor[batch_start:batch_end]

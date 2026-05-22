@@ -148,6 +148,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Overwrite output file if it exists",
     )
+    output_group.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress progress bars (useful for CI or library usage)",
+    )
 
     return parser.parse_args()
 
@@ -322,6 +328,7 @@ def _main_impl() -> None:
             n_ctx=args.n_ctx,
             api_key=args.api_key,
             endpoint=args.endpoint,
+            show_progress=not args.quiet,
         )
     except ValueError as error:
         print(f"Configuration error: {error}", file=sys.stderr)
