@@ -1,6 +1,16 @@
 from collections.abc import Sequence
+from typing import NamedTuple
 
 from cordon.core.types import MergedBlock, ScoredWindow
+
+
+class _WindowInterval(NamedTuple):
+    """Internal representation of a window's line interval for merging."""
+
+    start: int
+    end: int
+    window_id: int
+    score: float
 
 
 class IntervalMerger:
@@ -15,42 +25,38 @@ class IntervalMerger:
         """Merge overlapping windows into contiguous blocks.
 
         Args:
-            scored_windows: Sequence of scored windows to merge
+            scored_windows: Sequence of scored windows to merge.
 
         Returns:
-            List of merged blocks with no overlaps
+            List of merged blocks with no overlaps.
         """
         if not scored_windows:
             return []
 
-        # convert to intervals: (start, end, window_id, score)
         intervals = [
-            (
-                sw.window.start_line,
-                sw.window.end_line,
-                sw.window.window_id,
-                sw.score,
+            _WindowInterval(
+                start=sw.window.start_line,
+                end=sw.window.end_line,
+                window_id=sw.window.window_id,
+                score=sw.score,
             )
             for sw in scored_windows
         ]
-        intervals.sort(key=lambda interval: interval[0])
+        intervals.sort(key=lambda interval: interval.start)
 
-        # initialize merge state with first interval
         merged: list[MergedBlock] = []
-        current_start, current_end, first_id, first_score = intervals[0]
-        contributing_ids = [first_id]
-        max_score = first_score
+        first = intervals[0]
+        current_start = first.start
+        current_end = first.end
+        contributing_ids = [first.window_id]
+        max_score = first.score
 
-        # sweep through remaining intervals
-        for start, end, window_id, score in intervals[1:]:
-            # check if overlapping or adjacent (lines N and N+1 are adjacent)
-            if start <= current_end + 1:
-                # extend current block
-                current_end = max(current_end, end)
-                contributing_ids.append(window_id)
-                max_score = max(max_score, score)
+        for interval in intervals[1:]:
+            if interval.start <= current_end + 1:
+                current_end = max(current_end, interval.end)
+                contributing_ids.append(interval.window_id)
+                max_score = max(max_score, interval.score)
             else:
-                # gap found - save current block and start new one
                 merged.append(
                     MergedBlock(
                         start_line=current_start,
@@ -59,12 +65,11 @@ class IntervalMerger:
                         max_score=max_score,
                     )
                 )
-                current_start = start
-                current_end = end
-                contributing_ids = [window_id]
-                max_score = score
+                current_start = interval.start
+                current_end = interval.end
+                contributing_ids = [interval.window_id]
+                max_score = interval.score
 
-        # append final block
         merged.append(
             MergedBlock(
                 start_line=current_start,

@@ -1,4 +1,3 @@
-from collections import deque
 from collections.abc import Iterator
 
 from cordon.core.config import AnalysisConfig
@@ -10,7 +9,8 @@ class SlidingWindowSegmenter:
 
     This segmenter creates non-overlapping chunks of text from a stream of lines.
     Each window maintains references to its original line numbers for downstream
-    processing.
+    processing. Optionally splits long lines into virtual lines based on a
+    character limit.
     """
 
     def segment(
@@ -18,49 +18,75 @@ class SlidingWindowSegmenter:
     ) -> Iterator[TextWindow]:
         """Segment lines into non-overlapping text windows.
 
+        When max_line_length is set, lines exceeding that limit are split into
+        multiple virtual lines, each counting toward window_size. The window's
+        start_line/end_line still reference real file line numbers.
+
         Args:
-            lines: Iterator of (line_number, line_content) tuples
-            config: Analysis configuration with window_size
+            lines: Iterator of (line_number, line_content) tuples.
+            config: Analysis configuration with window_size and
+                optional max_line_length.
 
         Yields:
-            TextWindow instances with content and line tracking
+            TextWindow instances with content and line tracking.
         """
         window_size = config.window_size
+        max_line_length = config.max_line_length
 
-        # use deque without maxlen to handle variable-length buffers
-        buffer: deque[tuple[int, str]] = deque()
+        buffer: list[tuple[int, str]] = []
         window_id = 0
 
         for line_num, line_text in lines:
-            buffer.append((line_num, line_text))
+            chunks = self._split_line(line_num, line_text, max_line_length)
 
-            # when buffer reaches window size, yield a window
-            if len(buffer) == window_size:
-                start_line = buffer[0][0]
-                end_line = buffer[-1][0]
-                content = "\n".join(text for _, text in buffer)
+            for chunk_line_num, chunk_text in chunks:
+                buffer.append((chunk_line_num, chunk_text))
 
-                yield TextWindow(
-                    content=content,
-                    start_line=start_line,
-                    end_line=end_line,
-                    window_id=window_id,
-                )
+                if len(buffer) == window_size:
+                    yield self._flush_buffer(buffer, window_id)
+                    window_id += 1
+                    buffer = []
 
-                window_id += 1
+        if buffer:
+            yield self._flush_buffer(buffer, window_id)
 
-                # clear buffer for next non-overlapping window
-                buffer.clear()
+    @staticmethod
+    def _flush_buffer(buffer: list[tuple[int, str]], window_id: int) -> TextWindow:
+        """Create a TextWindow from buffered lines.
 
-        # handle final partial window
-        if len(buffer) > 0:
-            start_line = buffer[0][0]
-            end_line = buffer[-1][0]
-            content = "\n".join(text for _, text in buffer)
+        Args:
+            buffer: List of (line_number, line_content) tuples.
+            window_id: Unique identifier for this window.
 
-            yield TextWindow(
-                content=content,
-                start_line=start_line,
-                end_line=end_line,
-                window_id=window_id,
-            )
+        Returns:
+            A TextWindow constructed from the buffer contents.
+        """
+        start_line = buffer[0][0]
+        end_line = buffer[-1][0]
+        content = "\n".join(text for _, text in buffer)
+        return TextWindow(
+            content=content,
+            start_line=start_line,
+            end_line=end_line,
+            window_id=window_id,
+        )
+
+    @staticmethod
+    def _split_line(line_num: int, line_text: str, max_length: int | None) -> list[tuple[int, str]]:
+        """Split a line into chunks if it exceeds max_length.
+
+        Args:
+            line_num: The real file line number.
+            line_text: The line content.
+            max_length: Maximum characters per chunk, or None to disable.
+
+        Returns:
+            List of (line_number, chunk_text) tuples. All chunks share
+            the same line_number since they originate from the same file line.
+        """
+        if max_length is None or len(line_text) <= max_length:
+            return [(line_num, line_text)]
+
+        return [
+            (line_num, line_text[i : i + max_length]) for i in range(0, len(line_text), max_length)
+        ]

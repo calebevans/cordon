@@ -9,6 +9,8 @@ class AnalysisConfig:
 
     Attributes:
         window_size: Number of lines per sliding window.
+        max_line_length: Maximum characters per line before splitting into
+            virtual lines. None disables splitting.
         k_neighbors: Number of neighbors for k-NN density scoring.
         anomaly_percentile: Fraction of windows to retain (e.g. 0.1 = top 10%).
         anomaly_range_min: Lower bound for range mode (e.g. 0.05 = exclude top 5%).
@@ -33,6 +35,7 @@ class AnalysisConfig:
     """
 
     window_size: int = 4
+    max_line_length: int | None = None
     k_neighbors: int = 5
     anomaly_percentile: float = 0.1
     anomaly_range_min: float | None = None
@@ -66,6 +69,8 @@ class AnalysisConfig:
             raise ValueError("k_neighbors must be >= 1")
         if not 0.0 <= self.anomaly_percentile <= 1.0:
             raise ValueError("anomaly_percentile must be between 0.0 and 1.0")
+        if self.max_line_length is not None and self.max_line_length < 1:
+            raise ValueError("max_line_length must be >= 1 if set")
         if self.batch_size < 1:
             raise ValueError("batch_size must be >= 1")
         if self.scoring_batch_size is not None and self.scoring_batch_size < 1:
