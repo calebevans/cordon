@@ -7,6 +7,7 @@ import torch
 from tqdm import tqdm
 
 from cordon.core.config import AnalysisConfig
+from cordon.core.device import detect_device
 from cordon.core.types import ScoredWindow, TextWindow
 
 # Constants
@@ -23,55 +24,6 @@ class DensityAnomalyScorer:
     For large datasets, automatically switches to memory-mapped storage to
     reduce RAM usage.
     """
-
-    def _detect_device(self, config: AnalysisConfig) -> str:
-        """Detect the best available device for scoring.
-
-        Args:
-            config: Analysis configuration with optional device setting
-
-        Returns:
-            Device string: 'cuda', 'mps', or 'cpu'
-
-        Raises:
-            RuntimeError: If CUDA device is incompatible
-        """
-        if config.device is not None:
-            device = config.device
-            # validate CUDA compatibility if CUDA requested
-            if device == "cuda" and torch.cuda.is_available():
-                self._check_cuda_compatibility()
-            return device
-
-        # auto-detect device priority: cuda > mps > cpu
-        if torch.cuda.is_available():
-            self._check_cuda_compatibility()
-            return "cuda"
-        elif torch.backends.mps.is_available():
-            return "mps"
-        else:
-            return "cpu"
-
-    def _check_cuda_compatibility(self) -> None:
-        """Check if CUDA GPU is compatible with current PyTorch build.
-
-        Raises:
-            RuntimeError: If GPU compute capability is too old for PyTorch
-        """
-        if not torch.cuda.is_available():
-            return
-
-        # get compute capability
-        device_props = torch.cuda.get_device_properties(0)
-
-        # PyTorch 2.0+ requires compute capability >= 6.0 (Pascal or newer)
-        if device_props.major < 6:
-            gpu_name = device_props.name
-            compute_capability = f"{device_props.major}.{device_props.minor}"
-            raise RuntimeError(
-                f"GPU {gpu_name} (compute capability {compute_capability}) is not supported by "
-                f"PyTorch 2.0+. Requires compute capability >= 6.0 (Pascal architecture or newer)."
-            )
 
     def _calculate_n_neighbors(self, config: AnalysisConfig, n_samples: int) -> int:
         """Calculate the number of neighbors to use for k-NN.
@@ -346,7 +298,7 @@ class DensityAnomalyScorer:
             return [ScoredWindow(window=window, score=0.0, embedding=embedding)]
 
         # detect best available device
-        device = self._detect_device(config)
+        device = detect_device(config.device)
 
         # route to appropriate PyTorch implementation
         if device in ("cuda", "mps"):

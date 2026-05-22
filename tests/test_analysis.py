@@ -99,25 +99,6 @@ class TestDensityAnomalyScorer:
         for sw_small, sw_large in zip(scored_small, scored_large, strict=False):
             assert abs(sw_small.score - sw_large.score) < 1e-6
 
-    def test_device_detection(self) -> None:
-        """Test that device detection respects config and auto-detects correctly."""
-        scorer = DensityAnomalyScorer()
-
-        # test explicit device settings
-        config_cpu = AnalysisConfig(device="cpu")
-        assert scorer._detect_device(config_cpu) == "cpu"
-
-        config_cuda = AnalysisConfig(device="cuda")
-        assert scorer._detect_device(config_cuda) == "cuda"
-
-        config_mps = AnalysisConfig(device="mps")
-        assert scorer._detect_device(config_mps) == "mps"
-
-        # test auto-detection (should return one of the supported devices)
-        config_auto = AnalysisConfig()
-        device = scorer._detect_device(config_auto)
-        assert device in ("cuda", "mps", "cpu")
-
     def test_pytorch_scoring_cpu(self) -> None:
         """Test that PyTorch scoring works correctly on CPU."""
         windows = [
