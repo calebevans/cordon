@@ -224,3 +224,80 @@ class TestOutputFormatter:
             assert "z > 10" not in output  # > should be escaped
         finally:
             temp_path.unlink()
+
+    def test_format_multi_block_content_correctness(self) -> None:
+        """Test that multi-block formatting extracts correct content for each block."""
+        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
+            for i in range(1, 11):
+                f.write(f"line {i}\n")
+            temp_path = Path(f.name)
+
+        try:
+            from cordon.core.types import MergedBlock
+
+            blocks = [
+                MergedBlock(start_line=2, end_line=3, original_windows=(0,), max_score=0.7),
+                MergedBlock(start_line=7, end_line=8, original_windows=(1,), max_score=0.9),
+            ]
+
+            formatter = OutputFormatter()
+            output = formatter.format_blocks(blocks, temp_path)
+
+            assert "line 7" in output
+            assert "line 8" in output
+            assert '<block lines="7-8" score="0.9000">' in output
+            assert "line 2" in output
+            assert "line 3" in output
+            assert '<block lines="2-3" score="0.7000">' in output
+        finally:
+            temp_path.unlink()
+
+    def test_format_truncated_file(self) -> None:
+        """Test formatting when file is shorter than block end_line indicates."""
+        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
+            f.write("line 1\n")
+            f.write("line 2\n")
+            f.write("line 3\n")
+            temp_path = Path(f.name)
+
+        try:
+            from cordon.core.types import MergedBlock
+
+            blocks = [
+                MergedBlock(start_line=2, end_line=10, original_windows=(0,), max_score=0.8),
+            ]
+
+            formatter = OutputFormatter()
+            output = formatter.format_blocks(blocks, temp_path)
+
+            assert "line 2" in output
+            assert "line 3" in output
+            assert "</anomalies>" in output
+        finally:
+            temp_path.unlink()
+
+    def test_format_unsorted_block_input(self) -> None:
+        """Test that blocks passed in unsorted order are output in correct order."""
+        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
+            for i in range(1, 11):
+                f.write(f"line {i}\n")
+            temp_path = Path(f.name)
+
+        try:
+            from cordon.core.types import MergedBlock
+
+            blocks = [
+                MergedBlock(start_line=7, end_line=8, original_windows=(1,), max_score=0.9),
+                MergedBlock(start_line=2, end_line=3, original_windows=(0,), max_score=0.7),
+            ]
+
+            formatter = OutputFormatter()
+            output = formatter.format_blocks(blocks, temp_path)
+
+            block_2_pos = output.index('<block lines="2-3"')
+            block_7_pos = output.index('<block lines="7-8"')
+            assert block_2_pos < block_7_pos
+            assert "line 2" in output
+            assert "line 7" in output
+        finally:
+            temp_path.unlink()

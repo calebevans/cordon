@@ -96,3 +96,23 @@ class TestLogFileReader:
             assert lines[1] == (2, "line with 中文")
         finally:
             temp_path.unlink()
+
+    def test_read_file_with_invalid_utf8(self) -> None:
+        """Test reading a file with bytes invalid in UTF-8."""
+        with NamedTemporaryFile(mode="wb", delete=False, suffix=".log") as f:
+            f.write(b"line 1\n")
+            f.write(b"line with \xff\xfe bytes\n")
+            f.write(b"line 3\n")
+            temp_path = Path(f.name)
+
+        try:
+            reader = LogFileReader()
+            lines = list(reader.read_lines(temp_path))
+
+            assert len(lines) == 3
+            assert lines[0] == (1, "line 1")
+            assert "\ufffd" in lines[1][1]
+            assert lines[1][0] == 2
+            assert lines[2] == (3, "line 3")
+        finally:
+            temp_path.unlink()
