@@ -1,3 +1,5 @@
+import dataclasses
+
 import numpy as np
 import pytest
 
@@ -22,6 +24,16 @@ class TestTextWindow:
             TextWindow(content="test", start_line=0, end_line=5, window_id=0)
         with pytest.raises(ValueError):
             TextWindow(content="test", start_line=5, end_line=3, window_id=0)
+
+    def test_empty_content_rejected(self) -> None:
+        """Test that empty content is rejected."""
+        with pytest.raises(ValueError, match="content must not be empty"):
+            TextWindow(content="", start_line=1, end_line=1, window_id=0)
+
+    def test_whitespace_only_content_rejected(self) -> None:
+        """Test that whitespace-only content is rejected."""
+        with pytest.raises(ValueError, match="content must not be empty"):
+            TextWindow(content="   \n\t  ", start_line=1, end_line=1, window_id=0)
 
 
 class TestScoredWindow:
@@ -61,7 +73,7 @@ class TestAnalysisConfig:
         assert config.model_name == "all-MiniLM-L6-v2"
         assert config.batch_size == 32
         assert config.device is None
-        assert config.scoring_batch_size is None  # auto-detect by default
+        assert config.scoring_batch_size is None
 
     def test_custom_config(self) -> None:
         """Test custom configuration values."""
@@ -83,7 +95,24 @@ class TestAnalysisConfig:
         with pytest.raises(ValueError):
             AnalysisConfig(anomaly_percentile=1.5)
         with pytest.raises(ValueError):
-            AnalysisConfig(device="gpu")
+            AnalysisConfig(device="gpu")  # type: ignore[arg-type]
+
+        with pytest.raises(ValueError, match="backend must be one of"):
+            AnalysisConfig(backend="openai")  # type: ignore[arg-type]
+
+    def test_empty_model_name_rejected(self) -> None:
+        """Test that empty model_name is rejected."""
+        with pytest.raises(ValueError, match="model_name must not be empty"):
+            AnalysisConfig(model_name="")
+
+        with pytest.raises(ValueError, match="model_name must not be empty"):
+            AnalysisConfig(model_name="   ")
+
+    def test_frozen_config(self) -> None:
+        """Test that config attributes cannot be mutated after construction."""
+        config = AnalysisConfig()
+        with pytest.raises(dataclasses.FrozenInstanceError):
+            config.window_size = 10  # type: ignore[misc]
 
     def test_range_mode_valid(self) -> None:
         """Test that valid range configurations are accepted."""
@@ -93,24 +122,20 @@ class TestAnalysisConfig:
 
     def test_range_mode_both_required(self) -> None:
         """Test that both range parameters must be set together."""
-        # only min set - should fail
         with pytest.raises(ValueError, match="must both be set"):
             AnalysisConfig(anomaly_range_min=0.05)
 
-        # only max set - should fail
         with pytest.raises(ValueError, match="must both be set"):
             AnalysisConfig(anomaly_range_max=0.15)
 
     def test_range_mode_bounds_validation(self) -> None:
         """Test that range bounds are validated."""
-        # min out of range
         with pytest.raises(ValueError, match="anomaly_range_min must be between"):
             AnalysisConfig(anomaly_range_min=-0.1, anomaly_range_max=0.15)
 
         with pytest.raises(ValueError, match="anomaly_range_min must be between"):
             AnalysisConfig(anomaly_range_min=1.5, anomaly_range_max=2.0)
 
-        # max out of range
         with pytest.raises(ValueError, match="anomaly_range_max must be between"):
             AnalysisConfig(anomaly_range_min=0.05, anomaly_range_max=-0.1)
 
@@ -119,21 +144,18 @@ class TestAnalysisConfig:
 
     def test_range_mode_min_less_than_max(self) -> None:
         """Test that range_min must be less than range_max."""
-        # min >= max should fail
         with pytest.raises(ValueError, match="must be less than"):
             AnalysisConfig(anomaly_range_min=0.15, anomaly_range_max=0.05)
 
-        # equal values should fail
         with pytest.raises(ValueError, match="must be less than"):
             AnalysisConfig(anomaly_range_min=0.1, anomaly_range_max=0.1)
 
     def test_range_mode_with_default_percentile(self) -> None:
         """Test that range mode works with default percentile value."""
-        # should be valid - percentile is ignored in range mode
         config = AnalysisConfig(
             anomaly_range_min=0.05,
             anomaly_range_max=0.15,
-            anomaly_percentile=0.1,  # default value
+            anomaly_percentile=0.1,
         )
         assert config.anomaly_range_min == 0.05
         assert config.anomaly_range_max == 0.15

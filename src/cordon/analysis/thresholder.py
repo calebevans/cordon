@@ -33,8 +33,8 @@ class Thresholder:
         # check if using range mode
         if config.anomaly_range_min is not None:
             # Range mode: exclude top X%, keep next Y%
-            # Type narrowing: if min is not None, max is also not None (enforced in config)
-            assert config.anomaly_range_max is not None
+            if config.anomaly_range_max is None:
+                raise ValueError("anomaly_range_max must be set when anomaly_range_min is set")
 
             scores = np.array([sw.score for sw in scored_windows])
 

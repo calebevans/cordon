@@ -229,8 +229,8 @@ def _print_backend_info(config: AnalysisConfig) -> None:
 def _print_filtering_mode(config: AnalysisConfig) -> None:
     """Print filtering mode configuration."""
     if config.anomaly_range_min is not None:
-        # Type narrowing: if min is not None, max is also not None (enforced in config)
-        assert config.anomaly_range_max is not None
+        if config.anomaly_range_max is None:
+            raise ValueError("anomaly_range_max must be set when anomaly_range_min is set")
         print(
             f"Filtering mode: Range (exclude top {config.anomaly_range_min*100:.1f}%, keep up to {config.anomaly_range_max*100:.1f}%)"
         )

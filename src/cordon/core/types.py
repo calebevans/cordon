@@ -27,6 +27,8 @@ class TextWindow:
 
     def __post_init__(self) -> None:
         """Validate window invariants."""
+        if not self.content.strip():
+            raise ValueError("content must not be empty or whitespace-only")
         if self.start_line < 1:
             raise ValueError("start_line must be >= 1")
         if self.end_line < self.start_line:
