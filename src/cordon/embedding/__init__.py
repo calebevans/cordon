@@ -7,28 +7,34 @@ if TYPE_CHECKING:
     from cordon.core.types import Embedder
 
 
-def create_vectorizer(config: "AnalysisConfig") -> "Embedder":
-    """Factory function to create appropriate vectorizer based on config.
+def create_embedder(config: "AnalysisConfig") -> "Embedder":
+    """Factory function to create the appropriate embedder for a config.
 
     Args:
-        config: Analysis configuration with backend selection
+        config: Analysis configuration with backend selection.
 
     Returns:
-        Vectorizer instance implementing the Embedder protocol
+        Embedder instance matching the configured backend.
+
+    Raises:
+        ValueError: If the backend is not recognized.
     """
     if config.backend == "remote":
-        from cordon.embedding.remote import RemoteVectorizer
+        from cordon.embedding.remote import RemoteEmbedder
 
-        return RemoteVectorizer(config)
+        return RemoteEmbedder(config)
 
     if config.backend == "llama-cpp":
-        from cordon.embedding.llama_cpp import LlamaCppVectorizer
+        from cordon.embedding.llama_cpp import LlamaCppEmbedder
 
-        return LlamaCppVectorizer(config)
+        return LlamaCppEmbedder(config)
 
-    from cordon.embedding.transformer import TransformerVectorizer
+    if config.backend == "sentence-transformers":
+        from cordon.embedding.transformer import TransformerEmbedder
 
-    return TransformerVectorizer(config)
+        return TransformerEmbedder(config)
+
+    raise ValueError(f"Unknown backend: {config.backend}")
 
 
-__all__ = ["create_vectorizer"]
+__all__ = ["create_embedder"]

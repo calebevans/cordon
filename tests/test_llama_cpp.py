@@ -1,4 +1,6 @@
-"""Unit tests for llama.cpp vectorizer backend."""
+"""Unit tests for llama.cpp embedder backend."""
+
+import logging
 
 import numpy as np
 import pytest
@@ -7,8 +9,8 @@ from cordon.core.config import AnalysisConfig
 from cordon.core.types import TextWindow
 
 
-class TestLlamaCppVectorizerConfiguration:
-    """Tests for LlamaCppVectorizer configuration and initialization."""
+class TestLlamaCppEmbedderConfiguration:
+    """Tests for LlamaCppEmbedder configuration and initialization."""
 
     def test_missing_model_path_auto_downloads(self, monkeypatch, tmp_path) -> None:
         """Test that missing model_path triggers auto-download."""
@@ -28,10 +30,10 @@ class TestLlamaCppVectorizerConfiguration:
 
         config = AnalysisConfig(backend="llama-cpp", model_path=None)
 
-        from cordon.embedding.llama_cpp import LlamaCppVectorizer
+        from cordon.embedding.llama_cpp import LlamaCppEmbedder
 
         with pytest.raises((RuntimeError, ValueError)):
-            LlamaCppVectorizer(config)
+            LlamaCppEmbedder(config)
 
     def test_nonexistent_model_path_raises_error(self) -> None:
         """Test that nonexistent model file raises ValueError."""
@@ -54,15 +56,42 @@ class TestLlamaCppVectorizerConfiguration:
         assert config.backend == "llama-cpp"
         assert config.model_path == str(model_file)
 
-
-class TestLlamaCppVectorizerFactory:
-    """Tests for factory function with llama.cpp backend."""
-
-    def test_factory_creates_llama_vectorizer(self, tmp_path) -> None:
-        """Test that factory function creates LlamaCppVectorizer."""
+    def test_logging_used_instead_of_print(self, monkeypatch, tmp_path, caplog) -> None:
+        """Test that logging.info is used instead of print for downloads."""
         pytest.importorskip("llama_cpp")
 
-        from cordon.embedding import create_vectorizer
+        model_file = tmp_path / "all-MiniLM-L6-v2-Q4_K_M.gguf"
+        model_file.write_text("fake model")
+
+        import sys
+        from unittest.mock import MagicMock
+
+        mock_hub = MagicMock()
+        mock_hub.hf_hub_download = MagicMock(return_value=str(model_file))
+        monkeypatch.setitem(sys.modules, "huggingface_hub", mock_hub)
+
+        from cordon.embedding.llama_cpp import LlamaCppEmbedder
+
+        config = AnalysisConfig(backend="llama-cpp", model_path=None)
+
+        with caplog.at_level(logging.INFO, logger="cordon.embedding.llama_cpp"):
+            try:
+                LlamaCppEmbedder(config)
+            except (RuntimeError, ValueError):
+                pass
+
+        log_messages = [r.message for r in caplog.records]
+        assert any("Downloading default GGUF model" in msg for msg in log_messages)
+
+
+class TestLlamaCppEmbedderFactory:
+    """Tests for factory function with llama.cpp backend."""
+
+    def test_factory_creates_llama_embedder(self, tmp_path) -> None:
+        """Test that factory function creates LlamaCppEmbedder."""
+        pytest.importorskip("llama_cpp")
+
+        from cordon.embedding import create_embedder
 
         model_file = tmp_path / "model.gguf"
         model_file.touch()
@@ -73,11 +102,11 @@ class TestLlamaCppVectorizerFactory:
         )
 
         with pytest.raises((ValueError, RuntimeError)):
-            create_vectorizer(config)
+            create_embedder(config)
 
 
-class TestLlamaCppVectorizerEmbedding:
-    """Tests for LlamaCppVectorizer embedding functionality."""
+class TestLlamaCppEmbedderEmbedding:
+    """Tests for LlamaCppEmbedder embedding functionality."""
 
     @pytest.fixture
     def model_path(self) -> str:
@@ -90,11 +119,11 @@ class TestLlamaCppVectorizerEmbedding:
         return model_path
 
     @pytest.fixture
-    def vectorizer(self, model_path: str):
-        """Create a LlamaCppVectorizer instance for testing."""
+    def embedder(self, model_path: str):
+        """Create a LlamaCppEmbedder instance for testing."""
         pytest.importorskip("llama_cpp")
 
-        from cordon.embedding.llama_cpp import LlamaCppVectorizer
+        from cordon.embedding.llama_cpp import LlamaCppEmbedder
 
         config = AnalysisConfig(
             backend="llama-cpp",
@@ -102,9 +131,9 @@ class TestLlamaCppVectorizerEmbedding:
             n_ctx=512,
             n_gpu_layers=0,
         )
-        return LlamaCppVectorizer(config)
+        return LlamaCppEmbedder(config)
 
-    def test_embed_single_window(self, vectorizer) -> None:
+    def test_embed_single_window(self, embedder) -> None:
         """Test embedding a single text window."""
         window = TextWindow(
             content="Error: Connection timeout",
@@ -113,7 +142,7 @@ class TestLlamaCppVectorizerEmbedding:
             window_id=0,
         )
 
-        results = list(vectorizer.embed_windows([window]))
+        results = list(embedder.embed_windows([window]))
 
         assert len(results) == 1
         result_window, embedding = results[0]
@@ -123,7 +152,7 @@ class TestLlamaCppVectorizerEmbedding:
         assert len(embedding.shape) == 1
         assert embedding.shape[0] > 0
 
-    def test_embed_multiple_windows(self, vectorizer) -> None:
+    def test_embed_multiple_windows(self, embedder) -> None:
         """Test embedding multiple text windows."""
         windows = [
             TextWindow(
@@ -146,7 +175,7 @@ class TestLlamaCppVectorizerEmbedding:
             ),
         ]
 
-        results = list(vectorizer.embed_windows(windows))
+        results = list(embedder.embed_windows(windows))
 
         assert len(results) == 3
         for i, (result_window, embedding) in enumerate(results):
@@ -154,7 +183,7 @@ class TestLlamaCppVectorizerEmbedding:
             assert isinstance(embedding, np.ndarray)
             assert embedding.dtype == np.float32
 
-    def test_embedding_normalization(self, vectorizer) -> None:
+    def test_embedding_normalization(self, embedder) -> None:
         """Test that embeddings are L2 normalized."""
         window = TextWindow(
             content="Test content for normalization",
@@ -163,13 +192,13 @@ class TestLlamaCppVectorizerEmbedding:
             window_id=0,
         )
 
-        results = list(vectorizer.embed_windows([window]))
+        results = list(embedder.embed_windows([window]))
         _, embedding = results[0]
 
         norm = np.linalg.norm(embedding)
         assert np.isclose(norm, 1.0, atol=1e-6)
 
-    def test_embedding_consistency(self, vectorizer) -> None:
+    def test_embedding_consistency(self, embedder) -> None:
         """Test that same input produces same embedding."""
         window = TextWindow(
             content="Consistent content test",
@@ -178,20 +207,20 @@ class TestLlamaCppVectorizerEmbedding:
             window_id=0,
         )
 
-        results1 = list(vectorizer.embed_windows([window]))
-        results2 = list(vectorizer.embed_windows([window]))
+        results1 = list(embedder.embed_windows([window]))
+        results2 = list(embedder.embed_windows([window]))
 
         _, embedding1 = results1[0]
         _, embedding2 = results2[0]
 
         np.testing.assert_array_almost_equal(embedding1, embedding2, decimal=5)
 
-    def test_empty_windows_list(self, vectorizer) -> None:
+    def test_empty_windows_list(self, embedder) -> None:
         """Test embedding empty list of windows."""
-        results = list(vectorizer.embed_windows([]))
+        results = list(embedder.embed_windows([]))
         assert len(results) == 0
 
-    def test_semantic_similarity(self, vectorizer) -> None:
+    def test_semantic_similarity(self, embedder) -> None:
         """Test that semantically similar texts have similar embeddings."""
         window1 = TextWindow(
             content="Error: Database connection failed",
@@ -212,7 +241,7 @@ class TestLlamaCppVectorizerEmbedding:
             window_id=2,
         )
 
-        results = list(vectorizer.embed_windows([window1, window2, window3]))
+        results = list(embedder.embed_windows([window1, window2, window3]))
         _, emb1 = results[0]
         _, emb2 = results[1]
         _, emb3 = results[2]
@@ -223,7 +252,7 @@ class TestLlamaCppVectorizerEmbedding:
         assert sim_1_2 > sim_1_3
 
 
-class TestLlamaCppVectorizerIntegration:
+class TestLlamaCppEmbedderIntegration:
     """Integration tests with the full analysis pipeline."""
 
     def test_config_validation_for_llama_cpp(self, tmp_path) -> None:

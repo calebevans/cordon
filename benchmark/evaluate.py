@@ -197,7 +197,7 @@ def run_cordon_analysis(
         - intermediates: Dict with embeddings, scores, windows (if return_intermediates=True)
     """
     from cordon.analysis.scorer import DensityAnomalyScorer
-    from cordon.embedding import create_vectorizer
+    from cordon.embedding import create_embedder
     from cordon.ingestion.reader import LogFileReader
     from cordon.segmentation.windower import SlidingWindowSegmenter
 
@@ -216,8 +216,8 @@ def run_cordon_analysis(
         segmenter = SlidingWindowSegmenter()
         windows = list(segmenter.segment(lines, config))
 
-        vectorizer = create_vectorizer(config)
-        embedded = list(vectorizer.embed_windows(windows))
+        embedder = create_embedder(config)
+        embedded = list(embedder.embed_windows(windows))
 
         scorer = DensityAnomalyScorer()
         scored = scorer.score_windows(embedded, config)

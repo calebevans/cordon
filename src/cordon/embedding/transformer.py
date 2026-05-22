@@ -1,3 +1,4 @@
+import logging
 import warnings
 from collections.abc import Iterable, Iterator
 from typing import Any
@@ -13,23 +14,35 @@ from cordon.core.device import detect_device
 from cordon.core.types import TextWindow
 
 
-class TransformerVectorizer:
+class TransformerEmbedder:
     """Convert text windows to dense embeddings with hardware acceleration.
 
-    This vectorizer uses sentence-transformers models to create semantic
-    embeddings of text windows. It automatically detects and utilizes
-    available hardware acceleration (CUDA, MPS, or CPU).
+    Uses sentence-transformers models to create semantic embeddings of text
+    windows. Automatically detects and utilizes available hardware
+    acceleration (CUDA, MPS, or CPU).
     """
 
     def __init__(self, config: AnalysisConfig) -> None:
-        """Initialize the vectorizer with a model.
+        """Initialize the embedder with a sentence-transformer model.
 
         Args:
-            config: Analysis configuration specifying model and device
+            config: Analysis configuration specifying model and device.
+
+        Raises:
+            RuntimeError: If the model cannot be loaded.
         """
         self.config = config
         self.device = detect_device(self.config.device)
-        self.model = SentenceTransformer(config.model_name)
+
+        try:
+            self.model = SentenceTransformer(config.model_name)
+        except Exception as error:
+            raise RuntimeError(
+                f"Failed to load sentence-transformer model '{config.model_name}'. "
+                f"Verify the model name is correct and you have network access "
+                f"for first-time downloads. Error: {error}"
+            ) from error
+
         self.model.to(self.device)
         self._truncation_warned = False
 
@@ -39,11 +52,11 @@ class TransformerVectorizer:
         """Embed text windows into vector representations.
 
         Args:
-            windows: Iterable of text windows to embed
+            windows: Iterable of text windows to embed.
 
         Yields:
-            Tuples of (window, embedding) where embeddings are normalized
-            numpy arrays
+            Tuples of (window, embedding) where embeddings are L2-normalized
+            numpy arrays.
         """
         window_list = list(windows)
 
@@ -53,7 +66,6 @@ class TransformerVectorizer:
         if not self._truncation_warned:
             self._check_truncation_warning(window_list)
 
-        # clear GPU cache before starting
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
@@ -77,17 +89,13 @@ class TransformerVectorizer:
                 normalize_embeddings=True,
             )
 
-            # aggressive memory cleanup
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-
             yield from zip(batch, embeddings, strict=False)
 
     def _check_truncation_warning(self, windows: list[TextWindow]) -> None:
         """Check if windows are likely to be truncated and warn user.
 
         Args:
-            windows: List of windows to check
+            windows: List of windows to check.
         """
         if not windows:
             return
@@ -132,5 +140,5 @@ class TransformerVectorizer:
                     stacklevel=3,
                 )
                 self._truncation_warned = True
-        except Exception:
-            pass
+        except (AttributeError, TypeError, ValueError):
+            logging.getLogger(__name__).debug("Could not check truncation warning", exc_info=True)
