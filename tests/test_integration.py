@@ -33,6 +33,7 @@ class TestIntegration:
             result = analyzer.analyze_file_detailed(temp_path)
 
             # verify result structure
+            assert result.total_lines == 43
             assert result.total_windows > 0
             assert result.significant_windows > 0
             assert result.merged_blocks >= 0
@@ -53,6 +54,7 @@ class TestIntegration:
             analyzer = SemanticLogAnalyzer(config)
             result = analyzer.analyze_file_detailed(temp_path)
 
+            assert result.total_lines == 0
             assert result.total_windows == 0
             assert result.significant_windows == 0
             assert result.merged_blocks == 0
@@ -73,6 +75,7 @@ class TestIntegration:
             analyzer = SemanticLogAnalyzer(config)
             result = analyzer.analyze_file_detailed(temp_path)
 
+            assert result.total_lines == 1
             assert result.total_windows == 1
             # single window gets score 0.0, might not be selected
             assert result.processing_time > 0

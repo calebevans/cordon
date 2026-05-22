@@ -166,7 +166,6 @@ class DensityAnomalyScorer:
                     ScoredWindow(
                         window=windows[global_idx],
                         score=float(batch_scores[local_idx]),
-                        embedding=embeddings_np[global_idx],
                     )
                 )
 
@@ -196,8 +195,8 @@ class DensityAnomalyScorer:
             return []
 
         if len(embedded_windows) == 1:
-            window, embedding = embedded_windows[0]
-            return [ScoredWindow(window=window, score=0.0, embedding=embedding)]
+            window, _ = embedded_windows[0]
+            return [ScoredWindow(window=window, score=0.0)]
 
         from cordon.core.device import detect_device
 

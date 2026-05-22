@@ -160,19 +160,15 @@ def analyze_file(
         print(f"Error: Not a file: {log_path}", file=sys.stderr)
         return
 
-    # count lines in file
-    with open(log_path) as log_file:
-        line_count = sum(1 for _ in log_file)
-
     print("=" * 80)
     print(f"Analyzing: {log_path}")
-    print(f"Total lines: {line_count:,}")
     print("=" * 80)
 
-    if detailed:
-        # run detailed analysis
-        result = analyzer.analyze_file_detailed(log_path)
+    result = analyzer.analyze_file_detailed(log_path)
 
+    print(f"Total lines: {result.total_lines:,}")
+
+    if detailed:
         print("\nAnalysis Statistics:")
         print(f"  Total windows created: {result.total_windows:,}")
         print(f"  Significant windows: {result.significant_windows:,}")
@@ -188,22 +184,11 @@ def analyze_file(
         print(f"\n{'Significant Blocks':^80}")
         print("=" * 80)
 
-        # write output to file or stdout
-        if output_path:
-            output_path.write_text(result.output)
-            print(f"Anomalous blocks written to: {output_path}")
-        else:
-            print(result.output)
+    if output_path:
+        output_path.write_text(result.output)
+        print(f"Anomalous blocks written to: {output_path}")
     else:
-        # run simple analysis
-        output = analyzer.analyze_file(log_path)
-
-        # write output to file or stdout
-        if output_path:
-            output_path.write_text(output)
-            print(f"Anomalous blocks written to: {output_path}")
-        else:
-            print(output)
+        print(result.output)
 
     print()
 
