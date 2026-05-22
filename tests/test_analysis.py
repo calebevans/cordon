@@ -1,6 +1,7 @@
 """Tests for analysis module."""
 
 import numpy as np
+import pytest
 import torch
 
 from cordon.analysis.scorer import DensityAnomalyScorer
@@ -39,9 +40,7 @@ class TestDensityAnomalyScorer:
             TextWindow(content="test", start_line=i, end_line=i, window_id=i - 1)
             for i in range(1, 6)
         ]
-        # all embeddings very similar
         embeddings = [np.array([0.1, 0.2, 0.3]) + np.random.randn(3) * 0.01 for _ in range(5)]
-        # normalize
         embeddings = [e / np.linalg.norm(e) for e in embeddings]
         embedded = list(zip(windows, embeddings, strict=False))
         config = AnalysisConfig(k_neighbors=3)
@@ -49,8 +48,8 @@ class TestDensityAnomalyScorer:
         scorer = DensityAnomalyScorer()
         scored = scorer.score_windows(embedded, config)
 
-        # all scores should be relatively small
         for sw in scored:
+            assert sw.score >= 0.0
             assert sw.score < 0.2
 
     def test_score_diverse_windows(self) -> None:
@@ -59,10 +58,8 @@ class TestDensityAnomalyScorer:
             TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
             for i in range(1, 7)
         ]
-        # create 5 similar embeddings and 1 outlier
         embeddings = [np.array([0.1, 0.2, 0.3]) for _ in range(5)]
-        embeddings.append(np.array([0.9, 0.1, 0.1]))  # outlier
-        # normalize
+        embeddings.append(np.array([0.9, 0.1, 0.1]))
         embeddings = [e / np.linalg.norm(e) for e in embeddings]
         embedded = list(zip(windows, embeddings, strict=False))
         config = AnalysisConfig(k_neighbors=3)
@@ -70,7 +67,8 @@ class TestDensityAnomalyScorer:
         scorer = DensityAnomalyScorer()
         scored = scorer.score_windows(embedded, config)
 
-        # outlier (last window) should have highest score
+        for sw in scored:
+            assert sw.score >= 0.0
         assert scored[-1].score > scored[0].score
 
     def test_large_dataset_consistency(self) -> None:
@@ -133,20 +131,17 @@ class TestDensityAnomalyScorer:
         embeddings = [e / np.linalg.norm(e) for e in embeddings]
         embedded = list(zip(windows, embeddings, strict=False))
 
-        # only run if GPU is available
         if torch.cuda.is_available():
             device = "cuda"
         elif torch.backends.mps.is_available():
             device = "mps"
         else:
-            # skip test if no GPU available
-            return
+            pytest.skip("No GPU available")
 
         config = AnalysisConfig(k_neighbors=3, device=device, scoring_batch_size=5)
         scorer = DensityAnomalyScorer()
-        scored = scorer._score_windows_gpu(embedded, config, device)
+        scored = scorer._score_windows(embedded, config, device)
 
-        # verify results
         assert len(scored) == 10
         for sw in scored:
             assert sw.score >= 0.0
@@ -177,7 +172,6 @@ class TestDensityAnomalyScorer:
 
     def test_pytorch_gpu_availability(self) -> None:
         """Test that PyTorch GPU implementation runs if GPU is available."""
-        # this test will use GPU if available, otherwise skip to CPU
         windows = [
             TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
             for i in range(1, 11)
@@ -186,15 +180,60 @@ class TestDensityAnomalyScorer:
         embeddings = [e / np.linalg.norm(e) for e in embeddings]
         embedded = list(zip(windows, embeddings, strict=False))
 
-        # test with auto-detected device
         config = AnalysisConfig(k_neighbors=3, scoring_batch_size=5)
         scorer = DensityAnomalyScorer()
         scored = scorer.score_windows(embedded, config)
 
-        # should work regardless of GPU availability
         assert len(scored) == 10
         for sw in scored:
             assert sw.score >= 0.0
+
+    def test_score_two_windows(self) -> None:
+        """Test scoring with only 2 windows to verify chunk_size clamping."""
+        windows = [
+            TextWindow(content="a", start_line=1, end_line=1, window_id=0),
+            TextWindow(content="b", start_line=2, end_line=2, window_id=1),
+        ]
+        embeddings = [
+            np.array([1.0, 0.0, 0.0], dtype=np.float32),
+            np.array([0.0, 1.0, 0.0], dtype=np.float32),
+        ]
+        embedded = list(zip(windows, embeddings, strict=False))
+        config = AnalysisConfig(k_neighbors=1, device="cpu", scoring_batch_size=5)
+
+        scorer = DensityAnomalyScorer()
+        scored = scorer.score_windows(embedded, config)
+
+        assert len(scored) == 2
+        for sw in scored:
+            assert sw.score >= 0.0
+            assert isinstance(sw.score, float)
+
+    def test_score_unnormalized_embeddings(self) -> None:
+        """Test that unnormalized embeddings still produce valid scores.
+
+        The scorer normalizes internally, so raw embeddings with arbitrary
+        norms should still yield non-negative, finite scores.
+        """
+        windows = [
+            TextWindow(content=f"test{i}", start_line=i, end_line=i, window_id=i - 1)
+            for i in range(1, 11)
+        ]
+        np.random.seed(99)
+        embeddings = [np.random.randn(8).astype(np.float32) * 5.0 for _ in range(10)]
+        norms = [np.linalg.norm(e) for e in embeddings]
+        assert all(abs(n - 1.0) > 0.1 for n in norms), "Embeddings should not be unit norm"
+
+        embedded = list(zip(windows, embeddings, strict=False))
+        config = AnalysisConfig(k_neighbors=3, device="cpu", scoring_batch_size=5)
+
+        scorer = DensityAnomalyScorer()
+        scored = scorer.score_windows(embedded, config)
+
+        assert len(scored) == 10
+        for sw in scored:
+            assert sw.score >= 0.0
+            assert np.isfinite(sw.score)
 
 
 class TestThresholder:
