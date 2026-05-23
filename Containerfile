@@ -18,7 +18,7 @@ RUN mkdir -p src/cordon && touch src/cordon/__init__.py
 
 RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
 
-RUN CMAKE_ARGS="-DGGML_VULKAN=on" \
+RUN CMAKE_ARGS="-DGGML_VULKAN=on" CMAKE_BUILD_PARALLEL_LEVEL=2 \
     uv pip install --system ".[llama-cpp]"
 
 COPY src/ ./src/
