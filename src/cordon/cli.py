@@ -137,38 +137,90 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Save anomalous blocks to file (default: print to stdout)",
     )
+    output_group.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite output file if it exists",
+    )
 
     return parser.parse_args()
 
 
+def _validate_file(log_path: Path) -> bool:
+    """Check that a log file exists and is a regular file.
+
+    Args:
+        log_path: Path to the log file to validate.
+
+    Returns:
+        True if the file is valid, False otherwise.
+    """
+    if not log_path.exists():
+        print(f"Error: File not found: {log_path}", file=sys.stderr)
+        return False
+    if not log_path.is_file():
+        print(f"Error: Not a file: {log_path}", file=sys.stderr)
+        return False
+    return True
+
+
+def _write_output(content: str, output_path: Path, force: bool) -> None:
+    """Write analysis output to a file with overwrite protection.
+
+    Args:
+        content: The content to write.
+        output_path: Destination file path.
+        force: If True, overwrite an existing file.
+    """
+    if output_path.exists() and not force:
+        print(
+            f"Error: Output file already exists: {output_path}",
+            file=sys.stderr,
+        )
+        print("Use --force to overwrite.", file=sys.stderr)
+        return
+
+    try:
+        output_path.write_text(content)
+        print(f"Anomalous blocks written to: {output_path}")
+    except OSError as error:
+        print(f"Error writing output file: {error}", file=sys.stderr)
+
+
 def analyze_file(
-    log_path: Path, analyzer: SemanticLogAnalyzer, detailed: bool, output_path: Path | None = None
+    log_path: Path,
+    analyzer: SemanticLogAnalyzer,
+    detailed: bool,
+    output_path: Path | None = None,
+    force: bool = False,
 ) -> None:
     """Analyze a single log file and print results.
 
     Args:
-        log_path: Path to the log file
-        analyzer: Configured SemanticLogAnalyzer instance
-        detailed: Whether to show detailed statistics
-        output_path: Optional path to save anomalous blocks (None = stdout)
+        log_path: Path to the log file.
+        analyzer: Configured SemanticLogAnalyzer instance.
+        detailed: Whether to show detailed statistics.
+        output_path: Optional path to save anomalous blocks (None prints to stdout).
+        force: If True, overwrite an existing output file.
     """
-    # verify file exists and is readable
-    if not log_path.exists():
-        print(f"Error: File not found: {log_path}", file=sys.stderr)
-        return
-    if not log_path.is_file():
-        print(f"Error: Not a file: {log_path}", file=sys.stderr)
+    if not _validate_file(log_path):
         return
 
     print("=" * 80)
     print(f"Analyzing: {log_path}")
     print("=" * 80)
 
-    result = analyzer.analyze_file_detailed(log_path)
-
-    print(f"Total lines: {result.total_lines:,}")
+    try:
+        if detailed:
+            result = analyzer.analyze_file_detailed(log_path)
+        else:
+            output = analyzer.analyze_file(log_path)
+    except Exception as error:
+        print(f"Error analyzing {log_path}: {error}", file=sys.stderr)
+        return
 
     if detailed:
+        print(f"Total lines: {result.total_lines:,}")
         print("\nAnalysis Statistics:")
         print(f"  Total windows created: {result.total_windows:,}")
         print(f"  Significant windows: {result.significant_windows:,}")
@@ -184,11 +236,14 @@ def analyze_file(
         print(f"\n{'Significant Blocks':^80}")
         print("=" * 80)
 
-    if output_path:
-        output_path.write_text(result.output)
-        print(f"Anomalous blocks written to: {output_path}")
+        content = result.output
     else:
-        print(result.output)
+        content = output
+
+    if output_path:
+        _write_output(content, output_path, force)
+    else:
+        print(content)
 
     print()
 
@@ -223,8 +278,8 @@ def _print_filtering_mode(config: AnalysisConfig) -> None:
         print(f"Filtering mode: Percentile (top {config.anomaly_percentile*100:.1f}%)")
 
 
-def main() -> None:
-    """Main entry point for the CLI."""
+def _main_impl() -> None:
+    """Implementation of the main CLI entry point."""
     args = parse_args()
 
     # handle anomaly range vs percentile mutual exclusivity
@@ -233,10 +288,8 @@ def main() -> None:
     anomaly_percentile = args.anomaly_percentile
 
     if args.anomaly_range is not None:
-        # Using range mode
         anomaly_range_min = args.anomaly_range[0]
         anomaly_range_max = args.anomaly_range[1]
-        # Keep default percentile value (not used in range mode)
         if not isclose(args.anomaly_percentile, 0.1):
             print(
                 "Warning: --anomaly-percentile is ignored when using --anomaly-range",
@@ -288,7 +341,16 @@ def main() -> None:
 
     # analyze each log file
     for log_path in args.logfiles:
-        analyze_file(log_path, analyzer, args.detailed, args.output)
+        analyze_file(log_path, analyzer, args.detailed, args.output, args.force)
+
+
+def main() -> None:
+    """Main entry point for the CLI."""
+    try:
+        _main_impl()
+    except KeyboardInterrupt:
+        print("\nInterrupted.", file=sys.stderr)
+        sys.exit(130)
 
 
 if __name__ == "__main__":
