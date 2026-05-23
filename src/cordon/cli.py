@@ -117,6 +117,12 @@ def parse_args() -> argparse.Namespace:
         help="Device for embedding and scoring (default: auto-detect)",
     )
     config_group.add_argument(
+        "--max-line-length",
+        type=int,
+        default=None,
+        help="Maximum characters per line before splitting into virtual lines (default: no limit)",
+    )
+    config_group.add_argument(
         "--scoring-batch-size",
         type=int,
         default=None,
@@ -300,6 +306,7 @@ def _main_impl() -> None:
     try:
         config = AnalysisConfig(
             window_size=args.window_size,
+            max_line_length=args.max_line_length,
             k_neighbors=args.k_neighbors,
             anomaly_percentile=anomaly_percentile,
             anomaly_range_min=anomaly_range_min,

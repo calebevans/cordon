@@ -156,3 +156,14 @@ class TestAnalysisConfig:
         )
         assert config.anomaly_range_min == 0.05
         assert config.anomaly_range_max == 0.15
+
+    def test_max_line_length_validation(self) -> None:
+        """Test that max_line_length must be >= 1 if set."""
+        with pytest.raises(ValueError, match="max_line_length"):
+            AnalysisConfig(max_line_length=0)
+        with pytest.raises(ValueError, match="max_line_length"):
+            AnalysisConfig(max_line_length=-1)
+        config = AnalysisConfig(max_line_length=None)
+        assert config.max_line_length is None
+        config = AnalysisConfig(max_line_length=500)
+        assert config.max_line_length == 500

@@ -1,6 +1,9 @@
 """Unit tests for sentence-transformers embedder backend."""
 
-from unittest.mock import patch
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -8,10 +11,14 @@ import pytest
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import TextWindow
 
+if TYPE_CHECKING:
+    from cordon.embedding.transformer import TransformerEmbedder
+
 
 class TestTransformerEmbedderConfiguration:
     """Tests for TransformerEmbedder configuration and initialization."""
 
+    @pytest.mark.integration
     def test_default_backend_creates_transformer(self) -> None:
         """Test that default backend creates TransformerEmbedder."""
         from cordon.embedding import create_embedder
@@ -23,6 +30,7 @@ class TestTransformerEmbedderConfiguration:
 
         assert isinstance(embedder, TransformerEmbedder)
 
+    @pytest.mark.integration
     def test_explicit_sentence_transformers_backend(self) -> None:
         """Test explicit sentence-transformers backend selection."""
         from cordon.embedding import create_embedder
@@ -34,6 +42,7 @@ class TestTransformerEmbedderConfiguration:
 
         assert isinstance(embedder, TransformerEmbedder)
 
+    @pytest.mark.integration
     def test_device_detection(self) -> None:
         """Test device detection logic."""
         from cordon.embedding.transformer import TransformerEmbedder
@@ -43,6 +52,7 @@ class TestTransformerEmbedderConfiguration:
 
         assert embedder.device == "cpu"
 
+    @pytest.mark.integration
     def test_custom_model_name(self) -> None:
         """Test custom model name configuration."""
         from cordon.embedding.transformer import TransformerEmbedder
@@ -53,7 +63,7 @@ class TestTransformerEmbedderConfiguration:
         assert embedder.config.model_name == "all-MiniLM-L6-v2"
 
     @patch("cordon.embedding.transformer.SentenceTransformer")
-    def test_model_loading_failure(self, mock_st) -> None:
+    def test_model_loading_failure(self, mock_st: MagicMock) -> None:
         """Test that model loading failure raises RuntimeError."""
         mock_st.side_effect = OSError("Model not found")
         with pytest.raises(RuntimeError, match="Failed to load"):
@@ -62,11 +72,12 @@ class TestTransformerEmbedderConfiguration:
             TransformerEmbedder(AnalysisConfig(device="cpu"))
 
 
+@pytest.mark.integration
 class TestTransformerEmbedderEmbedding:
     """Tests for TransformerEmbedder embedding functionality."""
 
     @pytest.fixture
-    def embedder(self):
+    def embedder(self) -> TransformerEmbedder:
         """Create a TransformerEmbedder instance for testing."""
         from cordon.embedding.transformer import TransformerEmbedder
 
@@ -176,6 +187,7 @@ class TestTransformerEmbedderEmbedding:
             assert embedding.shape[0] > 0
 
 
+@pytest.mark.integration
 class TestTransformerEmbedderIntegration:
     """Integration tests with the full analysis pipeline."""
 
@@ -190,3 +202,42 @@ class TestTransformerEmbedderIntegration:
 
         assert isinstance(embedder, TransformerEmbedder)
         assert embedder.config.backend == "sentence-transformers"
+
+
+class TestTransformerEmbedderUnit:
+    """Unit tests for TransformerEmbedder with mocked SentenceTransformer."""
+
+    @pytest.fixture
+    @patch("cordon.embedding.transformer.SentenceTransformer")
+    def embedder(self, mock_st: MagicMock) -> TransformerEmbedder:
+        """Create a TransformerEmbedder with a mocked model."""
+        from cordon.embedding.transformer import TransformerEmbedder
+
+        mock_model = MagicMock()
+        rng = np.random.default_rng(0)
+        raw = rng.standard_normal((1, 384)).astype(np.float32)
+        mock_model.encode.return_value = raw / np.linalg.norm(raw, axis=1, keepdims=True)
+        mock_st.return_value = mock_model
+
+        config = AnalysisConfig(device="cpu", batch_size=2)
+        return TransformerEmbedder(config)
+
+    def test_embed_returns_normalized_vectors(self, embedder: TransformerEmbedder) -> None:
+        """Test that mocked embedding produces normalized output."""
+        window = TextWindow(content="test content", start_line=1, end_line=1, window_id=0)
+        results = list(embedder.embed_windows([window]))
+
+        assert len(results) == 1
+        _, embedding = results[0]
+        assert isinstance(embedding, np.ndarray)
+        assert embedding.dtype == np.float32
+        norm = np.linalg.norm(embedding)
+        assert np.isclose(norm, 1.0, atol=1e-6)
+
+    def test_embed_preserves_window_identity(self, embedder: TransformerEmbedder) -> None:
+        """Test that embedding preserves the original window object."""
+        window = TextWindow(content="log entry", start_line=5, end_line=5, window_id=3)
+        results = list(embedder.embed_windows([window]))
+
+        result_window, _ = results[0]
+        assert result_window == window

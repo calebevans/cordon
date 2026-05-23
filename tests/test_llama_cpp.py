@@ -1,12 +1,18 @@
 """Unit tests for llama.cpp embedder backend."""
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import TextWindow
+
+if TYPE_CHECKING:
+    from cordon.embedding.llama_cpp import LlamaCppEmbedder
 
 
 class TestLlamaCppEmbedderConfiguration:
@@ -119,7 +125,7 @@ class TestLlamaCppEmbedderEmbedding:
         return model_path
 
     @pytest.fixture
-    def embedder(self, model_path: str):
+    def embedder(self, model_path: str) -> LlamaCppEmbedder:
         """Create a LlamaCppEmbedder instance for testing."""
         pytest.importorskip("llama_cpp")
 

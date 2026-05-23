@@ -92,3 +92,57 @@ class TestSlidingWindowSegmenter:
 
         for i, window in enumerate(windows):
             assert window.window_id == i
+
+    def test_split_long_line_at_limit(self) -> None:
+        """Test that a line exactly at max_line_length is not split."""
+        config = AnalysisConfig(window_size=2, max_line_length=10)
+        lines = iter([(1, "0123456789"), (2, "abcdefghij")])
+        segmenter = SlidingWindowSegmenter()
+        windows = list(segmenter.segment(lines, config))
+        assert len(windows) == 1
+        assert windows[0].start_line == 1
+        assert windows[0].end_line == 2
+
+    def test_split_long_line_exceeds_limit(self) -> None:
+        """Test that a line exceeding max_line_length is split into virtual lines."""
+        config = AnalysisConfig(window_size=3, max_line_length=5)
+        lines = iter([(1, "abcdefghijklmno")])
+        segmenter = SlidingWindowSegmenter()
+        windows = list(segmenter.segment(lines, config))
+        assert len(windows) == 1
+        assert windows[0].start_line == 1
+        assert windows[0].end_line == 1
+        assert "abcde" in windows[0].content
+        assert "fghij" in windows[0].content
+        assert "klmno" in windows[0].content
+
+    def test_split_creates_multiple_windows(self) -> None:
+        """Test that a very long line creates multiple windows."""
+        config = AnalysisConfig(window_size=2, max_line_length=5)
+        lines = iter([(1, "abcdefghijklmnopqrst")])
+        segmenter = SlidingWindowSegmenter()
+        windows = list(segmenter.segment(lines, config))
+        assert len(windows) == 2
+        assert windows[0].start_line == 1
+        assert windows[0].end_line == 1
+        assert windows[1].start_line == 1
+        assert windows[1].end_line == 1
+
+    def test_no_split_when_under_limit(self) -> None:
+        """Test that short lines are not split."""
+        config = AnalysisConfig(window_size=2, max_line_length=100)
+        lines = iter([(1, "short"), (2, "lines")])
+        segmenter = SlidingWindowSegmenter()
+        windows = list(segmenter.segment(lines, config))
+        assert len(windows) == 1
+        assert "short" in windows[0].content
+        assert "lines" in windows[0].content
+
+    def test_no_split_when_disabled(self) -> None:
+        """Test that max_line_length=None disables splitting."""
+        config = AnalysisConfig(window_size=1, max_line_length=None)
+        lines = iter([(1, "a" * 10000)])
+        segmenter = SlidingWindowSegmenter()
+        windows = list(segmenter.segment(lines, config))
+        assert len(windows) == 1
+        assert len(windows[0].content) == 10000

@@ -38,14 +38,13 @@ class Thresholder:
 
             scores = np.array([sw.score for sw in scored_windows])
 
-            # Calculate percentile thresholds
-            # e.g., min=0.05 (exclude top 5%) -> 95th percentile
-            # e.g., max=0.15 (include up to 15%) -> 85th percentile
-            upper_percentile = (1 - config.anomaly_range_min) * 100
-            lower_percentile = (1 - config.anomaly_range_max) * 100
+            # anomaly_range_min = fraction to exclude from top (e.g., 0.05 = exclude top 5%)
+            # anomaly_range_max = cumulative fraction to include (e.g., 0.15 = include up to top 15%)
+            exclusion_cutoff = (1 - config.anomaly_range_min) * 100
+            inclusion_floor = (1 - config.anomaly_range_max) * 100
 
-            upper_threshold = np.percentile(scores, upper_percentile)
-            lower_threshold = np.percentile(scores, lower_percentile)
+            upper_threshold = np.percentile(scores, exclusion_cutoff)
+            lower_threshold = np.percentile(scores, inclusion_floor)
 
             # Select windows in the range: lower <= score < upper
             selected = [

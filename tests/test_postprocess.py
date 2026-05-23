@@ -1,5 +1,5 @@
 from cordon.core.types import MergedBlock, ScoredWindow, TextWindow
-from cordon.postprocess.formatter import OutputFormatter
+from cordon.postprocess.formatter import XmlFormatter
 from cordon.postprocess.merger import IntervalMerger
 
 
@@ -119,15 +119,15 @@ class TestIntervalMerger:
         assert merged[0].end_line == 5
 
 
-class TestOutputFormatter:
-    """Tests for OutputFormatter class."""
+class TestXmlFormatter:
+    """Tests for XmlFormatter class."""
 
     def test_format_single_block(self) -> None:
         """Test formatting a single block."""
         lines = [(1, "line 1"), (2, "line 2"), (3, "line 3")]
         blocks = [MergedBlock(start_line=1, end_line=2, original_windows=(0,), max_score=0.8)]
 
-        formatter = OutputFormatter()
+        formatter = XmlFormatter()
         output = formatter.format_blocks(blocks, lines)
 
         assert '<?xml version="1.0" encoding="UTF-8"?>' in output
@@ -146,7 +146,7 @@ class TestOutputFormatter:
             MergedBlock(start_line=5, end_line=7, original_windows=(1,), max_score=0.9),
         ]
 
-        formatter = OutputFormatter()
+        formatter = XmlFormatter()
         output = formatter.format_blocks(blocks, lines)
 
         assert '<?xml version="1.0" encoding="UTF-8"?>' in output
@@ -161,7 +161,7 @@ class TestOutputFormatter:
         lines = [(1, "line 1")]
         blocks: list[MergedBlock] = []
 
-        formatter = OutputFormatter()
+        formatter = XmlFormatter()
         output = formatter.format_blocks(blocks, lines)
 
         assert output == '<?xml version="1.0" encoding="UTF-8"?>\n<anomalies></anomalies>'
@@ -175,7 +175,7 @@ class TestOutputFormatter:
         ]
         blocks = [MergedBlock(start_line=1, end_line=3, original_windows=(0,), max_score=0.8)]
 
-        formatter = OutputFormatter()
+        formatter = XmlFormatter()
         output = formatter.format_blocks(blocks, lines)
 
         assert '<?xml version="1.0" encoding="UTF-8"?>' in output
@@ -198,7 +198,7 @@ class TestOutputFormatter:
             MergedBlock(start_line=7, end_line=8, original_windows=(1,), max_score=0.9),
         ]
 
-        formatter = OutputFormatter()
+        formatter = XmlFormatter()
         output = formatter.format_blocks(blocks, lines)
 
         assert "line 7" in output
@@ -215,7 +215,7 @@ class TestOutputFormatter:
             MergedBlock(start_line=2, end_line=10, original_windows=(0,), max_score=0.8),
         ]
 
-        formatter = OutputFormatter()
+        formatter = XmlFormatter()
         output = formatter.format_blocks(blocks, lines)
 
         assert "line 2" in output
@@ -230,7 +230,7 @@ class TestOutputFormatter:
             MergedBlock(start_line=2, end_line=3, original_windows=(0,), max_score=0.7),
         ]
 
-        formatter = OutputFormatter()
+        formatter = XmlFormatter()
         output = formatter.format_blocks(blocks, lines)
 
         block_2_pos = output.index('<block lines="2-3"')
