@@ -42,14 +42,12 @@ class ScoredWindow:
     """Window with its anomaly score.
 
     Attributes:
-        window: The text window
-        score: Anomaly score (higher = more anomalous)
-        embedding: Vector embedding for downstream use
+        window: The text window.
+        score: Anomaly score (higher = more anomalous).
     """
 
     window: TextWindow
     score: float
-    embedding: npt.NDArray[np.floating[Any]]
 
     def __post_init__(self) -> None:
         """Validate score is non-negative."""
@@ -90,15 +88,17 @@ class AnalysisResult:
     """Complete analysis result with metadata.
 
     Attributes:
-        output: Formatted output string with XML tags
-        total_windows: Total number of windows created
-        significant_windows: Number of windows above threshold
-        merged_blocks: Number of merged blocks in output
-        score_distribution: Statistical summary of scores
-        processing_time: Total processing time in seconds
+        output: Formatted output string with XML tags.
+        total_lines: Total number of lines in the input file.
+        total_windows: Total number of windows created.
+        significant_windows: Number of windows above threshold.
+        merged_blocks: Number of merged blocks in output.
+        score_distribution: Statistical summary of scores.
+        processing_time: Total processing time in seconds.
     """
 
     output: str
+    total_lines: int
     total_windows: int
     significant_windows: int
     merged_blocks: int

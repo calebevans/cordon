@@ -1,6 +1,5 @@
 import dataclasses
 
-import numpy as np
 import pytest
 
 from cordon.core.config import AnalysisConfig
@@ -42,11 +41,9 @@ class TestScoredWindow:
     def test_valid_scored_window(self) -> None:
         """Test creating a valid scored window."""
         window = TextWindow(content="test", start_line=1, end_line=5, window_id=0)
-        embedding = np.array([0.1, 0.2, 0.3])
-        scored = ScoredWindow(window=window, score=0.5, embedding=embedding)
+        scored = ScoredWindow(window=window, score=0.5)
         assert scored.window == window
         assert scored.score == 0.5
-        np.testing.assert_array_equal(scored.embedding, embedding)
 
 
 class TestMergedBlock:

@@ -29,6 +29,7 @@ class SemanticLogAnalyzer:
             config: Analysis configuration (uses defaults if None)
         """
         self.config = config if config is not None else AnalysisConfig()
+        self._vectorizer = create_vectorizer(self.config)
 
     def analyze_file(self, file_path: Path) -> str:
         """Analyze a log file and return formatted output.
@@ -55,20 +56,21 @@ class SemanticLogAnalyzer:
 
         # stage 1: ingestion
         reader = LogFileReader()
-        lines = reader.read_lines(file_path)
+        lines_list = list(reader.read_lines(file_path))
+        total_lines = len(lines_list)
 
         # stage 2: segmentation
         segmenter = SlidingWindowSegmenter()
-        windows = segmenter.segment(lines, self.config)
+        windows = segmenter.segment(iter(lines_list), self.config)
 
-        # stage 3: vectorization (using factory to select backend)
-        vectorizer = create_vectorizer(self.config)
-        embedded = list(vectorizer.embed_windows(windows))
+        # stage 3: vectorization
+        embedded = list(self._vectorizer.embed_windows(windows))
         total_windows = len(embedded)
 
         # stage 4: scoring
         scorer = DensityAnomalyScorer()
         scored = scorer.score_windows(embedded, self.config)
+        del embedded
 
         # stage 5: thresholding
         thresholder = Thresholder()
@@ -79,17 +81,20 @@ class SemanticLogAnalyzer:
         merger = IntervalMerger()
         merged = merger.merge_windows(significant)
         merged_blocks = len(merged)
+        del significant
 
         # stage 7: formatting
         formatter = OutputFormatter()
-        output = formatter.format_blocks(merged, file_path)
+        output = formatter.format_blocks(merged, lines_list)
 
         # calculate statistics
         processing_time = time.time() - start_time
         score_distribution = self._calculate_score_distribution(scored)
+        del scored
 
         return AnalysisResult(
             output=output,
+            total_lines=total_lines,
             total_windows=total_windows,
             significant_windows=significant_windows,
             merged_blocks=merged_blocks,

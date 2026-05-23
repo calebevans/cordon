@@ -1,9 +1,4 @@
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-
-import numpy as np
-
-from cordon.core.types import ScoredWindow, TextWindow
+from cordon.core.types import MergedBlock, ScoredWindow, TextWindow
 from cordon.postprocess.formatter import OutputFormatter
 from cordon.postprocess.merger import IntervalMerger
 
@@ -13,14 +8,15 @@ class TestIntervalMerger:
 
     def test_merge_no_overlap(self) -> None:
         """Test merging windows with no overlap."""
-        windows = [
-            TextWindow(content="w1", start_line=1, end_line=3, window_id=0),
-            TextWindow(content="w2", start_line=10, end_line=12, window_id=1),
-        ]
-        embeddings = [np.array([0.1]), np.array([0.2])]
         scored = [
-            ScoredWindow(window=w, score=0.5, embedding=e)
-            for w, e in zip(windows, embeddings, strict=False)
+            ScoredWindow(
+                window=TextWindow(content="w1", start_line=1, end_line=3, window_id=0),
+                score=0.5,
+            ),
+            ScoredWindow(
+                window=TextWindow(content="w2", start_line=10, end_line=12, window_id=1),
+                score=0.5,
+            ),
         ]
 
         merger = IntervalMerger()
@@ -34,15 +30,19 @@ class TestIntervalMerger:
 
     def test_merge_overlapping_windows(self) -> None:
         """Test merging overlapping windows."""
-        windows = [
-            TextWindow(content="w1", start_line=1, end_line=5, window_id=0),
-            TextWindow(content="w2", start_line=3, end_line=7, window_id=1),
-            TextWindow(content="w3", start_line=6, end_line=10, window_id=2),
-        ]
-        embeddings = [np.array([0.1]), np.array([0.2]), np.array([0.3])]
         scored = [
-            ScoredWindow(window=w, score=0.5, embedding=e)
-            for w, e in zip(windows, embeddings, strict=False)
+            ScoredWindow(
+                window=TextWindow(content="w1", start_line=1, end_line=5, window_id=0),
+                score=0.5,
+            ),
+            ScoredWindow(
+                window=TextWindow(content="w2", start_line=3, end_line=7, window_id=1),
+                score=0.5,
+            ),
+            ScoredWindow(
+                window=TextWindow(content="w3", start_line=6, end_line=10, window_id=2),
+                score=0.5,
+            ),
         ]
 
         merger = IntervalMerger()
@@ -55,14 +55,15 @@ class TestIntervalMerger:
 
     def test_merge_adjacent_windows(self) -> None:
         """Test merging adjacent windows (lines N and N+1)."""
-        windows = [
-            TextWindow(content="w1", start_line=1, end_line=5, window_id=0),
-            TextWindow(content="w2", start_line=6, end_line=10, window_id=1),
-        ]
-        embeddings = [np.array([0.1]), np.array([0.2])]
         scored = [
-            ScoredWindow(window=w, score=0.5, embedding=e)
-            for w, e in zip(windows, embeddings, strict=False)
+            ScoredWindow(
+                window=TextWindow(content="w1", start_line=1, end_line=5, window_id=0),
+                score=0.5,
+            ),
+            ScoredWindow(
+                window=TextWindow(content="w2", start_line=6, end_line=10, window_id=1),
+                score=0.5,
+            ),
         ]
 
         merger = IntervalMerger()
@@ -75,14 +76,15 @@ class TestIntervalMerger:
 
     def test_merge_preserves_max_score(self) -> None:
         """Test that merging preserves the maximum score."""
-        windows = [
-            TextWindow(content="w1", start_line=1, end_line=5, window_id=0),
-            TextWindow(content="w2", start_line=3, end_line=7, window_id=1),
-        ]
-        embeddings = [np.array([0.1]), np.array([0.2])]
         scored = [
-            ScoredWindow(window=windows[0], score=0.8, embedding=embeddings[0]),
-            ScoredWindow(window=windows[1], score=0.5, embedding=embeddings[1]),
+            ScoredWindow(
+                window=TextWindow(content="w1", start_line=1, end_line=5, window_id=0),
+                score=0.8,
+            ),
+            ScoredWindow(
+                window=TextWindow(content="w2", start_line=3, end_line=7, window_id=1),
+                score=0.5,
+            ),
         ]
 
         merger = IntervalMerger()
@@ -102,11 +104,11 @@ class TestIntervalMerger:
 
     def test_merge_single_window(self) -> None:
         """Test merging with a single window."""
-        windows = [TextWindow(content="w1", start_line=1, end_line=5, window_id=0)]
-        embeddings = [np.array([0.1])]
         scored = [
-            ScoredWindow(window=w, score=0.5, embedding=e)
-            for w, e in zip(windows, embeddings, strict=False)
+            ScoredWindow(
+                window=TextWindow(content="w1", start_line=1, end_line=5, window_id=0),
+                score=0.5,
+            ),
         ]
 
         merger = IntervalMerger()
@@ -122,182 +124,117 @@ class TestOutputFormatter:
 
     def test_format_single_block(self) -> None:
         """Test formatting a single block."""
-        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
-            f.write("line 1\n")
-            f.write("line 2\n")
-            f.write("line 3\n")
-            temp_path = Path(f.name)
+        lines = [(1, "line 1"), (2, "line 2"), (3, "line 3")]
+        blocks = [MergedBlock(start_line=1, end_line=2, original_windows=(0,), max_score=0.8)]
 
-        try:
-            from cordon.core.types import MergedBlock
+        formatter = OutputFormatter()
+        output = formatter.format_blocks(blocks, lines)
 
-            blocks = [MergedBlock(start_line=1, end_line=2, original_windows=(0,), max_score=0.8)]
-
-            formatter = OutputFormatter()
-            output = formatter.format_blocks(blocks, temp_path)
-
-            assert '<?xml version="1.0" encoding="UTF-8"?>' in output
-            assert "<anomalies>" in output
-            assert "</anomalies>" in output
-            assert '<block lines="1-2" score="0.8000">' in output
-            assert "line 1\n" in output
-            assert "line 2\n" in output
-            assert "</block>" in output
-        finally:
-            temp_path.unlink()
+        assert '<?xml version="1.0" encoding="UTF-8"?>' in output
+        assert "<anomalies>" in output
+        assert "</anomalies>" in output
+        assert '<block lines="1-2" score="0.8000">' in output
+        assert "line 1" in output
+        assert "line 2" in output
+        assert "</block>" in output
 
     def test_format_multiple_blocks(self) -> None:
         """Test formatting multiple blocks."""
-        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
-            for i in range(1, 11):
-                f.write(f"line {i}\n")
-            temp_path = Path(f.name)
+        lines = [(i, f"line {i}") for i in range(1, 11)]
+        blocks = [
+            MergedBlock(start_line=1, end_line=2, original_windows=(0,), max_score=0.8),
+            MergedBlock(start_line=5, end_line=7, original_windows=(1,), max_score=0.9),
+        ]
 
-        try:
-            from cordon.core.types import MergedBlock
+        formatter = OutputFormatter()
+        output = formatter.format_blocks(blocks, lines)
 
-            blocks = [
-                MergedBlock(start_line=1, end_line=2, original_windows=(0,), max_score=0.8),
-                MergedBlock(start_line=5, end_line=7, original_windows=(1,), max_score=0.9),
-            ]
-
-            formatter = OutputFormatter()
-            output = formatter.format_blocks(blocks, temp_path)
-
-            assert '<?xml version="1.0" encoding="UTF-8"?>' in output
-            assert "<anomalies>" in output
-            assert "</anomalies>" in output
-            assert '<block lines="1-2" score="0.8000">' in output
-            assert '<block lines="5-7" score="0.9000">' in output
-            assert output.count("</block>") == 2
-        finally:
-            temp_path.unlink()
+        assert '<?xml version="1.0" encoding="UTF-8"?>' in output
+        assert "<anomalies>" in output
+        assert "</anomalies>" in output
+        assert '<block lines="1-2" score="0.8000">' in output
+        assert '<block lines="5-7" score="0.9000">' in output
+        assert output.count("</block>") == 2
 
     def test_format_empty_blocks(self) -> None:
         """Test formatting with no blocks."""
-        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
-            f.write("line 1\n")
-            temp_path = Path(f.name)
+        lines = [(1, "line 1")]
+        blocks: list[MergedBlock] = []
 
-        try:
-            from cordon.core.types import MergedBlock
+        formatter = OutputFormatter()
+        output = formatter.format_blocks(blocks, lines)
 
-            blocks: list[MergedBlock] = []
-
-            formatter = OutputFormatter()
-            output = formatter.format_blocks(blocks, temp_path)
-
-            assert output == '<?xml version="1.0" encoding="UTF-8"?>\n<anomalies></anomalies>'
-        finally:
-            temp_path.unlink()
+        assert output == '<?xml version="1.0" encoding="UTF-8"?>\n<anomalies></anomalies>'
 
     def test_format_escapes_xml_special_chars(self) -> None:
         """Test that XML special characters are properly escaped."""
-        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
-            f.write("command: test |& tee file.txt\n")
-            f.write("error: x < y && z > 10\n")
-            f.write("message: \"quoted\" & 'single'\n")
-            temp_path = Path(f.name)
+        lines = [
+            (1, "command: test |& tee file.txt"),
+            (2, "error: x < y && z > 10"),
+            (3, "message: \"quoted\" & 'single'"),
+        ]
+        blocks = [MergedBlock(start_line=1, end_line=3, original_windows=(0,), max_score=0.8)]
 
-        try:
-            from cordon.core.types import MergedBlock
+        formatter = OutputFormatter()
+        output = formatter.format_blocks(blocks, lines)
 
-            blocks = [MergedBlock(start_line=1, end_line=3, original_windows=(0,), max_score=0.8)]
-
-            formatter = OutputFormatter()
-            output = formatter.format_blocks(blocks, temp_path)
-
-            # Verify XML structure
-            assert '<?xml version="1.0" encoding="UTF-8"?>' in output
-            assert "<anomalies>" in output
-            assert "</anomalies>" in output
-            # Verify XML special characters are escaped (& < > must be escaped in text content)
-            assert "&amp;" in output
-            assert "&lt;" in output
-            assert "&gt;" in output
-            # Verify the content is properly escaped
-            assert "command: test |&amp; tee file.txt" in output
-            assert "error: x &lt; y &amp;&amp; z &gt; 10" in output
-            # Verify raw special characters are not present where they should be escaped
-            assert "|& tee" not in output  # & should be escaped
-            assert "x < y" not in output  # < should be escaped
-            assert "z > 10" not in output  # > should be escaped
-        finally:
-            temp_path.unlink()
+        assert '<?xml version="1.0" encoding="UTF-8"?>' in output
+        assert "<anomalies>" in output
+        assert "</anomalies>" in output
+        assert "&amp;" in output
+        assert "&lt;" in output
+        assert "&gt;" in output
+        assert "command: test |&amp; tee file.txt" in output
+        assert "error: x &lt; y &amp;&amp; z &gt; 10" in output
+        assert "|& tee" not in output
+        assert "x < y" not in output
+        assert "z > 10" not in output
 
     def test_format_multi_block_content_correctness(self) -> None:
         """Test that multi-block formatting extracts correct content for each block."""
-        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
-            for i in range(1, 11):
-                f.write(f"line {i}\n")
-            temp_path = Path(f.name)
+        lines = [(i, f"line {i}") for i in range(1, 11)]
+        blocks = [
+            MergedBlock(start_line=2, end_line=3, original_windows=(0,), max_score=0.7),
+            MergedBlock(start_line=7, end_line=8, original_windows=(1,), max_score=0.9),
+        ]
 
-        try:
-            from cordon.core.types import MergedBlock
+        formatter = OutputFormatter()
+        output = formatter.format_blocks(blocks, lines)
 
-            blocks = [
-                MergedBlock(start_line=2, end_line=3, original_windows=(0,), max_score=0.7),
-                MergedBlock(start_line=7, end_line=8, original_windows=(1,), max_score=0.9),
-            ]
-
-            formatter = OutputFormatter()
-            output = formatter.format_blocks(blocks, temp_path)
-
-            assert "line 7" in output
-            assert "line 8" in output
-            assert '<block lines="7-8" score="0.9000">' in output
-            assert "line 2" in output
-            assert "line 3" in output
-            assert '<block lines="2-3" score="0.7000">' in output
-        finally:
-            temp_path.unlink()
+        assert "line 7" in output
+        assert "line 8" in output
+        assert '<block lines="7-8" score="0.9000">' in output
+        assert "line 2" in output
+        assert "line 3" in output
+        assert '<block lines="2-3" score="0.7000">' in output
 
     def test_format_truncated_file(self) -> None:
-        """Test formatting when file is shorter than block end_line indicates."""
-        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
-            f.write("line 1\n")
-            f.write("line 2\n")
-            f.write("line 3\n")
-            temp_path = Path(f.name)
+        """Test formatting when lines don't cover block end_line."""
+        lines = [(1, "line 1"), (2, "line 2"), (3, "line 3")]
+        blocks = [
+            MergedBlock(start_line=2, end_line=10, original_windows=(0,), max_score=0.8),
+        ]
 
-        try:
-            from cordon.core.types import MergedBlock
+        formatter = OutputFormatter()
+        output = formatter.format_blocks(blocks, lines)
 
-            blocks = [
-                MergedBlock(start_line=2, end_line=10, original_windows=(0,), max_score=0.8),
-            ]
-
-            formatter = OutputFormatter()
-            output = formatter.format_blocks(blocks, temp_path)
-
-            assert "line 2" in output
-            assert "line 3" in output
-            assert "</anomalies>" in output
-        finally:
-            temp_path.unlink()
+        assert "line 2" in output
+        assert "line 3" in output
+        assert "</anomalies>" in output
 
     def test_format_unsorted_block_input(self) -> None:
         """Test that blocks passed in unsorted order are output in correct order."""
-        with NamedTemporaryFile(mode="w", delete=False, suffix=".log") as f:
-            for i in range(1, 11):
-                f.write(f"line {i}\n")
-            temp_path = Path(f.name)
+        lines = [(i, f"line {i}") for i in range(1, 11)]
+        blocks = [
+            MergedBlock(start_line=7, end_line=8, original_windows=(1,), max_score=0.9),
+            MergedBlock(start_line=2, end_line=3, original_windows=(0,), max_score=0.7),
+        ]
 
-        try:
-            from cordon.core.types import MergedBlock
+        formatter = OutputFormatter()
+        output = formatter.format_blocks(blocks, lines)
 
-            blocks = [
-                MergedBlock(start_line=7, end_line=8, original_windows=(1,), max_score=0.9),
-                MergedBlock(start_line=2, end_line=3, original_windows=(0,), max_score=0.7),
-            ]
-
-            formatter = OutputFormatter()
-            output = formatter.format_blocks(blocks, temp_path)
-
-            block_2_pos = output.index('<block lines="2-3"')
-            block_7_pos = output.index('<block lines="7-8"')
-            assert block_2_pos < block_7_pos
-            assert "line 2" in output
-            assert "line 7" in output
-        finally:
-            temp_path.unlink()
+        block_2_pos = output.index('<block lines="2-3"')
+        block_7_pos = output.index('<block lines="7-8"')
+        assert block_2_pos < block_7_pos
+        assert "line 2" in output
+        assert "line 7" in output
