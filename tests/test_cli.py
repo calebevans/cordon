@@ -84,6 +84,12 @@ class TestParseArgs:
         args = parse_args()
         assert args.output_format == "xml"
 
+    def test_stdin_argument(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that '-' is accepted as a logfile argument for stdin."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "-"])
+        args = parse_args()
+        assert str(args.logfiles[0]) == "-"
+
 
 class TestAnalyzeFile:
     """Tests for analyze_file function."""
@@ -125,7 +131,7 @@ class TestAnalyzeFile:
         log_file.write_text("line 1\nline 2\n")
 
         analyzer = MagicMock()
-        analyzer.analyze_file.side_effect = ValueError("Bad input")
+        analyzer.analyze_file_detailed.side_effect = ValueError("Bad input")
 
         analyze_file(log_file, analyzer, detailed=False)
         captured = capsys.readouterr()
@@ -167,6 +173,9 @@ class TestAnalyzeFile:
         output_file.write_text("existing content")
 
         analyzer = MagicMock()
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies></anomalies>"
+        analyzer.analyze_file_detailed.return_value = mock_result
         analyze_file(
             log_file,
             analyzer,
@@ -188,7 +197,9 @@ class TestAnalyzeFile:
         output_file.write_text("existing content")
 
         analyzer = MagicMock()
-        analyzer.analyze_file.return_value = "<anomalies>new</anomalies>"
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies>new</anomalies>"
+        analyzer.analyze_file_detailed.return_value = mock_result
 
         analyze_file(
             log_file,
@@ -205,7 +216,9 @@ class TestAnalyzeFile:
         log_file.write_text("line 1\n")
 
         analyzer = MagicMock()
-        analyzer.analyze_file.return_value = "<anomalies>results</anomalies>"
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies>results</anomalies>"
+        analyzer.analyze_file_detailed.return_value = mock_result
 
         analyze_file(log_file, analyzer, detailed=False)
         captured = capsys.readouterr()
