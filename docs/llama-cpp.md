@@ -4,10 +4,10 @@ This guide explains how to use Cordon with the llama.cpp backend for GPU-acceler
 
 ## Overview
 
-Cordon supports two embedding backends:
+Cordon supports multiple embedding backends:
 
-1. **sentence-transformers** (default): Uses PyTorch, best for native installations
-2. **llama.cpp**: Uses GGUF models, enables GPU acceleration in containers via Vulkan
+1. **sentence-transformers** (default): Uses PyTorch via `TransformerEmbedder`, best for native installations
+2. **llama.cpp**: Uses GGUF models via `LlamaCppEmbedder`, enables GPU acceleration in containers via Vulkan
 
 ## Why llama.cpp?
 
@@ -19,8 +19,8 @@ Cordon supports two embedding backends:
 
 ### Trade-offs
 
-- **No Batching**: Processes embeddings one at a time
 - **Performance**: See benchmarks below - competitive with sentence-transformers on CPU, faster with GPU acceleration
+- **Download progress**: Uses `logging.info()` for model download status
 
 ### Recommendation
 
@@ -38,7 +38,7 @@ Tested on 2,000-line Apache log file (macOS, Podman machine with libkrun):
 | llama.cpp | GPU (Vulkan) | 22.20s | 47 | 19% faster than baseline, 8% faster than llama-cpp CPU |
 
 **Key Findings:**
-- llama.cpp CPU is 12% faster than sentence-transformers despite no batching
+- llama.cpp CPU is 12% faster than sentence-transformers (with batching and tqdm progress)
 - GPU acceleration provides an additional 8% speedup over CPU
 - CPU-only mode is fully functional for environments without GPU
 

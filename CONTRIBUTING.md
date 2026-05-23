@@ -53,7 +53,7 @@ pytest
 pytest --no-cov
 
 # Run a specific test file
-pytest tests/test_analyzer.py
+pytest tests/test_core.py
 
 # Run tests with verbose output
 pytest -v
@@ -163,6 +163,9 @@ When requesting features:
 ```bash
 # Test with sentence-transformers (default)
 cordon examples/apache_sample.log
+
+# Test with JSON output
+cordon --format json examples/apache_sample.log
 
 # Test with llama.cpp
 cordon --backend llama-cpp examples/apache_sample.log

@@ -91,9 +91,12 @@ Cordon uses **density scoring for anomaly detection** in **semantic embedding sp
 
 **Windowing converts variable-length logs into fixed-size semantic units.**
 
+File reading uses `errors="replace"` for encoding robustness, handling mixed-encoding logs without fallback logic.
+
 ```python
 # Configuration (defaults)
 window_size = 4  # Lines per window
+max_line_length = None  # Optional: split lines exceeding this character limit
 
 # Example
 Log lines:  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
@@ -122,7 +125,7 @@ Output: [0.23, -0.45, 0.12, ..., 0.67]  # 384-dimensional vector
 
 Cordon supports multiple embedding backends to balance performance, cost, and convenience:
 
-**Local Models (sentence-transformers)**
+**Local Models (sentence-transformers via `TransformerEmbedder`)**
 - **Default backend**: Fast, runs entirely on your machine
 - **No API costs**: Free inference once model is downloaded
 - **GPU acceleration**: Automatic CUDA/MPS support
@@ -136,7 +139,7 @@ cordon system.log
 cordon --model-name BAAI/bge-base-en-v1.5 system.log
 ```
 
-**Remote Models**
+**Remote Models (via `RemoteEmbedder`)**
 - **Cloud-hosted**: Offload computation to API providers
 - **Latest models**: Access state-of-the-art embedding models
 - **Scalable**: No local GPU required
@@ -196,6 +199,8 @@ window_size=10: ~500-600 tokens → exceeds 256 limit → only first ~4 lines an
 
 **Uses k-NN distance in embedding space to quantify "unusualness".**
 
+Scoring is unified into a single method that works on both GPU and CPU, using `F.normalize()` to guarantee unit-length embeddings before cosine distance computation.
+
 ```python
 k_neighbors = 5  # Number of nearest neighbors to consider
 
@@ -236,7 +241,7 @@ Score 0.30: "FATAL: Database corruption detected" (rare, semantically unique)
 
 ### 4. Thresholding
 
-**Selects anomalies using percentile or range filtering.**
+**Selects anomalies using percentile filtering, range filtering, or token budget.**
 
 #### Percentile Mode (Default)
 
@@ -284,6 +289,26 @@ cordon --anomaly-percentile 0.05 app.log > top5.xml
 cordon --anomaly-range 0.05 0.15 app.log > next10.xml
 ```
 
+#### Token Budget Mode
+
+**Trims output to fit within a specified token count, ideal for LLM context windows.**
+
+```python
+token_budget = 4096  # Maximum tokens in output
+
+1. Score and threshold windows normally (percentile or range)
+2. Merge adjacent windows into blocks
+3. Rank blocks by score (highest first)
+4. Include blocks until token budget is exhausted
+```
+
+Uses tiktoken for accurate token counting. Configurable encoding via `tokenizer_encoding`.
+
+```bash
+# Fit output into an LLM context window
+cordon --token-budget 4096 app.log
+```
+
 ### 5. Merging
 
 **Combines adjacent significant windows into contiguous blocks.**
@@ -301,7 +326,11 @@ Merged block: lines 10-30 (score=max(0.15, 0.18, 0.12) = 0.18)
 
 ### 6. Output Formatting
 
-**Generates pretty-printed, structured XML output with metadata.**
+**Generates structured output in XML or JSON format with metadata.**
+
+Cordon supports multiple output formats via the `--format` flag. The formatter accepts pre-read lines rather than re-reading the file, eliminating redundant I/O.
+
+#### XML Output (Default)
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -312,32 +341,30 @@ Merged block: lines 10-30 (score=max(0.15, 0.18, 0.12) = 0.18)
     [Sun Dec 04 07:18:00 2005] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties
     [Sun Dec 04 07:18:00 2005] [error] mod_jk child workerEnv in error state 7
     [Sun Dec 04 07:45:45 2005] [error] [client 63.13.186.196] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 08:54:17 2005] [error] [client 147.31.138.75] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 09:35:12 2005] [error] [client 207.203.80.15] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 10:53:30 2005] [error] [client 218.76.139.20] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 11:11:07 2005] [error] [client 24.147.151.74] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 11:33:18 2005] [error] [client 211.141.93.88] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 11:42:43 2005] [error] [client 216.127.124.16] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 12:33:13 2005] [error] [client 208.51.151.210] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 13:32:32 2005] [error] [client 65.68.235.27] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 14:29:00 2005] [error] [client 4.245.93.87] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 15:18:36 2005] [error] [client 67.154.58.130] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 15:59:01 2005] [error] [client 24.83.37.136] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 16:24:03 2005] [notice] jk2_init() Found child 1219 in scoreboard slot 6
-    [Sun Dec 04 16:24:05 2005] [error] [client 58.225.62.140] Directory index forbidden by rule: /var/www/html/
-    [Sun Dec 04 16:24:06 2005] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties
-    [Sun Dec 04 16:24:06 2005] [error] mod_jk child workerEnv in error state 6
-    [Sun Dec 04 16:31:07 2005] [notice] jk2_init() Found child 1248 in scoreboard slot 7
+    ...
   </block>
 
 </anomalies>
 ```
 
+#### JSON Output
+
+```json
+{
+  "anomalies": [
+    {
+      "lines": "581-600",
+      "score": 0.1746,
+      "content": "[Sun Dec 04 07:18:00 2005] [error] mod_jk child workerEnv in error state 6\n..."
+    }
+  ]
+}
+```
+
 **Output structure:**
-- Valid XML with proper declaration and root element
-- Pretty-printed with indentation for readability
-- XML special characters (`&`, `<`, `>`) are automatically escaped
-- Each `<block>` contains metadata and original log content
+- XML: Valid XML with proper declaration, pretty-printed with indentation, special characters escaped
+- JSON: Standard JSON with anomalies array, suitable for programmatic consumption
+- Each block contains line range, anomaly score, and original log content
 
 **Metadata included:**
 - **Line range**: References back to original file
@@ -355,13 +382,9 @@ Merged block: lines 10-30 (score=max(0.15, 0.18, 0.12) = 0.18)
 **Solutions:**
 1. **Lazy loading**: Read log lines on-demand
 2. **Streaming embeddings**: Process in batches, don't store all at once
-3. **Memory-mapped arrays**: Store embeddings on disk for huge logs
-
-**Automatic scaling:**
-```python
-< 50K windows:  In-memory NumPy arrays (fastest)
-≥ 50K windows:  Memory-mapped arrays (RAM-efficient, auto-enabled)
-```
+3. **Vectorizer caching**: Embedder is initialized once at pipeline construction and reused across files
+4. **Intermediate data release**: Embeddings are released after scoring; `ScoredWindow` stores only scores and metadata
+5. **Formatter accepts lines**: Output formatting receives pre-read lines rather than re-reading the file
 ### Batching Strategy
 
 **Embedding batches:**
