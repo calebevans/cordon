@@ -21,9 +21,7 @@ class LlamaCppVectorizer:
             config: Analysis configuration specifying model and parameters
         """
         self.config = config
-        if not config.model_path:
-            # Auto-download default model and update config
-            config.model_path = self._get_default_model()
+        self.model_path = config.model_path if config.model_path else self._get_default_model()
 
         try:
             from llama_cpp import Llama
@@ -33,7 +31,7 @@ class LlamaCppVectorizer:
             ) from error
 
         self.model = Llama(
-            model_path=config.model_path,
+            model_path=self.model_path,
             embedding=True,
             n_ctx=config.n_ctx,
             n_threads=config.n_threads,

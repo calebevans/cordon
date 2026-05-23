@@ -28,10 +28,14 @@ on:
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "Makefile"
 
+env:
+  UV_LINK_MODE: copy
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
+
 jobs:
   test:
     name: Test (Python ${{ matrix.python-version }})
-    runs-on: arc-runner-set
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -48,6 +52,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install dependencies
         run: uv pip install --system -e ".[dev]"
@@ -67,7 +73,7 @@ jobs:
 
   pre-commit:
     name: Pre-commit checks
-    runs-on: arc-runner-set
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -80,6 +86,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install dependencies
         run: uv pip install --system -e ".[dev]"
@@ -89,25 +97,51 @@ jobs:
 
   container:
     name: Container build
-    runs-on: arc-runner-set
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build container image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Containerfile
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha,scope=container-amd64
+          cache-to: type=gha,mode=min,scope=container-amd64
+
+  container-build:
+    name: Build container (${{ matrix.slug }})
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+            slug: amd64
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            slug: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
       - name: Log in to GitHub Container Registry
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -118,28 +152,91 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=ref,event=pr
-            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/main' }}
+          images: ${{ env.REGISTRY_IMAGE }}
 
-      - name: Build and push container image
-        id: push
+      - name: Build and push by digest
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           file: Containerfile
-          platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: ${{ github.ref == 'refs/heads/main' && 'type=gha,mode=min' || '' }}
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=container-${{ matrix.slug }}
+          cache-to: type=gha,mode=min,scope=container-${{ matrix.slug }}
+
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digest-${{ matrix.slug }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  container-manifest:
+    name: Create container manifest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: container-build
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=dev
+
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      - name: Create manifest list and push
+        id: manifest
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect manifest
+        run: docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:dev
+
+      - name: Get manifest digest
+        id: digest
+        run: |
+          digest=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:dev --format '{{.Manifest.Digest}}')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
       - name: Generate artifact attestation
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/attest-build-provenance@v4
         with:
-          subject-name: ghcr.io/${{ github.repository }}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-name: ${{ env.REGISTRY_IMAGE }}
+          subject-digest: ${{ steps.digest.outputs.digest }}
           push-to-registry: true

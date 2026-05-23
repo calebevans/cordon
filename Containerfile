@@ -8,7 +8,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ cmake git \
-    libvulkan1 libvulkan-dev vulkan-tools glslang-tools glslc \
+    libvulkan1 libvulkan-dev vulkan-tools glslang-tools glslc spirv-headers \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir uv
@@ -16,7 +16,9 @@ RUN pip install --no-cache-dir uv
 COPY pyproject.toml README.md LICENSE ./
 RUN mkdir -p src/cordon && touch src/cordon/__init__.py
 
-RUN CMAKE_ARGS="-DGGML_VULKAN=on" \
+RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
+
+RUN CMAKE_ARGS="-DGGML_VULKAN=on" CMAKE_BUILD_PARALLEL_LEVEL=2 \
     uv pip install --system ".[llama-cpp]"
 
 COPY src/ ./src/

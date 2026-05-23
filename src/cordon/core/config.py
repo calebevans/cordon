@@ -1,32 +1,54 @@
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 
-@dataclass
+@dataclass(frozen=True)
 class AnalysisConfig:
-    """Global configuration for the analysis pipeline."""
+    """Global configuration for the analysis pipeline.
+
+    Attributes:
+        window_size: Number of lines per sliding window.
+        k_neighbors: Number of neighbors for k-NN density scoring.
+        anomaly_percentile: Fraction of windows to retain (e.g. 0.1 = top 10%).
+        anomaly_range_min: Lower bound for range mode (e.g. 0.05 = exclude top 5%).
+            Must be set together with anomaly_range_max or left as None.
+        anomaly_range_max: Upper bound for range mode (e.g. 0.15 = include up to 15%).
+            Must be set together with anomaly_range_min or left as None.
+        model_name: Model identifier. HuggingFace name for sentence-transformers,
+            provider/model for remote (e.g. openai/text-embedding-3-small).
+        batch_size: Batch size for embedding requests.
+        device: Compute device for embedding and scoring. None for auto-detect.
+        scoring_batch_size: Batch size for k-NN scoring queries.
+            None triggers auto-detection based on available GPU memory.
+        backend: Embedding backend to use.
+        model_path: Path to a GGUF model file (llama-cpp backend).
+        n_ctx: llama.cpp context window size.
+        n_threads: llama.cpp thread count. None for auto-detect.
+        n_gpu_layers: Number of model layers to offload to GPU
+            (-1 for all layers, 0 for CPU-only).
+        api_key: API key for remote embedding providers.
+        endpoint: Custom API endpoint URL (remote backend).
+        request_timeout: HTTP request timeout in seconds (remote backend).
+    """
 
     window_size: int = 4
     k_neighbors: int = 5
     anomaly_percentile: float = 0.1
-    anomaly_range_min: float | None = (
-        None  # Lower bound for range mode (e.g., 0.05 = exclude top 5%)
-    )
-    anomaly_range_max: float | None = (
-        None  # Upper bound for range mode (e.g., 0.15 = include up to 15%)
-    )
+    anomaly_range_min: float | None = None
+    anomaly_range_max: float | None = None
     model_name: str = "all-MiniLM-L6-v2"
     batch_size: int = 32
-    device: str | None = None
-    scoring_batch_size: int | None = None  # batch size for k-NN scoring (None=auto-detect)
-    backend: str = "sentence-transformers"  # or "llama-cpp" or "remote"
-    model_path: str | None = None  # GGUF model file path
-    n_ctx: int = 2048  # llama.cpp context size
-    n_threads: int | None = None  # llama.cpp threads (None=auto)
-    n_gpu_layers: int = 0  # llama.cpp GPU layer offloading
-    api_key: str | None = None  # API key for remote embeddings
-    endpoint: str | None = None  # Custom API endpoint URL
-    request_timeout: float = 60.0  # Request timeout in seconds
+    device: Literal["cuda", "mps", "cpu"] | None = None
+    scoring_batch_size: int | None = None
+    backend: Literal["sentence-transformers", "llama-cpp", "remote"] = "sentence-transformers"
+    model_path: str | None = None
+    n_ctx: int = 2048
+    n_threads: int | None = None
+    n_gpu_layers: int = 0
+    api_key: str | None = None
+    endpoint: str | None = None
+    request_timeout: float = 60.0
 
     def __post_init__(self) -> None:
         """Validate configuration parameters."""
@@ -36,6 +58,8 @@ class AnalysisConfig:
 
     def _validate_core_params(self) -> None:
         """Validate core analysis parameters."""
+        if not self.model_name.strip():
+            raise ValueError("model_name must not be empty")
         if self.window_size < 1:
             raise ValueError("window_size must be >= 1")
         if self.k_neighbors < 1:
@@ -57,8 +81,8 @@ class AnalysisConfig:
             )
 
         if self.anomaly_range_min is not None:
-            # Type narrowing: if min is not None, max is also not None (checked above)
-            assert self.anomaly_range_max is not None
+            if self.anomaly_range_max is None:
+                raise ValueError("anomaly_range_max must be set when anomaly_range_min is set")
 
             if not 0.0 <= self.anomaly_range_min <= 1.0:
                 raise ValueError("anomaly_range_min must be between 0.0 and 1.0")
@@ -68,11 +92,10 @@ class AnalysisConfig:
                 raise ValueError("anomaly_range_min must be less than anomaly_range_max")
 
     def _validate_backend(self) -> None:
-        """Validate backend and backend-specific parameters."""
-        if self.backend not in ("sentence-transformers", "llama-cpp", "remote"):
-            raise ValueError(
-                f"backend must be 'sentence-transformers', 'llama-cpp', or 'remote', got '{self.backend}'"
-            )
+        """Validate backend-specific parameters."""
+        _ALLOWED_BACKENDS = ("sentence-transformers", "llama-cpp", "remote")
+        if self.backend not in _ALLOWED_BACKENDS:
+            raise ValueError(f"backend must be one of {_ALLOWED_BACKENDS}, got {self.backend!r}")
 
         if self.backend == "llama-cpp" and self.model_path is not None:
             self._validate_llama_cpp_model_path()
@@ -88,7 +111,8 @@ class AnalysisConfig:
 
     def _validate_llama_cpp_model_path(self) -> None:
         """Validate llama.cpp model path exists and has correct extension."""
-        assert self.model_path is not None
+        if self.model_path is None:
+            raise ValueError("model_path must not be None for llama-cpp validation")
         model_file = Path(self.model_path)
         if not model_file.exists():
             raise ValueError(f"GGUF model file not found: {self.model_path}")

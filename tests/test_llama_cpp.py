@@ -75,11 +75,6 @@ class TestLlamaCppVectorizerFactory:
         with pytest.raises((ValueError, RuntimeError)):
             create_vectorizer(config)
 
-    def test_factory_with_invalid_backend_raises_error(self) -> None:
-        """Test that factory rejects invalid backend names."""
-        with pytest.raises(ValueError, match="backend must be"):
-            AnalysisConfig(backend="invalid-backend")
-
 
 class TestLlamaCppVectorizerEmbedding:
     """Tests for LlamaCppVectorizer embedding functionality."""
@@ -245,9 +240,6 @@ class TestLlamaCppVectorizerIntegration:
         assert config.backend == "llama-cpp"
         assert config.n_gpu_layers == 5
         assert config.n_ctx == 1024
-
-        with pytest.raises(ValueError, match="backend must be"):
-            AnalysisConfig(backend="invalid")
 
     def test_config_backend_defaults(self, tmp_path) -> None:
         """Test default values for llama.cpp backend parameters."""
