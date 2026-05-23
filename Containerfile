@@ -8,7 +8,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ cmake git \
-    libvulkan1 libvulkan-dev vulkan-tools glslang-tools glslc \
+    libvulkan1 libvulkan-dev vulkan-tools glslang-tools glslc spirv-headers \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir uv
