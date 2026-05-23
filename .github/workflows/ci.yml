@@ -28,6 +28,9 @@ on:
       - ".github/PULL_REQUEST_TEMPLATE.md"
       - "Makefile"
 
+env:
+  UV_LINK_MODE: copy
+
 jobs:
   test:
     name: Test (Python ${{ matrix.python-version }})
@@ -48,6 +51,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install dependencies
         run: uv pip install --system -e ".[dev]"
@@ -80,6 +85,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install dependencies
         run: uv pip install --system -e ".[dev]"

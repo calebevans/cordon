@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+env:
+  UV_LINK_MODE: copy
+
 jobs:
   build:
     name: Build Python package
@@ -20,6 +23,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Install build tools
         run: uv pip install --system build
