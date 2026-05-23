@@ -128,6 +128,30 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Batch size for k-NN scoring queries (default: auto-detect based on GPU memory)",
     )
+    config_group.add_argument(
+        "--token-budget",
+        type=int,
+        default=None,
+        help="Maximum token budget for output; dynamically adjusts percentile to fit (overrides --anomaly-percentile)",
+    )
+    config_group.add_argument(
+        "--tokenizer-encoding",
+        type=str,
+        default="cl100k_base",
+        help="tiktoken encoding for token counting (default: cl100k_base)",
+    )
+    config_group.add_argument(
+        "--max-blocks",
+        type=int,
+        default=None,
+        help="Maximum number of anomaly blocks to output (keeps highest scoring)",
+    )
+    config_group.add_argument(
+        "--min-score",
+        type=float,
+        default=None,
+        help="Minimum anomaly score threshold for output blocks",
+    )
 
     # output options
     output_group = parser.add_argument_group("output options")
@@ -160,9 +184,8 @@ def parse_args() -> argparse.Namespace:
         "--quiet",
         "-q",
         action="store_true",
-        help="Suppress progress bars (useful for CI or library usage)",
+        help="Suppress all human-readable banners and progress bars, keeping only formatted output on stdout",
     )
-
     return parser.parse_args()
 
 
@@ -212,6 +235,7 @@ def _display_results(
     detailed: bool,
     output_path: Path | None,
     force: bool,
+    quiet: bool,
 ) -> None:
     """Display analysis results, optionally with detailed statistics.
 
@@ -220,8 +244,9 @@ def _display_results(
         detailed: Whether to print detailed statistics before the output.
         output_path: Optional path to save anomalous blocks (None prints to stdout).
         force: If True, overwrite an existing output file.
+        quiet: If True, suppress human-readable banners and stats.
     """
-    if detailed:
+    if detailed and not quiet:
         print(f"Total lines: {result.total_lines:,}")
         print("\nAnalysis Statistics:")
         print(f"  Total windows created: {result.total_windows:,}")
@@ -243,7 +268,8 @@ def _display_results(
     else:
         print(result.output)
 
-    print()
+    if not quiet:
+        print()
 
 
 def analyze_file(
@@ -252,6 +278,7 @@ def analyze_file(
     detailed: bool,
     output_path: Path | None = None,
     force: bool = False,
+    quiet: bool = False,
 ) -> None:
     """Analyze a single log file and print results.
 
@@ -261,13 +288,15 @@ def analyze_file(
         detailed: Whether to show detailed statistics.
         output_path: Optional path to save anomalous blocks (None prints to stdout).
         force: If True, overwrite an existing output file.
+        quiet: If True, suppress human-readable banners and stats.
     """
     if not _validate_file(log_path):
         return
 
-    print("=" * 80)
-    print(f"Analyzing: {log_path}")
-    print("=" * 80)
+    if not quiet:
+        print("=" * 80)
+        print(f"Analyzing: {log_path}")
+        print("=" * 80)
 
     try:
         result = analyzer.analyze_file_detailed(log_path)
@@ -275,7 +304,7 @@ def analyze_file(
         print(f"Error analyzing {log_path}: {error}", file=sys.stderr)
         return
 
-    _display_results(result, detailed, output_path, force)
+    _display_results(result, detailed, output_path, force, quiet)
 
 
 def analyze_stdin(
@@ -283,6 +312,7 @@ def analyze_stdin(
     detailed: bool,
     output_path: Path | None = None,
     force: bool = False,
+    quiet: bool = False,
 ) -> None:
     """Analyze log data from stdin and print results.
 
@@ -291,12 +321,14 @@ def analyze_stdin(
         detailed: Whether to show detailed statistics.
         output_path: Optional path to save anomalous blocks (None prints to stdout).
         force: If True, overwrite an existing output file.
+        quiet: If True, suppress human-readable banners and stats.
     """
     text = sys.stdin.read()
 
-    print("=" * 80)
-    print("Analyzing: <stdin>")
-    print("=" * 80)
+    if not quiet:
+        print("=" * 80)
+        print("Analyzing: <stdin>")
+        print("=" * 80)
 
     try:
         result = analyzer.analyze_text_detailed(text)
@@ -304,7 +336,7 @@ def analyze_stdin(
         print(f"Error analyzing <stdin>: {error}", file=sys.stderr)
         return
 
-    _display_results(result, detailed, output_path, force)
+    _display_results(result, detailed, output_path, force, quiet)
 
 
 def _print_backend_info(config: AnalysisConfig) -> None:
@@ -355,6 +387,12 @@ def _main_impl() -> None:
                 file=sys.stderr,
             )
 
+    if args.token_budget is not None and not isclose(args.anomaly_percentile, 0.1):
+        print(
+            "Warning: --anomaly-percentile is overridden by --token-budget",
+            file=sys.stderr,
+        )
+
     # create configuration from arguments
     try:
         config = AnalysisConfig(
@@ -376,17 +414,21 @@ def _main_impl() -> None:
             api_key=args.api_key,
             endpoint=args.endpoint,
             show_progress=not args.quiet,
+            token_budget=args.token_budget,
+            tokenizer_encoding=args.tokenizer_encoding,
             output_format=args.output_format,
+            max_blocks=args.max_blocks,
+            min_score=args.min_score,
         )
     except ValueError as error:
         print(f"Configuration error: {error}", file=sys.stderr)
         sys.exit(1)
 
-    # create analyzer
-    print("Initializing analyzer...")
-    _print_backend_info(config)
-    _print_filtering_mode(config)
-    print()
+    if not args.quiet:
+        print("Initializing analyzer...")
+        _print_backend_info(config)
+        _print_filtering_mode(config)
+        print()
 
     try:
         analyzer = SemanticLogAnalyzer(config)
@@ -399,14 +441,18 @@ def _main_impl() -> None:
     except Exception as error:
         print(f"Initialization error: {error}", file=sys.stderr)
         sys.exit(1)
-    print()
+
+    if not args.quiet:
+        print()
 
     # analyze each log file
     for log_path in args.logfiles:
         if str(log_path) == "-":
-            analyze_stdin(analyzer, args.detailed, args.output, args.force)
+            analyze_stdin(analyzer, args.detailed, args.output, args.force, quiet=args.quiet)
         else:
-            analyze_file(log_path, analyzer, args.detailed, args.output, args.force)
+            analyze_file(
+                log_path, analyzer, args.detailed, args.output, args.force, quiet=args.quiet
+            )
 
 
 def main() -> None:

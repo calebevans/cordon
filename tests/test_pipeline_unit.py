@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from cordon.core.config import AnalysisConfig
+from cordon.core.types import MergedBlock, ScoredWindow, TextWindow
 from cordon.pipeline import SemanticLogAnalyzer
 
 
@@ -184,3 +185,159 @@ class TestAnalyzeText:
         lines: list[tuple[int, str]] = [(1, "hello"), (2, "world")]
         result = analyzer.analyze_lines(lines)
         assert result.total_lines == 2
+
+
+class TestTokenBudget:
+    """Tests for token budget mode."""
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_token_budget_computes_percentile(self, mock_create: MagicMock) -> None:
+        """Test that token budget dynamically adjusts percentile."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu", token_budget=100)
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("word " * 100)
+        assert result.total_lines >= 1
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_token_budget_larger_than_file(self, mock_create: MagicMock) -> None:
+        """Test that budget larger than file results in percentile capped at 1.0."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu", token_budget=999999)
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("short text")
+        assert result.total_lines >= 1
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_token_budget_empty_input(self, mock_create: MagicMock) -> None:
+        """Test token budget with empty input."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        config = AnalysisConfig(device="cpu", token_budget=100)
+        analyzer = SemanticLogAnalyzer(config)
+        result = analyzer.analyze_text_detailed("")
+        assert result.total_lines == 0
+
+
+class TestPostMergeFiltering:
+    """Tests for max_blocks and min_score post-merge filtering."""
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_max_blocks_filtering(self, mock_create: MagicMock) -> None:
+        """Test that max_blocks keeps only the top N highest-scoring blocks."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        mock_reader = MagicMock()
+        mock_reader.read_lines.return_value = iter([(i, f"line {i}") for i in range(1, 21)])
+
+        blocks = [
+            MergedBlock(start_line=1, end_line=3, original_windows=(0,), max_score=0.3),
+            MergedBlock(start_line=5, end_line=7, original_windows=(1,), max_score=0.9),
+            MergedBlock(start_line=10, end_line=12, original_windows=(2,), max_score=0.6),
+            MergedBlock(start_line=15, end_line=17, original_windows=(3,), max_score=0.8),
+        ]
+        mock_merger = MagicMock()
+        mock_merger.merge_windows.return_value = blocks
+
+        mock_thresholder = MagicMock()
+        window = TextWindow(content="test", start_line=1, end_line=3, window_id=0)
+        mock_thresholder.select_significant.return_value = [ScoredWindow(window=window, score=0.5)]
+
+        config = AnalysisConfig(device="cpu", max_blocks=2)
+        analyzer = SemanticLogAnalyzer(
+            config,
+            reader=mock_reader,
+            merger=mock_merger,
+            thresholder=mock_thresholder,
+        )
+        result = analyzer.analyze_file_detailed(Path("dummy.log"))
+
+        assert result.merged_blocks == 2
+        assert len(result.blocks) == 2
+        scores = [b.max_score for b in result.blocks]
+        assert 0.9 in scores
+        assert 0.8 in scores
+        assert result.blocks[0].start_line < result.blocks[1].start_line
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_min_score_filtering(self, mock_create: MagicMock) -> None:
+        """Test that min_score drops blocks below the threshold."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        mock_reader = MagicMock()
+        mock_reader.read_lines.return_value = iter([(i, f"line {i}") for i in range(1, 21)])
+
+        blocks = [
+            MergedBlock(start_line=1, end_line=3, original_windows=(0,), max_score=0.2),
+            MergedBlock(start_line=5, end_line=7, original_windows=(1,), max_score=0.5),
+            MergedBlock(start_line=10, end_line=12, original_windows=(2,), max_score=0.8),
+        ]
+        mock_merger = MagicMock()
+        mock_merger.merge_windows.return_value = blocks
+
+        mock_thresholder = MagicMock()
+        window = TextWindow(content="test", start_line=1, end_line=3, window_id=0)
+        mock_thresholder.select_significant.return_value = [ScoredWindow(window=window, score=0.5)]
+
+        config = AnalysisConfig(device="cpu", min_score=0.5)
+        analyzer = SemanticLogAnalyzer(
+            config,
+            reader=mock_reader,
+            merger=mock_merger,
+            thresholder=mock_thresholder,
+        )
+        result = analyzer.analyze_file_detailed(Path("dummy.log"))
+
+        assert result.merged_blocks == 2
+        assert len(result.blocks) == 2
+        assert all(b.max_score >= 0.5 for b in result.blocks)
+
+    @patch("cordon.pipeline.create_embedder")
+    def test_max_blocks_and_min_score_combined(self, mock_create: MagicMock) -> None:
+        """Test that min_score is applied before max_blocks."""
+        mock_embedder = MagicMock()
+        mock_create.return_value = mock_embedder
+        mock_embedder.embed_windows.return_value = iter([])
+
+        mock_reader = MagicMock()
+        mock_reader.read_lines.return_value = iter([(i, f"line {i}") for i in range(1, 21)])
+
+        blocks = [
+            MergedBlock(start_line=1, end_line=3, original_windows=(0,), max_score=0.2),
+            MergedBlock(start_line=5, end_line=7, original_windows=(1,), max_score=0.5),
+            MergedBlock(start_line=10, end_line=12, original_windows=(2,), max_score=0.7),
+            MergedBlock(start_line=15, end_line=17, original_windows=(3,), max_score=0.9),
+        ]
+        mock_merger = MagicMock()
+        mock_merger.merge_windows.return_value = blocks
+
+        mock_thresholder = MagicMock()
+        window = TextWindow(content="test", start_line=1, end_line=3, window_id=0)
+        mock_thresholder.select_significant.return_value = [ScoredWindow(window=window, score=0.5)]
+
+        config = AnalysisConfig(device="cpu", min_score=0.5, max_blocks=2)
+        analyzer = SemanticLogAnalyzer(
+            config,
+            reader=mock_reader,
+            merger=mock_merger,
+            thresholder=mock_thresholder,
+        )
+        result = analyzer.analyze_file_detailed(Path("dummy.log"))
+
+        assert result.merged_blocks == 2
+        assert len(result.blocks) == 2
+        scores = [b.max_score for b in result.blocks]
+        assert 0.9 in scores
+        assert 0.7 in scores

@@ -1,5 +1,7 @@
+import logging
 import time
 from collections.abc import Sequence
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +24,8 @@ from cordon.ingestion.reader import LogFileReader
 from cordon.postprocess.formatter import XmlFormatter
 from cordon.postprocess.merger import IntervalMerger
 from cordon.segmentation.windower import SlidingWindowSegmenter
+
+logger = logging.getLogger(__name__)
 
 
 class SemanticLogAnalyzer:
@@ -153,13 +157,45 @@ class SemanticLogAnalyzer:
         del embedded
 
         # stage 5: thresholding
-        significant = self._thresholder.select_significant(scored, self.config)
+        thresholding_config = self.config
+        if self.config.token_budget is not None:
+            import tiktoken
+
+            enc = tiktoken.get_encoding(self.config.tokenizer_encoding)
+            total_tokens = sum(len(enc.encode(text)) for _, text in lines_list)
+
+            if total_tokens > 0:
+                budget_percentile = min(self.config.token_budget / total_tokens, 1.0)
+            else:
+                budget_percentile = 1.0
+
+            thresholding_config = replace(self.config, anomaly_percentile=budget_percentile)
+
+            logger.info(
+                "Token budget: %d/%d tokens (%.1f%% percentile)",
+                self.config.token_budget,
+                total_tokens,
+                budget_percentile * 100,
+            )
+
+        significant = self._thresholder.select_significant(scored, thresholding_config)
         significant_windows = len(significant)
 
         # stage 6: merging
         merged = self._merger.merge_windows(significant)
-        merged_blocks_count = len(merged)
         del significant
+
+        # stage 6b: post-merge filters
+        if self.config.min_score is not None:
+            merged = [b for b in merged if b.max_score >= self.config.min_score]
+
+        if self.config.max_blocks is not None and len(merged) > self.config.max_blocks:
+            merged = sorted(merged, key=lambda b: b.max_score, reverse=True)[
+                : self.config.max_blocks
+            ]
+            merged = sorted(merged, key=lambda b: b.start_line)
+
+        merged_blocks_count = len(merged)
 
         # stage 7: formatting
         output = self._formatter.format_blocks(merged, lines_list)

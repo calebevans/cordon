@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from cordon.cli import analyze_file, parse_args
+from cordon.cli import analyze_file, analyze_stdin, parse_args
 
 
 class TestParseArgs:
@@ -89,6 +89,32 @@ class TestParseArgs:
         monkeypatch.setattr(sys, "argv", ["cordon", "-"])
         args = parse_args()
         assert str(args.logfiles[0]) == "-"
+
+    def test_token_budget(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test --token-budget parsing."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--token-budget", "500", "test.log"])
+        args = parse_args()
+        assert args.token_budget == 500
+
+    def test_token_budget_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --token-budget defaults to None."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.token_budget is None
+
+    def test_tokenizer_encoding(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test --tokenizer-encoding parsing."""
+        monkeypatch.setattr(
+            sys, "argv", ["cordon", "--tokenizer-encoding", "p50k_base", "test.log"]
+        )
+        args = parse_args()
+        assert args.tokenizer_encoding == "p50k_base"
+
+    def test_tokenizer_encoding_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --tokenizer-encoding defaults to cl100k_base."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.tokenizer_encoding == "cl100k_base"
 
 
 class TestAnalyzeFile:
@@ -174,8 +200,10 @@ class TestAnalyzeFile:
 
         analyzer = MagicMock()
         mock_result = MagicMock()
-        mock_result.output = "<anomalies></anomalies>"
+        mock_result.output = "<anomalies/>"
+        mock_result.merged_blocks = 0
         analyzer.analyze_file_detailed.return_value = mock_result
+
         analyze_file(
             log_file,
             analyzer,
@@ -199,6 +227,7 @@ class TestAnalyzeFile:
         analyzer = MagicMock()
         mock_result = MagicMock()
         mock_result.output = "<anomalies>new</anomalies>"
+        mock_result.merged_blocks = 1
         analyzer.analyze_file_detailed.return_value = mock_result
 
         analyze_file(
@@ -218,6 +247,7 @@ class TestAnalyzeFile:
         analyzer = MagicMock()
         mock_result = MagicMock()
         mock_result.output = "<anomalies>results</anomalies>"
+        mock_result.merged_blocks = 0
         analyzer.analyze_file_detailed.return_value = mock_result
 
         analyze_file(log_file, analyzer, detailed=False)
@@ -253,6 +283,77 @@ class TestAnalyzeFile:
         assert "Significant windows: 3" in captured.out
         assert "Processing time: 1.23s" in captured.out
         assert "Score Distribution:" in captured.out
+
+
+class TestQuietMode:
+    """Tests for --quiet banner suppression."""
+
+    def test_quiet_suppresses_banners(
+        self, capsys: pytest.CaptureFixture[str], tmp_path: Path
+    ) -> None:
+        """Test that --quiet suppresses all human-readable banners."""
+        log_file = tmp_path / "test.log"
+        log_file.write_text("line 1\n")
+
+        analyzer = MagicMock()
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies/>"
+        mock_result.merged_blocks = 0
+        analyzer.analyze_file_detailed.return_value = mock_result
+
+        analyze_file(log_file, analyzer, detailed=True, quiet=True)
+        captured = capsys.readouterr()
+        assert "Analyzing:" not in captured.out
+        assert "=" * 80 not in captured.out
+        assert "Total lines" not in captured.out
+        assert "Score Distribution" not in captured.out
+        assert "<anomalies/>" in captured.out
+
+    def test_quiet_suppresses_stdin_banners(
+        self, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test that --quiet suppresses banners for stdin analysis."""
+        monkeypatch.setattr("sys.stdin", MagicMock(read=MagicMock(return_value="line 1\n")))
+
+        analyzer = MagicMock()
+        mock_result = MagicMock()
+        mock_result.output = "<anomalies/>"
+        mock_result.merged_blocks = 0
+        analyzer.analyze_text_detailed.return_value = mock_result
+
+        analyze_stdin(analyzer, detailed=True, quiet=True)
+        captured = capsys.readouterr()
+        assert "Analyzing:" not in captured.out
+        assert "=" * 80 not in captured.out
+        assert "<anomalies/>" in captured.out
+
+
+class TestNewFlags:
+    """Tests for --max-blocks and --min-score flags."""
+
+    def test_max_blocks_flag(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --max-blocks is parsed correctly."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--max-blocks", "10", "test.log"])
+        args = parse_args()
+        assert args.max_blocks == 10
+
+    def test_max_blocks_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --max-blocks defaults to None."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.max_blocks is None
+
+    def test_min_score_flag(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --min-score is parsed correctly."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "--min-score", "0.5", "test.log"])
+        args = parse_args()
+        assert args.min_score == 0.5
+
+    def test_min_score_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test that --min-score defaults to None."""
+        monkeypatch.setattr(sys, "argv", ["cordon", "test.log"])
+        args = parse_args()
+        assert args.min_score is None
 
 
 class TestMainEntryPoint:

@@ -17,6 +17,7 @@ dependencies = [
     "tqdm>=4.65.0",
     "litellm>=1.83.0",
     "tokenizers>=0.20.0",
+    "tiktoken",
 ]
 
 [project.scripts]
@@ -87,6 +88,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "litellm.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tiktoken.*"
 ignore_missing_imports = true
 
 [tool.ruff]
