@@ -41,6 +41,7 @@ class TestIntegration:
             assert "min" in result.score_distribution
             assert "max" in result.score_distribution
             assert result.output is not None
+            assert isinstance(result.blocks, list)
         finally:
             temp_path.unlink()
 

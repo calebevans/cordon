@@ -60,7 +60,14 @@ class SemanticLogAnalyzer:
         self._scorer = scorer if scorer is not None else DensityAnomalyScorer()
         self._thresholder = thresholder if thresholder is not None else ThresholderImpl()
         self._merger = merger if merger is not None else IntervalMerger()
-        self._formatter = formatter if formatter is not None else XmlFormatter()
+        if formatter is not None:
+            self._formatter = formatter
+        elif self.config.output_format == "json":
+            from cordon.postprocess.json_formatter import JsonFormatter
+
+            self._formatter = JsonFormatter()
+        else:
+            self._formatter = XmlFormatter()
 
     def analyze_file(self, file_path: Path) -> str:
         """Analyze a log file and return formatted output.
@@ -69,7 +76,7 @@ class SemanticLogAnalyzer:
             file_path: Path to the log file to analyze.
 
         Returns:
-            Formatted string with XML-tagged significant blocks.
+            Formatted string with significant blocks (XML or JSON, per output_format).
         """
         result = self.analyze_file_detailed(file_path)
         return result.output
@@ -119,6 +126,7 @@ class SemanticLogAnalyzer:
 
         return AnalysisResult(
             output=output,
+            blocks=list(merged),
             total_lines=total_lines,
             total_windows=total_windows,
             significant_windows=significant_windows,

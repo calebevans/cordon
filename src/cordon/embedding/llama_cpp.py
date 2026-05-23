@@ -69,6 +69,7 @@ class LlamaCppEmbedder:
             desc="Generating embeddings",
             total=total_batches,
             unit="batch",
+            disable=not self.config.show_progress,
         ):
             batch = window_list[batch_start : batch_start + batch_size]
             texts = [w.content for w in batch]
