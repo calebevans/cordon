@@ -16,6 +16,8 @@ RUN pip install --no-cache-dir uv
 COPY pyproject.toml README.md LICENSE ./
 RUN mkdir -p src/cordon && touch src/cordon/__init__.py
 
+RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
+
 RUN CMAKE_ARGS="-DGGML_VULKAN=on" \
     uv pip install --system ".[llama-cpp]"
 
