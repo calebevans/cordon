@@ -21,6 +21,11 @@ Cordon uses transformer embeddings and density scoring to identify semantically 
 - **k-NN Density Scoring**: Identifies anomalies using k-NN distance in embedding space
 - **Noise Reduction**: Filters out repetitive logs, keeping only unusual patterns
 - **Multiple Backends**: sentence-transformers (default), llama.cpp for containers, or remote APIs (OpenAI, Gemini, etc.)
+- **Multiple Output Formats**: XML (default) or JSON output with `--format json`
+- **Token Budget**: Trim output to fit LLM context windows with `--token-budget`
+- **Stdin Support**: Pipe logs directly with `cordon -`
+- **Text API**: Analyze strings directly with `analyze_text()` and `analyze_text_detailed()`
+- **Output Filtering**: Control results with `--max-blocks`, `--min-score`, and `--max-line-length`
 
 ## Installation
 
@@ -80,11 +85,29 @@ cordon system.log
 # Multiple files
 cordon app.log error.log
 
+# Read from stdin
+echo "log data here" | cordon -
+
 # With options
 cordon --window-size 10 --k-neighbors 10 --anomaly-percentile 0.05 app.log
 
 # Filter to a percentile range (exclude top 5%, keep next 10%)
 cordon --anomaly-range 0.05 0.15 app.log
+
+# JSON output format
+cordon --format json app.log
+
+# Quiet mode (no banners or progress bars)
+cordon --quiet app.log
+
+# Token budget (trim output to fit LLM context windows)
+cordon --token-budget 4096 app.log
+
+# Output filtering
+cordon --max-blocks 5 --min-score 0.15 app.log
+
+# Split long lines before analysis
+cordon --max-line-length 200 app.log
 
 # With GPU acceleration (scoring batch size auto-detected)
 cordon --device cuda --batch-size 64 large.log
@@ -92,8 +115,9 @@ cordon --device cuda --batch-size 64 large.log
 # Override auto-detection if needed
 cordon --device cuda --batch-size 64 --scoring-batch-size 50000 large.log
 
-# Save results to file
+# Save results to file (with overwrite protection)
 cordon --output anomalies.xml system.log
+cordon --output anomalies.xml --force system.log  # overwrite existing
 
 # Show detailed statistics and save results
 cordon --detailed --output results.xml app.log
@@ -115,6 +139,16 @@ analyzer = SemanticLogAnalyzer()
 output = analyzer.analyze_file(Path("system.log"))
 print(output)
 
+# Analyze text directly (no file needed)
+analyzer = SemanticLogAnalyzer()
+output = analyzer.analyze_text("line 1\nline 2\nline 3\n...")
+result = analyzer.analyze_text_detailed("line 1\nline 2\nline 3\n...")
+
+# Access structured results
+for block in result.blocks:
+    print(f"Lines {block.start_line}-{block.end_line}: score={block.score}")
+    print(block.content)
+
 # Advanced configuration with GPU acceleration
 config = AnalysisConfig(
     window_size=10,
@@ -122,7 +156,10 @@ config = AnalysisConfig(
     anomaly_percentile=0.05,
     device="cuda",           # GPU for embedding and scoring
     batch_size=64,           # Embedding batch size
-    scoring_batch_size=None  # Auto-detect optimal batch size (default)
+    scoring_batch_size=None, # Auto-detect optimal batch size (default)
+    output_format="json",    # JSON output instead of XML
+    show_progress=False,     # Suppress progress bars
+    token_budget=4096,       # Trim output to fit LLM context
 )
 analyzer = SemanticLogAnalyzer(config)
 result = analyzer.analyze_file_detailed(Path("app.log"))
@@ -291,11 +328,16 @@ Cordon attempts to solve the problem of log files being too large for LLM contex
 Example workflow:
 
 ```python
-# Extract anomalies
-analyzer = SemanticLogAnalyzer()
-anomalies = analyzer.analyze_file(Path("production.log"))
+from cordon import SemanticLogAnalyzer, AnalysisConfig
 
-# Send curated context to LLM (now fits in context window)
+# Extract anomalies with token budget for LLM context fitting
+config = AnalysisConfig(token_budget=8000, output_format="json")
+analyzer = SemanticLogAnalyzer(config)
+result = analyzer.analyze_file_detailed(Path("production.log"))
+
+# Access structured blocks directly
+for block in result.blocks:
+    print(f"Lines {block.start_line}-{block.end_line}: {block.score:.4f}")
 ```
 
 The output is intentionally lossy—it discards repetitive patterns to focus on semantically unusual events.
@@ -304,13 +346,13 @@ The output is intentionally lossy—it discards repetitive patterns to focus on 
 
 ### Pipeline
 
-1. **Ingestion**: Read log file line-by-line
-2. **Segmentation**: Create non-overlapping windows of N lines
-3. **Vectorization**: Embed windows using transformer models
-4. **Scoring**: Calculate k-NN density scores
+1. **Ingestion**: Read log file line-by-line (with `errors="replace"` for encoding robustness)
+2. **Segmentation**: Create non-overlapping windows of N lines (supports `max_line_length` splitting)
+3. **Embedding**: Embed windows using transformer models
+4. **Scoring**: Calculate k-NN density scores (unified GPU/CPU method)
 5. **Thresholding**: Select top X% based on scores
 6. **Merging**: Combine adjacent significant windows
-7. **Formatting**: Generate XML-tagged output
+7. **Formatting**: Generate output in XML or JSON format
 
 ### Scoring
 
@@ -338,6 +380,11 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 | `anomaly_range_max` | None | `--anomaly-range MIN MAX` | Upper bound for range mode (include up to Y%) |
 | `batch_size` | 32 | `--batch-size` | Batch size for embedding generation |
 | `scoring_batch_size` | Auto | `--scoring-batch-size` | Batch size for k-NN scoring (auto-detects based on GPU memory) |
+| `max_line_length` | None | `--max-line-length` | Split lines exceeding this character limit |
+| `max_blocks` | None | `--max-blocks` | Maximum number of output blocks |
+| `min_score` | None | `--min-score` | Minimum anomaly score threshold for output |
+| `token_budget` | None | `--token-budget` | Trim output to fit within N tokens (uses tiktoken) |
+| `tokenizer_encoding` | `cl100k_base` | N/A | Tiktoken encoding for token budget calculation |
 
 **Note on Filtering Modes:**
 - **Percentile Mode** (default): `--anomaly-percentile 0.1` keeps the top 10% most anomalous windows
@@ -360,8 +407,11 @@ See [Cordon's architecture](./docs/architecture.md) for full details.
 
 | Parameter | Default | CLI Flag | Description |
 |-----------|---------|----------|-------------|
+| `output_format` | `xml` | `--format` | Output format (xml or json) |
+| `show_progress` | True | `--quiet`, `-q` | Show/suppress banners and progress bars |
 | `detailed` | False | `--detailed` | Show detailed statistics (timing, score distribution) |
 | `output` | None | `--output`, `-o` | Save anomalous blocks to file (default: stdout) |
+| N/A | N/A | `--force` | Overwrite existing output file |
 
 Run `cordon --help` for full CLI documentation.
 
@@ -453,6 +503,11 @@ Cordon uses PyTorch for all k-NN scoring operations:
 |----------|------|-----------|-------|
 | PyTorch GPU | GPU available (CUDA/MPS) | Moderate | Fastest |
 | PyTorch CPU | No GPU / CPU forced | Moderate | Fast |
+
+**Memory optimizations:**
+- Embedder cached at pipeline initialization (not recreated per file)
+- Intermediate data (raw embeddings) released after scoring
+- `ScoredWindow` stores only scores and metadata, not embedding vectors
 
 **What's a "window"?** A window is a non-overlapping chunk of N consecutive log lines (default: 4 lines). A 10,000-line log with window_size=4 creates 2,500 windows.
 

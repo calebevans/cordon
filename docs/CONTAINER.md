@@ -86,6 +86,14 @@ podman run -v $(pwd)/logs:/logs cordon:latest \
   --window-size 20 \
   --k-neighbors 10 \
   /logs/production.log
+
+# JSON output format
+podman run -v $(pwd)/logs:/logs cordon:latest \
+  --format json /logs/system.log
+
+# Quiet mode (no banners or progress bars)
+podman run -v $(pwd)/logs:/logs cordon:latest \
+  --quiet /logs/system.log
 ```
 
 ### llama.cpp Backend
