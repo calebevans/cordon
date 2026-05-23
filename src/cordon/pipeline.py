@@ -7,7 +7,7 @@ from cordon.analysis.scorer import DensityAnomalyScorer
 from cordon.analysis.thresholder import Thresholder
 from cordon.core.config import AnalysisConfig
 from cordon.core.types import AnalysisResult, ScoredWindow
-from cordon.embedding import create_vectorizer
+from cordon.embedding import create_embedder
 from cordon.ingestion.reader import LogFileReader
 from cordon.postprocess.formatter import OutputFormatter
 from cordon.postprocess.merger import IntervalMerger
@@ -26,19 +26,19 @@ class SemanticLogAnalyzer:
         """Initialize the analyzer with configuration.
 
         Args:
-            config: Analysis configuration (uses defaults if None)
+            config: Analysis configuration (uses defaults if None).
         """
         self.config = config if config is not None else AnalysisConfig()
-        self._vectorizer = create_vectorizer(self.config)
+        self._embedder = create_embedder(self.config)
 
     def analyze_file(self, file_path: Path) -> str:
         """Analyze a log file and return formatted output.
 
         Args:
-            file_path: Path to the log file to analyze
+            file_path: Path to the log file to analyze.
 
         Returns:
-            Formatted string with XML-tagged significant blocks
+            Formatted string with XML-tagged significant blocks.
         """
         result = self.analyze_file_detailed(file_path)
         return result.output
@@ -47,10 +47,10 @@ class SemanticLogAnalyzer:
         """Analyze a log file and return detailed results.
 
         Args:
-            file_path: Path to the log file to analyze
+            file_path: Path to the log file to analyze.
 
         Returns:
-            Complete analysis result with metadata
+            Complete analysis result with metadata.
         """
         start_time = time.time()
 
@@ -64,7 +64,7 @@ class SemanticLogAnalyzer:
         windows = segmenter.segment(iter(lines_list), self.config)
 
         # stage 3: vectorization
-        embedded = list(self._vectorizer.embed_windows(windows))
+        embedded = list(self._embedder.embed_windows(windows))
         total_windows = len(embedded)
 
         # stage 4: scoring
@@ -106,10 +106,10 @@ class SemanticLogAnalyzer:
         """Calculate statistical distribution of scores.
 
         Args:
-            scored_windows: List of scored windows
+            scored_windows: List of scored windows.
 
         Returns:
-            Dictionary with statistical measures
+            Dictionary with statistical measures.
         """
         if not scored_windows:
             return {

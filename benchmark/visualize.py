@@ -47,7 +47,7 @@ from evaluate import (
 
 from cordon import AnalysisConfig
 from cordon.analysis.scorer import DensityAnomalyScorer
-from cordon.embedding import create_vectorizer
+from cordon.embedding import create_embedder
 from cordon.ingestion.reader import LogFileReader
 from cordon.segmentation.windower import SlidingWindowSegmenter
 
@@ -90,8 +90,8 @@ def get_embeddings(
     window_ranges = [(w.start_line, w.end_line) for w in windows]
 
     # Embed
-    vectorizer = create_vectorizer(config)
-    embedded = list(vectorizer.embed_windows(windows))
+    embedder = create_embedder(config)
+    embedded = list(embedder.embed_windows(windows))
 
     # Extract embeddings matrix
     embeddings = np.array([emb for _, emb in embedded])
