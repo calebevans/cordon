@@ -87,7 +87,14 @@ class TransformerEmbedder:
             normalize_embeddings=True,
         )
 
-        yield from zip(window_list, all_embeddings, strict=False)
+        if len(all_embeddings) != len(window_list):
+            raise ValueError(
+                f"model.encode() returned {len(all_embeddings)} embeddings "
+                f"for {len(window_list)} input windows. This indicates a "
+                f"sentence-transformers internal error."
+            )
+
+        yield from zip(window_list, all_embeddings, strict=True)
 
     def _check_truncation_warning(self, windows: list[TextWindow]) -> None:
         """Check if windows are likely to be truncated and warn user.
