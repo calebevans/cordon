@@ -7,7 +7,6 @@ import numpy as np
 import numpy.typing as npt
 import torch
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
 
 from cordon.core.config import AnalysisConfig
 from cordon.core.device import detect_device
@@ -25,6 +24,11 @@ class TransformerEmbedder:
     def __init__(self, config: AnalysisConfig) -> None:
         """Initialize the embedder with a sentence-transformer model.
 
+        The model is initialized directly on the target device via the
+        ``device`` constructor parameter. This ensures the internal
+        ``_target_device`` attribute is set correctly so that ``encode()``
+        places input tensors on the same device as the model parameters.
+
         Args:
             config: Analysis configuration specifying model and device.
 
@@ -35,7 +39,7 @@ class TransformerEmbedder:
         self.device = detect_device(self.config.device)
 
         try:
-            self.model = SentenceTransformer(config.model_name)
+            self.model = SentenceTransformer(config.model_name, device=str(self.device))
         except Exception as error:
             raise RuntimeError(
                 f"Failed to load sentence-transformer model '{config.model_name}'. "
@@ -43,13 +47,17 @@ class TransformerEmbedder:
                 f"for first-time downloads. Error: {error}"
             ) from error
 
-        self.model.to(self.device)
         self._truncation_warned = False
 
     def embed_windows(
         self, windows: Iterable[TextWindow]
     ) -> Iterator[tuple[TextWindow, npt.NDArray[np.floating[Any]]]]:
         """Embed text windows into vector representations.
+
+        Encodes all windows in a single ``model.encode()`` call, delegating
+        batching, length-based sorting, and padding to sentence-transformers.
+        This avoids per-batch overhead from repeated DataLoader creation and
+        tokenization and allows optimal GPU utilization.
 
         Args:
             windows: Iterable of text windows to embed.
@@ -69,28 +77,17 @@ class TransformerEmbedder:
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-        batch_size = self.config.batch_size
-        total_batches = (len(window_list) + batch_size - 1) // batch_size
+        texts = [window.content for window in window_list]
 
-        for batch_start_idx in tqdm(
-            range(0, len(window_list), batch_size),
-            desc="Generating embeddings",
-            total=total_batches,
-            unit="batch",
-            disable=not self.config.show_progress,
-        ):
-            batch = window_list[batch_start_idx : batch_start_idx + batch_size]
-            texts = [window.content for window in batch]
+        all_embeddings: npt.NDArray[np.floating[Any]] = self.model.encode(
+            texts,
+            batch_size=self.config.batch_size,
+            show_progress_bar=self.config.show_progress,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+        )
 
-            embeddings = self.model.encode(
-                texts,
-                batch_size=len(batch),
-                show_progress_bar=False,
-                convert_to_numpy=True,
-                normalize_embeddings=True,
-            )
-
-            yield from zip(batch, embeddings, strict=False)
+        yield from zip(window_list, all_embeddings, strict=False)
 
     def _check_truncation_warning(self, windows: list[TextWindow]) -> None:
         """Check if windows are likely to be truncated and warn user.

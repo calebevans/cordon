@@ -215,8 +215,13 @@ class TestTransformerEmbedderUnit:
 
         mock_model = MagicMock()
         rng = np.random.default_rng(0)
-        raw = rng.standard_normal((1, 384)).astype(np.float32)
-        mock_model.encode.return_value = raw / np.linalg.norm(raw, axis=1, keepdims=True)
+
+        def _fake_encode(texts: list[str], **kwargs: object) -> np.ndarray:  # type: ignore[type-arg]
+            n = len(texts) if isinstance(texts, list) else 1
+            raw = rng.standard_normal((n, 384)).astype(np.float32)
+            return raw / np.linalg.norm(raw, axis=1, keepdims=True)
+
+        mock_model.encode.side_effect = _fake_encode
         mock_st.return_value = mock_model
 
         config = AnalysisConfig(device="cpu", batch_size=2)
